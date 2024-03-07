@@ -1,0 +1,45 @@
+{
+	"name": "semantic-tokens-sample",
+	"displayName": "semantic-tokens-sample",
+	"description": "Sample showing the Semantic Tokens Provider API",
+	"version": "0.0.1",
+	"publisher": "vscode-samples",
+	"private": true,
+	"license": "MIT",
+	"engines": {
+		"vscode": "^1.74.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"languages": [
+			{
+				"id": "cubechaos",
+				"aliases": ["Cube Chaos", "cubechaos"],
+				"extensions": [".txt"],
+		        "configuration": "./language-configuration.json"
+			}
+		],
+		"grammars": [{
+		  "language": "cubechaos",
+		  "scopeName": "text.cubechaos",
+		  "path": "./syntaxes/cubechaos.tmLanguage.json"
+		}]
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"lint": "eslint \"src/**/*.ts\"",
+		"watch": "tsc -watch -p ./"
+	},
+	"devDependencies": {
+		"@types/node": "^16.18.34",
+		"@types/vscode": "^1.73.0",
+		"@typescript-eslint/eslint-plugin": "^6.7.0",
+		"@typescript-eslint/parser": "^6.7.0",
+		"eslint": "^8.26.0",
+		"typescript": "^5.3.2"
+	}
+}
