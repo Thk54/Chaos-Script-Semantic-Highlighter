@@ -4,9 +4,10 @@
 		"target": "es2020",
 		"lib": ["es2020"],
 		"outDir": "out",
-		"sourceMap": true,
 		"rootDir": "src",
-		"strict": true
+		"sourceMap": true
 	},
-	"exclude": ["node_modules", ".vscode-test"]
+	"include": ["src", "src/**/*.ts"],
+	"exclude": ["node_modules", ".vscode-test"],
+	"references": [{ "path": "./client" }]
 }

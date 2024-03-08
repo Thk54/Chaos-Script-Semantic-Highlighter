@@ -32,6 +32,10 @@ interface IParsedToken {
 	tokenModifiers: string[];
 }
 
+interface test {
+	test2: IParsedToken;
+}
+
 class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
 	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
 		const allTokens = this._parseText(document.getText());
@@ -67,22 +71,47 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 	private _parseText(text: string): IParsedToken[] {
 		const r: IParsedToken[] = [];
 		const lines = text.split(/\r\n|\r|\n/);
+		let inCube:boolean = false
+		let inCompound:boolean = false
+		let inComment:boolean = false
+		let compoundStartLine
 		for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
 			let currentOffset = 0;
 			do {
-				const openOffset = line.indexOf('COMPOUND: ', currentOffset);
-				if (openOffset === -1) {
+				if((false === (inCube||inCompound||inComment))&&/\bCOMPOUND:(?:\s|$)/.test(line)){
+					if(/\s(End)\s|$/i.test(line)){
+						let match//:RegExpExecArray
+						while ((match = /\bCOMPOUND:\s.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?\b[Ee][Nn][Dd]\b/.exec(line)) != null){//tada! write the text excludeing regex
+							console.log("match found at " + match.index);//todo send outputs to compound parser
+							const hangingCompoundCheckValue = line.lastIndexOf(' COMPOUND:');
+							break;
+						}
+					}
+					inCompound = true
+					compoundStartLine = i
 					break;
+				} else {
+					let inText:boolean = false
+					let reResult = /.*\bText:\s.*\b[Eb][Nn][Dd]\b.*?$/.test(line)
+					if(reResult){
+						inText = false
+					} else if(/\b(Text:)\s|$/.test(line)){
+						inText = true
+					}
+					reResult = 
+					if(!inText&&(/(?:.*(\bCOMPOUND:\s)?.*\b[Eb][Nn][Dd]\b).*?$/.test(line))){
+					}
 				}
-				const closeOffset = line.indexOf(' ', openOffset);
-				if (closeOffset === -1) {
-					break;
-				}
+
+				
+				if (/g/.test(line))
+				inCompound = true
+				compoundStartLine = i
 				const tokenData = this._parseTextToken(line.substring(openOffset + 1, closeOffset));
 				r.push({
 					line: i,
-					startCharacter: openOffset + 10,
+					startCharacter: openOffset + 1,
 					length: closeOffset - openOffset - 1,
 					tokenType: tokenData.tokenType,
 					tokenModifiers: tokenData.tokenModifiers
@@ -100,4 +129,8 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 			tokenModifiers: parts.slice(1)
 		};
 	}
+
+	private _checkfor
+
+	private _parseCompound
 }
