@@ -71,18 +71,18 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 			const line = lines[i];
 			let currentOffset = 0;
 			do {
-				const openOffset = line.indexOf('[', currentOffset);
+				const openOffset = line.indexOf('COMPOUND: ', currentOffset);
 				if (openOffset === -1) {
 					break;
 				}
-				const closeOffset = line.indexOf(']', openOffset);
+				const closeOffset = line.indexOf(' ', openOffset);
 				if (closeOffset === -1) {
 					break;
 				}
 				const tokenData = this._parseTextToken(line.substring(openOffset + 1, closeOffset));
 				r.push({
 					line: i,
-					startCharacter: openOffset + 1,
+					startCharacter: openOffset + 10,
 					length: closeOffset - openOffset - 1,
 					tokenType: tokenData.tokenType,
 					tokenModifiers: tokenData.tokenModifiers

@@ -8,7 +8,7 @@
 				"foreground": "#ff0000",
 				"fontStyle": "bold"
 			},
-			"type": {
+			"ABILITY": {
 				"foreground": "#00aa00"
 			}
 		}
