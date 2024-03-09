@@ -5,9 +5,9 @@
 		"lib": ["es2020"],
 		"outDir": "out",
 		"rootDir": "src",
-		"sourceMap": true
+		"sourceMap": true,
+		"strict": true
 	},
-	"include": ["src", "src/**/*.ts"],
 	"exclude": ["node_modules", ".vscode-test"],
-	"references": [{ "path": "./client" }]
+	"compileOnSave": true
 }

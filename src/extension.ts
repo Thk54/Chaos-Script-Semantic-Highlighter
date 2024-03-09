@@ -70,12 +70,13 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 
 	private _parseText(text: string): IParsedToken[] {
 		const r: IParsedToken[] = [];
-		const lines = text.split(/\r\n|\r|\n/);
+		//const lines = text.split(/\r\n|\r|\n/);
 		let inCube:boolean = false
 		let inCompound:boolean = false
 		let inComment:boolean = false
 		let compoundStartLine
-		for (let i = 0; i < lines.length; i++) {
+
+		/* for (let i = 0; i < lines.length; i++) {
 			const line = lines[i];
 			let currentOffset = 0;
 			do {
@@ -118,7 +119,7 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 				});
 				currentOffset = closeOffset;
 			} while (true);
-		}
+		}*/
 		return r;
 	}
 
@@ -130,7 +131,4 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 		};
 	}
 
-	private _checkfor
-
-	private _parseCompound
 }
