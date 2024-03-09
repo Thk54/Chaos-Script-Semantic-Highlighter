@@ -108,11 +108,11 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 				if (/g/.test(line))
 				inCompound = true
 				compoundStartLine = i
-				const tokenData = this._parseTextToken(line.substring(openOffset + 1, closeOffset));
+				const tokenData = this._parseTextToken(line.substring(1, 2));
 				r.push({
 					line: i,
-					startCharacter: openOffset + 1,
-					length: closeOffset - openOffset - 1,
+					startCharacter: 1,
+					length: 1,
 					tokenType: tokenData.tokenType,
 					tokenModifiers: tokenData.tokenModifiers
 				});
