@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 
 const tokenTypes = new Map<string, number>();
 const tokenModifiers = new Map<string, number>();
+var uniqueNames
 
 const legend = (function() {
 	const tokenTypesLegend = [
@@ -81,10 +82,16 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 		const lineLengths: number[] = text.split(/\r\n|\r|\n/).map(l => l.length+ 1 + Number(1 < text.split(/\r\n/).length));
 		const lineEndings: number = 1 + Number(1 < text.split(/\r\n/).length);
 		let matches;//:RegExpExecArray
+		this._getEndUsingNames(matches);
 		if (/\bCOMPOUND:\s.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?\b[Ee][Nn][Dd]\b/s.test(text))
 		{
+		/*
+		/(\bCOMPOUND:\s*)([\S]*\s*)([\S]*)\s.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?\b[Ee][Nn][Dd]\b/gs
+
+
+		*/
 			for (let match of text.matchAll(/(\bCOMPOUND:\s*)([\S]*\s*)([\S]*)\s.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?\b[Ee][Nn][Dd]\b/gs)){
-				const lineAndOffset = this._getLineAndOffset(match.index+match[1].length+match[2].length, lineLengths)
+				const lineAndOffset = this._getLineAndOffset(match.index+match[1].length+match[2].length, lineLengths);
 				//const tokenData = this._parseTextToken(line.substring(1, 2));
 				r.push({
 					line: lineAndOffset.lineNumber,
@@ -96,6 +103,9 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 				}
 		}
 		return r;
+	}
+	private _getEndUsingNames(matches: RegExpMatchArray) {
+		for (let match of matches){}
 	}
 
 	private _parseTextToken(text: string): { tokenType: string; tokenModifiers: string[]; } {
