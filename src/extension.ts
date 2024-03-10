@@ -68,7 +68,7 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 	private _getLineAndOffset(textOffset: number, lineLengths: number[]):{lineNumber: number; offset: number;} {
 		let currentOffset: number = textOffset
 		let currentLine: number = 0
-		while(currentOffset+1 > (lineLengths[currentLine])){//offset+1 because otherwise it exits one loop too early
+		while(currentOffset >= (lineLengths[currentLine])){//offset+1 because otherwise it exits one loop too early
 			currentOffset = currentOffset - (lineLengths[currentLine]);
 			currentLine ++;
 		} 
