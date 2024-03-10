@@ -33,6 +33,11 @@ interface IParsedToken {
 	tokenModifiers: string[];
 }
 
+interface ILineAndOffset{
+	lineNum:number;
+	offset:number;
+	originalOffset:number; 
+}
 
 class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
 	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
@@ -66,43 +71,62 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 		return result;
 	}
 
-	private _getLineAndOffset(textOffset: number, lineLengths: number[]):{lineNumber: number; offset: number;} {
-		let currentOffset: number = textOffset
-		let currentLine: number = 0
-		while(currentOffset >= (lineLengths[currentLine])){//offset+1 because otherwise it exits one loop too early
-			currentOffset = currentOffset - (lineLengths[currentLine]);
-			currentLine ++;
-		} 
-		return{lineNumber: currentLine, offset: currentOffset}
 
-	}
 
 	private _parseText(text: string): IParsedToken[] {
-		const r: IParsedToken[] = [];
 		const lineLengths: number[] = text.split(/\r\n|\r|\n/).map(l => l.length+ 1 + Number(1 < text.split(/\r\n/).length));
-		const lineEndings: number = 1 + Number(1 < text.split(/\r\n/).length);
 		/* /
 		First try to capture comments
 		(?:\s|^((/-)\s.*?\s-/)\s|$)|
 		Try to capture all of any compounds
-		(?:(\bCOMPOUND:\s*)((ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)*\s*)([\S]*)\s.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?\b[Ee][Nn][Dd]\b)
-
-
-		/gs */
-		for (let match of text.matchAll(/(?:\bCOMPOUND:\s*(?<compoundType>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<compoundName>[\S]*)\s.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?\b[Ee][Nn][Dd]\b)/gsd)){
-			const lineAndOffset = this._getLineAndOffset(match.indices.groups.compoundName[0], lineLengths);
-
-			//const tokenData = this._parseTextToken(line.substring(1, 2));
-			r.push({
-				line: lineAndOffset.lineNumber,
-				startCharacter: lineAndOffset.offset,
-				length: match.groups.compoundName.length,
-				tokenType: "function",//tokenData.tokenType,
-				tokenModifiers: ["declaration"]//tokenData.tokenModifiers
-			});
-			}
-		return r;
+		(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<compoundType>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<compoundName>[\S]*)\s.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?\b[Ee][Nn][Dd]\b)|
+		Try to capture most of other definition flags
+		//todo
+		/gsd */
+		for (let match of text.matchAll(/(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<compoundType>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<compoundName>[\S]*)\s.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?\b[Ee][Nn][Dd]\b)/gsd)){
+			const defStart = this._getLineAndOffset(match.length, lineLengths).ILineAndOffset
+			return this._returnTokensFromDefinitionMatch(match, defStart)
+		}
+		return [];//only used if regx fails
 	}
+
+
+
+	private _getLineAndOffset(textOffset: number, lineLengths: number[], defStart?: ILineAndOffset):{lineNum: number; offset: number; ILineAndOffset:ILineAndOffset} {
+		let ILineAndOffset: ILineAndOffset
+		ILineAndOffset.originalOffset = textOffset
+		let currentOffset: number = textOffset
+		let currentLine: number = 0
+		if (typeof defStart !== undefined){
+			ILineAndOffset.originalOffset = defStart.originalOffset
+			currentOffset = textOffset - defStart.originalOffset + defStart.offset
+			currentLine = defStart.lineNum
+		}
+		while(currentOffset >= (lineLengths[currentLine])){
+			currentOffset = currentOffset - (lineLengths[currentLine]);
+			currentLine ++;
+		}
+		ILineAndOffset.lineNum = currentLine
+		ILineAndOffset.offset = currentOffset
+		return{lineNum: currentLine, offset: currentOffset, ILineAndOffset}
+	}
+
+	private _returnTokensFromDefinitionMatch(match:RegExpMatchArray, ILineAndOffset:ILineAndOffset): IParsedToken[] {
+		let tokens:IParsedToken[] = []
+
+		//const tokenData = this._parseTextToken(line.substring(1, 2));
+		for (let token of tokens)
+			tokens.push({
+				line: token.line,
+				startCharacter: token.startCharacter,
+				length: token.length,
+				tokenType: token.tokenType,//tokenData.tokenType,
+				tokenModifiers: token.tokenModifiers//tokenData.tokenModifiers
+			});
+		return tokens
+	}
+
+	//private _createTokenFromGroupName
 
 	private _parseTextToken(text: string): { tokenType: string; tokenModifiers: string[]; } {
 		const parts = text.split('.');
