@@ -9,5 +9,4 @@
 		"strict": true
 	},
 	"exclude": ["node_modules", ".vscode-test"],
-	"compileOnSave": true
 }

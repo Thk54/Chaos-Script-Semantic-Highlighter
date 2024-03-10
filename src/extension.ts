@@ -32,9 +32,6 @@ interface IParsedToken {
 	tokenModifiers: string[];
 }
 
-interface test {
-	test2: IParsedToken;
-}
 
 class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
 	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
@@ -68,58 +65,36 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 		return result;
 	}
 
+	private _getLineAndOffset(textOffset: number, lineLengths: number[]):{lineNumber: number; offset: number;} {
+		let currentOffset: number = textOffset
+		let currentLine: number = 0
+		while(currentOffset+1 > (lineLengths[currentLine])){//offset+1 because otherwise it exits one loop too early
+			currentOffset = currentOffset - (lineLengths[currentLine]);
+			currentLine ++;
+		} 
+		return{lineNumber: currentLine, offset: currentOffset}
+
+	}
+
 	private _parseText(text: string): IParsedToken[] {
 		const r: IParsedToken[] = [];
-		//const lines = text.split(/\r\n|\r|\n/);
-		let inCube:boolean = false
-		let inCompound:boolean = false
-		let inComment:boolean = false
-		let compoundStartLine
-
-		/* for (let i = 0; i < lines.length; i++) {
-			const line = lines[i];
-			let currentOffset = 0;
-			do {
-				if((false === (inCube||inCompound||inComment))&&/\bCOMPOUND:(?:\s|$)/.test(line)){
-					if(/\s(End)\s|$/i.test(line)){
-						let match//:RegExpExecArray
-						while ((match = /\bCOMPOUND:\s.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?\b[Ee][Nn][Dd]\b/.exec(line)) != null){//tada! write the text excludeing regex
-							console.log("match found at " + match.index);//todo send outputs to compound parser
-							const hangingCompoundCheckValue = line.lastIndexOf(' COMPOUND:');
-							break;
-						}
-					}
-					inCompound = true
-					compoundStartLine = i
-					break;
-				} else {
-					let inText:boolean = false
-					let reResult = /.*\bText:\s.*\b[Eb][Nn][Dd]\b.*?$/.test(line)
-					if(reResult){
-						inText = false
-					} else if(/\b(Text:)\s|$/.test(line)){
-						inText = true
-					}
-					reResult = 
-					if(!inText&&(/(?:.*(\bCOMPOUND:\s)?.*\b[Eb][Nn][Dd]\b).*?$/.test(line))){
-					}
-				}
-
-				
-				if (/g/.test(line))
-				inCompound = true
-				compoundStartLine = i
-				const tokenData = this._parseTextToken(line.substring(1, 2));
+		const lineLengths: number[] = text.split(/\r\n|\r|\n/).map(l => l.length+ 1 + Number(1 < text.split(/\r\n/).length));
+		const lineEndings: number = 1 + Number(1 < text.split(/\r\n/).length);
+		let matches;//:RegExpExecArray
+		if (/\bCOMPOUND:\s.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?\b[Ee][Nn][Dd]\b/s.test(text))
+		{
+			for (let match of text.matchAll(/(\bCOMPOUND:\s*)([\S]*\s*)([\S]*)\s.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?\b[Ee][Nn][Dd]\b/gs)){
+				const lineAndOffset = this._getLineAndOffset(match.index+match[1].length+match[2].length, lineLengths)
+				//const tokenData = this._parseTextToken(line.substring(1, 2));
 				r.push({
-					line: i,
-					startCharacter: 1,
-					length: 1,
-					tokenType: tokenData.tokenType,
-					tokenModifiers: tokenData.tokenModifiers
+					line: lineAndOffset.lineNumber,
+					startCharacter: lineAndOffset.offset,
+					length: match[3].length,
+					tokenType: "function",//tokenData.tokenType,
+					tokenModifiers: ["declaration"]//tokenData.tokenModifiers
 				});
-				currentOffset = closeOffset;
-			} while (true);
-		}*/
+				}
+		}
 		return r;
 	}
 
