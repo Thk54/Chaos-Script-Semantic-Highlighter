@@ -2,13 +2,12 @@ import * as vscode from 'vscode';
 
 const tokenTypes = new Map<string, number>();
 const tokenModifiers = new Map<string, number>();
-var uniqueNames
 
 const legend = (function() {
 	const tokenTypesLegend = [
 		'comment', 'string', 'keyword', 'number', 'regexp', 'operator', 'namespace',
 		'type', 'struct', 'class', 'interface', 'enum', 'typeParameter', 'function',
-		'method', 'decorator', 'macro', 'variable', 'parameter', 'property', 'label'
+		'method', 'decorator', 'macro', 'variable', 'parameter', 'property', 'label2'
 	];
 	tokenTypesLegend.forEach((tokenType, index) => tokenTypes.set(tokenType, index));
 
@@ -33,15 +32,22 @@ interface IParsedToken {
 	tokenModifiers: string[];
 }
 
-interface ILineAndOffset{
+interface RegexGroup{
+	index:number;
+	length: number;
+	name: string;
+	content: string;
+}
+
+/*interface ILineAndOffset{
 	lineNum:number;
 	offset:number;
 	originalOffset:number; 
-}
+}*/
 
 class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
 	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
-		const allTokens = this._parseText(document.getText());
+		const allTokens = this._parseText(document);
 		const builder = new vscode.SemanticTokensBuilder();
 		allTokens.forEach((token) => {
 			builder.push(token.line, token.startCharacter, token.length, this._encodeTokenType(token.tokenType), this._encodeTokenModifiers(token.tokenModifiers));
@@ -73,7 +79,8 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 
 
 
-	private _parseText(text: string): IParsedToken[] {
+	private _parseText(document: vscode.TextDocument): IParsedToken[] {
+		const text = document.getText()
 		const lineLengths: number[] = text.split(/\r\n|\r|\n/).map(l => l.length+ 1 + Number(1 < text.split(/\r\n/).length));
 		/* /
 		First try to capture comments
@@ -83,16 +90,15 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 		Try to capture most of other definition flags
 		//todo
 		/gsd */
-		for (let match of text.matchAll(/(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<compoundType>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<compoundName>[\S]*)\s.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?\b[Ee][Nn][Dd]\b)/gsd)){
-			const defStart = this._getLineAndOffset(match.length, lineLengths).ILineAndOffset
-			return this._returnTokensFromDefinitionMatch(match, defStart)
+		for (let match of text.matchAll(/(?<howExistsAreWe>[^\s\S])|(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<compoundType>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<compoundName>[\S]*)\s.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?\b[Ee][Nn][Dd]\b)/gsd)){
+			return this._returnTokensFromDefinitionMatch(match, document)
 		}
 		return [];//only used if regx fails
 	}
 
 
 
-	private _getLineAndOffset(textOffset: number, lineLengths: number[], defStart?: ILineAndOffset):{lineNum: number; offset: number; ILineAndOffset:ILineAndOffset} {
+/*	private _getLineAndOffset(textOffset: number, lineLengths: number[], defStart?: ILineAndOffset):{lineNum: number; offset: number; ILineAndOffset:ILineAndOffset} {
 		let ILineAndOffset: ILineAndOffset
 		ILineAndOffset.originalOffset = textOffset
 		let currentOffset: number = textOffset
@@ -109,25 +115,51 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 		ILineAndOffset.lineNum = currentLine
 		ILineAndOffset.offset = currentOffset
 		return{lineNum: currentLine, offset: currentOffset, ILineAndOffset}
-	}
+	}*/
 
-	private _returnTokensFromDefinitionMatch(match:RegExpMatchArray, ILineAndOffset:ILineAndOffset): IParsedToken[] {
+	private _returnTokensFromDefinitionMatch(match:RegExpMatchArray, document: vscode.TextDocument): IParsedToken[] {
 		let tokens:IParsedToken[] = []
-
-		//const tokenData = this._parseTextToken(line.substring(1, 2));
-		for (let token of tokens)
+		let groupsNames = []
+		for (let name of Object.keys(match.groups)){
+			if(match.groups[name] != undefined){
+				groupsNames.push(name)
+			}
+		}
+		for (let key of groupsNames) {
+			let groupName:RegexGroup = {
+			name: key,
+			length: match.groups[key].length,
+			index: match.indices.groups[key][0],
+			content: match.groups[key]
+			}
+			tokens.push(this._createTokenFromGroupName(groupName,document))
+			
+		let slow = 'down'
+		}
+		let slow = 'down'
+	/*	//const tokenData = this._parseTextToken(line.substring(1, 2));
+		for (let i = 0; i < match.length; i++) {
 			tokens.push({
 				line: token.line,
 				startCharacter: token.startCharacter,
 				length: token.length,
 				tokenType: token.tokenType,//tokenData.tokenType,
 				tokenModifiers: token.tokenModifiers//tokenData.tokenModifiers
-			});
+			});*/
 		return tokens
 	}
 
-	//private _createTokenFromGroupName
-
+	private _createTokenFromGroupName(groupName:RegexGroup,document: vscode.TextDocument): IParsedToken {
+		const position = document.positionAt(groupName.index)
+		position.character
+		return {
+			line: position.line,
+			startCharacter: position.character,
+			length: groupName.length,
+			tokenType: 'lol',//token.tokenType,//tokenData.tokenType,
+			tokenModifiers: ['lamo']//token.tokenModifiers//tokenData.tokenModifiers}
+		}
+	}
 	private _parseTextToken(text: string): { tokenType: string; tokenModifiers: string[]; } {
 		const parts = text.split('.');
 		return {

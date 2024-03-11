@@ -18,7 +18,7 @@
 			{
 				"id": "cubechaos",
 				"aliases": ["Cube Chaos", "cubechaos"],
-				"extensions": [".txt"],
+				"extensions": [".chaos",".txt",".chaos.txt"],
 		        "configuration": "./language-configuration.json"
 			}
 		],
