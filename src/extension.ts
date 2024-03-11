@@ -1,13 +1,37 @@
 import * as vscode from 'vscode';
-
+let lazy:number
+let counter:number =0
 const tokenTypes = new Map<string, number>();
 const tokenModifiers = new Map<string, number>();
+enum ChaosTranslation {//green, salmon, pink, pale yellow, purple, off-text-white, teal, blue, light sky blue, and text-white
+	'comment' = 'comment',//green
+	'string' = 'string',//salmon
+	'compoundCube' ='keyword',//pink
+	'compoundDouble' ='number',//pale yellow
+	'compoundAbility' ='regexp',//purple
+	'compoundPerk' ='operator',//offwhite
+	'e' ='namespace',//teal
+	'f' ='type',//teal
+	'g' ='struct',//teal
+	'h' ='class',//teal
+	'i' ='interface',//teal
+	'compoundBoolean' ='enum',//teal
+	'k' ='typeParameter',//teal
+	'l' ='function',//pale yellow
+	'm' ='method',//pale yellow
+	'compoundPosition' ='decorator',//pale yellow
+	'compoundAction' ='macro',//blue
+	'p' ='variable',//light sky blue
+	'q' ='parameter',//light sky blue
+	'compoundDirection' ='property',//light sky blue
+	's' ='label'//text white
+}
 
 const legend = (function() {
 	const tokenTypesLegend = [
 		'comment', 'string', 'keyword', 'number', 'regexp', 'operator', 'namespace',
 		'type', 'struct', 'class', 'interface', 'enum', 'typeParameter', 'function',
-		'method', 'decorator', 'macro', 'variable', 'parameter', 'property', 'label2'
+		'method', 'decorator', 'macro', 'variable', 'parameter', 'property', 'label'
 	];
 	tokenTypesLegend.forEach((tokenType, index) => tokenTypes.set(tokenType, index));
 
@@ -23,7 +47,6 @@ const legend = (function() {
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'cubechaos' }, new DocumentSemanticTokensProvider(), legend));
 }
-
 interface IParsedToken {
 	line: number;
 	startCharacter: number;
@@ -81,6 +104,7 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 
 	private _parseText(document: vscode.TextDocument): IParsedToken[] {
 		const text = document.getText()
+		let tokens:IParsedToken[] = []
 		const lineLengths: number[] = text.split(/\r\n|\r|\n/).map(l => l.length+ 1 + Number(1 < text.split(/\r\n/).length));
 		/* /
 		First try to capture comments
@@ -91,9 +115,18 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 		//todo
 		/gsd */
 		for (let match of text.matchAll(/(?<howExistsAreWe>[^\s\S])|(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<compoundType>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<compoundName>[\S]*)\s.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?\b[Ee][Nn][Dd]\b)/gsd)){
-			return this._returnTokensFromDefinitionMatch(match, document)
-		}
-		return [];//only used if regx fails
+			lazy = match.length
+			for (let token of this._returnTokensFromDefinitionMatch(match, document)){
+				tokens.push({
+					line: token.line,
+					startCharacter: token.startCharacter,
+					length: token.length,
+					tokenType: token.tokenType,//token.tokenType,//tokenData.tokenType,
+					tokenModifiers: token.tokenModifiers//token.tokenModifiers//tokenData.tokenModifiers}})
+				})
+			}
+		} 
+		return tokens;//only used if regx fails
 	}
 
 
@@ -134,9 +167,7 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 			}
 			tokens.push(this._createTokenFromGroupName(groupName,document))
 			
-		let slow = 'down'
 		}
-		let slow = 'down'
 	/*	//const tokenData = this._parseTextToken(line.substring(1, 2));
 		for (let i = 0; i < match.length; i++) {
 			tokens.push({
@@ -151,13 +182,20 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 
 	private _createTokenFromGroupName(groupName:RegexGroup,document: vscode.TextDocument): IParsedToken {
 		const position = document.positionAt(groupName.index)
-		position.character
+		let docSym = new vscode.DocumentSymbol('string','alsostring',11,new vscode.Range(position,position.translate(groupName.length)),new vscode.Range(position,position.translate(lazy))) 
+		
+		counter++
+		if (counter>20) counter=0
+		let highlight:string
+		for (let entry in Object.entries(ChaosTranslation)[counter]){
+			if (groupName.name===entry[0]) highlight = entry[1]
+		}
 		return {
 			line: position.line,
 			startCharacter: position.character,
 			length: groupName.length,
-			tokenType: 'lol',//token.tokenType,//tokenData.tokenType,
-			tokenModifiers: ['lamo']//token.tokenModifiers//tokenData.tokenModifiers}
+			tokenType: highlight,//ChaosTranslation.comment,//tokenData.tokenType,
+			tokenModifiers: ['']//token.tokenModifiers//tokenData.tokenModifiers}
 		}
 	}
 	private _parseTextToken(text: string): { tokenType: string; tokenModifiers: string[]; } {
