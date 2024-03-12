@@ -1,9 +1,9 @@
 {
-	"name": "semantic-tokens-sample",
-	"displayName": "semantic-tokens-sample",
-	"description": "Sample showing the Semantic Tokens Provider API",
+	"name": "cube-chaos-semantic-highlighter",
+	"displayName": "Cube Chaos Semantic Highlighter",
+	"description": "Semantic highlighter for Cube Chaos mod files.",
 	"version": "0.0.1",
-	"publisher": "vscode-samples",
+	"publisher": "Thk",
 	"private": true,
 	"license": "MIT",
 	"engines": {
@@ -17,22 +17,56 @@
 		"languages": [
 			{
 				"id": "cubechaos",
-				"aliases": ["Cube Chaos", "cubechaos"],
-				"extensions": [".chaos",".txt",".chaos.txt"],
-		        "configuration": "./language-configuration.json"
+				"aliases": [
+					"Cube Chaos",
+					"cubechaos"
+				],
+				"extensions": [
+					".chaos",
+					".txt",
+					".chaos.txt"
+				],
+				"configuration": "./language-configuration.json",
+				"properties": {
+					"languageServerExample.maxNumberOfProblems": {
+						"scope": "resource",
+						"type": "number",
+						"default": 100,
+						"description": "Controls the maximum number of problems produced by the server."
+					},
+					"languageServerExample.trace.server": {
+						"scope": "window",
+						"type": "string",
+						"enum": [
+							"off",
+							"messages",
+							"verbose"
+						],
+						"default": "off",
+						"description": "Traces the communication between VS Code and the language server."
+					}
+				}
 			}
 		],
-		"grammars": [{
-		  "language": "cubechaos",
-		  "scopeName": "text.cubechaos",
-		  "path": "./syntaxes/cubechaos.tmLanguage.json"
-		}]
+		"grammars": [
+			{
+				"language": "cubechaos",
+				"scopeName": "text.cubechaos",
+				"path": "./syntaxes/cubechaos.tmLanguage.json"
+			}
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
 		"lint": "eslint \"src/**/*.ts\"",
-		"watch": "tsc -watch -p ./"
+		"watch": "tsc -watch -p ./",
+		"test": "sh ./scripts/e2e.sh"
+	},
+	"dependencies": {
+		"vscode-languageclient": "^9.0.1",
+		"vscode-languageserver": "^9.0.1",
+		"vscode-languageserver-textdocument": "^1.0.11"
 	},
 	"devDependencies": {
 		"@types/node": "^16.18.34",

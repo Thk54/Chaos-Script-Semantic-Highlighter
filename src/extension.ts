@@ -1,6 +1,11 @@
 import * as vscode from 'vscode';
-let lazy:number
-let counter:number =0
+import {
+	LanguageClient,
+	LanguageClientOptions,
+	ServerOptions,
+	TransportKind
+} from 'vscode-languageclient/node';
+
 const tokenTypes = new Map<string, number>();
 const tokenModifiers = new Map<string, number>();
 enum ChaosTranslation {//green, salmon, pink, pale yellow, purple, off-text-white, teal, blue, light sky blue, and text-white
@@ -45,53 +50,83 @@ const legend = (function() {
 	return new vscode.SemanticTokensLegend(tokenTypesLegend, tokenModifiersLegend);
 })();
 
+let client: LanguageClient
+
 export function activate(context: vscode.ExtensionContext) {
-	context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'cubechaos' }, new DocumentSymbolProvider()));
-	context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'cubechaos' }, new DocumentSemanticTokensProvider(), legend))
+	// The server is implemented in node
+	const serverModule = vscode.Uri.joinPath(context.extensionUri, 'out', 'server.js').toString(true);
+
+	// If the extension is launched in debug mode then the debug server options are used
+	// Otherwise the run options are used
+	const serverOptions: ServerOptions = {
+		run: { module: serverModule, transport: TransportKind.ipc },
+		debug: {module: serverModule, transport: TransportKind.ipc }
+	};
+		// Options to control the language client
+	const clientOptions: LanguageClientOptions = {
+		// Register the server for cube chaos documents
+		documentSelector: [{ scheme: 'file', language: 'cubechaos' }],
+		synchronize: {
+			// Notify the server about file changes to '.clientrc files contained in the workspace
+			fileEvents: vscode.workspace.createFileSystemWatcher('**/.clientrc')
+		}
+	}
+	// Create the language client and start the client.
+	client = new LanguageClient(
+		'CubeChaosLanguageServer',
+		'Cube Chaos Language Server',
+		serverOptions,
+		clientOptions
+	);
+	// Start the client. This will also launch the server
+	client.start();
+
+	//context.subscriptions.push(vscode.languages.registerFoldingRangeProvider({ language: 'cubechaos' }, new vscode.FoldingRangeProvider()));
+	//context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'cubechaos' }, new DocumentSymbolProvider()));
+	//context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'cubechaos' }, new DocumentSemanticTokensProvider(), legend))
 }
 
-
-interface Compounds {
-	Abilities: Compound[];
-	Actions: Compound[];
-	Booleans: Compound[];
-	Directions: Compound[];
-	Doubles: Compound[];
-	Cubes: Compound[];
-	Positions: Compound[];
+interface ICompounds {
+	Abilities: ICompound[];
+	Actions: ICompound[];
+	Booleans: ICompound[];
+	Directions: ICompound[];
+	Doubles: ICompound[];
+	Cubes: ICompound[];
+	Positions: ICompound[];
 }
 
-interface Compound {
+interface ICompound {
 	Type: string,
-	Name: Name,
-	Contents: Contents,
-	Arguments?: Arguments[]
+	Name: IName,
+	Contents: IContents,
+	Arguments?: IArguments[]
 }
 
-interface Name {
+interface IName {
 	Name: string,
 	Index: number
 }
 
-interface Contents {
+interface IContents {
 	Content: string,
 	Index: number
 }
 
-interface Arguments {
+interface IArguments {
 	Type: string,
 	String: string,
 	Index: number
 }
 
-interface compoundCaptures{
-	Abilities: RegExpMatchArray[];
-	Actions: RegExpMatchArray[];
-	Booleans: RegExpMatchArray[];
-	Directions: RegExpMatchArray[];
-	Doubles: RegExpMatchArray[];
-	Cubes: RegExpMatchArray[];
-	Positions: RegExpMatchArray[];
+interface RegExCompoundCaptures{
+	RegExAbilities: RegExpMatchArray[];
+	RegExActions: RegExpMatchArray[];
+	RegExBooleans: RegExpMatchArray[];
+	RegExDirections: RegExpMatchArray[];
+	RegExDoubles: RegExpMatchArray[];
+	RegExCubes: RegExpMatchArray[];
+	RegExPositions: RegExpMatchArray[];
 }
 
 /*interface ILineAndOffset{
@@ -100,40 +135,107 @@ interface compoundCaptures{
 	originalOffset:number; 
 }*/
 
-function gatherCompounds(document: vscode.TextDocument): compoundCaptures {
-	let abilities: RegExpMatchArray[] = []
-	let actions: RegExpMatchArray[] = []
-	let booleans: RegExpMatchArray[] = []
-	let directions: RegExpMatchArray[] = []
-	let doubles: RegExpMatchArray[] = []
-	let cubes: RegExpMatchArray[] = []
-	let positions: RegExpMatchArray[] = []
+function gatherCompounds(document: vscode.TextDocument): RegExCompoundCaptures {
+	let regExAbilities: RegExpMatchArray[] = []
+	let regExActions: RegExpMatchArray[] = []
+	let regExBooleans: RegExpMatchArray[] = []
+	let regExDirections: RegExpMatchArray[] = []
+	let regExDoubles: RegExpMatchArray[] = []
+	let regExCubes: RegExpMatchArray[] = []
+	let regExPositions: RegExpMatchArray[] = []
 	for (let match of document.getText().matchAll(/(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<CompoundType>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<CompoundName>[\S]*)\s(?<CompoundContents>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)\b[Ee][Nn][Dd]\b)/gsd)){
 		switch (match.groups['CompoundType']) {
 			case 'ABILITY':
-				abilities.push(match)
+				regExAbilities.push(match)
 				break;
 			case 'ACTION':
-				actions.push(match)
+				regExActions.push(match)
 				break;
 			case 'BOOLEAN':
-				booleans.push(match)
+				regExBooleans.push(match)
 				break;
 			case 'DIRECTION':
-				directions.push(match)
+				regExDirections.push(match)
 				break;
 			case 'DOUBLE':
-				doubles.push(match)
+				regExDoubles.push(match)
 				break;
 			case 'CUBE':
-				cubes.push(match)
+				regExCubes.push(match)
 				break;
 			case 'POSITION':
-				positions.push(match)
+				regExPositions.push(match)
 				break;
 			default:
 				console.log("Something has gone wrong or a new compound type was added");
 				break;
+		}
+	}
+	return{
+		RegExAbilities:regExAbilities,
+		RegExActions:regExActions,
+		RegExBooleans:regExBooleans,
+		RegExDirections:regExDirections,
+		RegExDoubles:regExDoubles,
+		RegExCubes:regExCubes,
+		RegExPositions:regExPositions
+	}
+}
+function extractDefinitionDetails(compounds: RegExCompoundCaptures): ICompounds {
+	function packIntoCompound (capture:RegExpMatchArray): ICompound {
+		let args:IArguments[] = []
+///(?:\bText:\s.*?\b[Ee][Nn][Dd]\b)|(?:\bGeneric(?:Perk|Position|String|Word|Name|Action|Boolean|Direction|Double|Constant|Cube|Stacking|Time)\b)/gd
+///(?:\bText:\s.*?\b[Ee][Nn][Dd]\b)|(?:\b[Gg][eE][nN][eE][rR][iI][cC](?:[Pp][eE][rR][kK]|[Pp][oO][sS][iI][tT][iI][oO][nN]|[Ss][tT][rR][iI][nN][gG]|[Ww][oO][rR][dD]|[Nn][aA][mM][eE]|[Aa][cC][tT][iI][oO][nN]|[Bb][oO][oO][lL][eE][aA][nN]|[Dd][iI][rR][eE][cC][tT][iI][oO][nN]|[Dd][oO][uU][bB][lL][eE]|[Cc][oO][nN][sS][tT][aA][nN][tT]|[Cc][uU][bB][eE]|[Ss][tT][aA][cC][kK][iI][nN][gG]|[Tt][iI][mM][eE])\b)/gd
+		for(let generic of capture.groups['CompoundContents'].matchAll(/(?:\bText:\s.*?\b[Ee][Nn][Dd]\b)|(?<CompoundGenerics>\b[Gg][eE][nN][eE][rR][iI][cC](?:[Pp][eE][rR][kK]|[Pp][oO][sS][iI][tT][iI][oO][nN]|[Ss][tT][rR][iI][nN][gG]|[Ww][oO][rR][dD]|[Nn][aA][mM][eE]|[Aa][cC][tT][iI][oO][nN]|[Bb][oO][oO][lL][eE][aA][nN]|[Dd][iI][rR][eE][cC][tT][iI][oO][nN]|[Dd][oO][uU][bB][lL][eE]|[Cc][oO][nN][sS][tT][aA][nN][tT]|[Cc][uU][bB][eE]|[Ss][tT][aA][cC][kK][iI][nN][gG]|[Tt][iI][mM][eE])\b)/gd)){
+			if (generic.groups['CompoundGenerics'])
+				args.push({
+					String: generic.groups['CompoundGenerics'],
+					Type: generic.groups['CompoundGenerics'].slice(7),
+					Index: generic.indices.groups['CompoundGenerics'][0]+capture.index
+			})
+		}
+		return {
+			Type:capture.groups['CompoundType'],
+			Contents: {Content:capture.groups['CompoundContents'], Index:capture.indices.groups['CompoundContents'][0]},
+			Name: {Name:capture.groups['CompoundName'], Index:capture.indices.groups['CompoundName'][0]},
+			Arguments: args
+		}
+	}
+	let abilities: ICompound[] = []
+	let actions: ICompound[] = []
+	let booleans: ICompound[] = []
+	let directions: ICompound[] = []
+	let doubles: ICompound[] = []
+	let cubes: ICompound[] = []
+	let positions: ICompound[] = []
+	for (let captures of Object.entries(compounds)) {
+		for (let capture of captures[1]){
+			switch (capture[1]) {
+				case 'ABILITY':
+					abilities.push(packIntoCompound(capture))
+					break;
+				case 'ACTION':
+					actions.push(packIntoCompound(capture))
+					break;
+				case 'BOOLEAN':
+					booleans.push(packIntoCompound(capture))
+					break;
+				case 'DIRECTION':
+					directions.push(packIntoCompound(capture))
+					break;
+				case 'DOUBLE':
+					doubles.push(packIntoCompound(capture))
+					break;
+				case 'CUBE':
+					cubes.push(packIntoCompound(capture))
+					break;
+				case 'POSITION':
+					positions.push(packIntoCompound(capture))
+					break;
+				default:
+					console.log("Something has gone wrong or a new compound type was added");
+					break;
+			}
 		}
 	}
 	return{
@@ -145,9 +247,7 @@ function gatherCompounds(document: vscode.TextDocument): compoundCaptures {
 		Cubes:cubes,
 		Positions:positions
 	}
-
 }
-
 
 class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 	async provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
@@ -185,9 +285,8 @@ class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 
 class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
 	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
-		const compounds = gatherCompounds(document);
-		let silly = this.extractDefinitionDetails(compounds)
-		console.log(silly);		
+		const compounds = extractDefinitionDetails(gatherCompounds(document));
+		console.log(compounds);		
 		let stupid:vscode.SemanticTokens
 		return stupid
 		
@@ -198,84 +297,6 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 		});
 		return builder.build();*/
 	}
-
-
-///(?:\bText:\s.*?\b[Ee][Nn][Dd]\b)|(?:\bGeneric(?:Perk|Position|String|Word|Name|Action|Boolean|Direction|Double|Constant|Cube|Stacking|Time)\b)/gd
-///(?:\bText:\s.*?\b[Ee][Nn][Dd]\b)|(?:\b[Gg][eE][nN][eE][rR][iI][cC](?:[Pp][eE][rR][kK]|[Pp][oO][sS][iI][tT][iI][oO][nN]|[Ss][tT][rR][iI][nN][gG]|[Ww][oO][rR][dD]|[Nn][aA][mM][eE]|[Aa][cC][tT][iI][oO][nN]|[Bb][oO][oO][lL][eE][aA][nN]|[Dd][iI][rR][eE][cC][tT][iI][oO][nN]|[Dd][oO][uU][bB][lL][eE]|[Cc][oO][nN][sS][tT][aA][nN][tT]|[Cc][uU][bB][eE]|[Ss][tT][aA][cC][kK][iI][nN][gG]|[Tt][iI][mM][eE])\b)/gd
-	private extractDefinitionDetails(compounds: compoundCaptures) {
-		function packIntoCompound (capture:RegExpMatchArray): Compound {
-			let args:Arguments[] = []
-			for(let generic of capture.groups['CompoundContents'].matchAll(/(?:\bText:\s.*?\b[Ee][Nn][Dd]\b)|(?<CompoundGenerics>\b[Gg][eE][nN][eE][rR][iI][cC](?:[Pp][eE][rR][kK]|[Pp][oO][sS][iI][tT][iI][oO][nN]|[Ss][tT][rR][iI][nN][gG]|[Ww][oO][rR][dD]|[Nn][aA][mM][eE]|[Aa][cC][tT][iI][oO][nN]|[Bb][oO][oO][lL][eE][aA][nN]|[Dd][iI][rR][eE][cC][tT][iI][oO][nN]|[Dd][oO][uU][bB][lL][eE]|[Cc][oO][nN][sS][tT][aA][nN][tT]|[Cc][uU][bB][eE]|[Ss][tT][aA][cC][kK][iI][nN][gG]|[Tt][iI][mM][eE])\b)/gd)){
-				if (generic.groups['CompoundGenerics'])
-					args.push({
-						String: generic.groups['CompoundGenerics'],
-						Type: generic.groups['CompoundGenerics'].slice(7),
-						Index: generic.indices.groups['CompoundGenerics'][0]+capture.index
-				})
-			}
-			return {
-				Type:capture.groups['CompoundType'],
-				Contents: {Content:capture.groups['CompoundContents'], Index:capture.indices.groups['CompoundContents'][0]},
-				Name: {Name:capture.groups['CompoundName'], Index:capture.indices.groups['CompoundName'][0]},
-				Arguments: args
-			}
-		}
-		let abilities: Compound[] = []
-		let actions: Compound[] = []
-		let booleans: Compound[] = []
-		let directions: Compound[] = []
-		let doubles: Compound[] = []
-		let cubes: Compound[] = []
-		let positions: Compound[] = []
-		for (let captures of Object.entries(compounds)) {
-			for (let capture of captures[1]){
-				switch (capture[1]) {
-					case 'ABILITY':
-						abilities.push(packIntoCompound(capture))
-						break;
-					case 'ACTION':
-						actions.push(packIntoCompound(capture))
-						break;
-					case 'BOOLEAN':
-						booleans.push(packIntoCompound(capture))
-						break;
-					case 'DIRECTION':
-						directions.push(packIntoCompound(capture))
-						break;
-					case 'DOUBLE':
-						doubles.push(packIntoCompound(capture))
-						break;
-					case 'CUBE':
-						cubes.push(packIntoCompound(capture))
-						break;
-					case 'POSITION':
-						positions.push(packIntoCompound(capture))
-						break;
-					default:
-						console.log("Something has gone wrong or a new compound type was added");
-						break;
-				}
-			}
-		}
-		return{
-			Abilities:abilities,
-			Actions:actions,
-			Booleans:booleans,
-			Directions:directions,
-			Doubles:doubles,
-			Cubes:cubes,
-			Positions:positions
-		}
-	}
-
-
-
-
-
-
-
-
-
 
 	/*private _encodeTokenModifiers(strTokenModifiers: string[]): number {
 		let result = 0;
