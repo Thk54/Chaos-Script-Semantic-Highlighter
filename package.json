@@ -14,29 +14,6 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
-		"configuration": {
-			"type": "object",
-			"title": "Example configuration",
-			"properties": {
-				"cubeChaoslanguageServer.maxNumberOfProblems": {
-					"scope": "resource",
-					"type": "number",
-					"default": 100,
-					"description": "Controls the maximum number of problems produced by the server."
-				},
-				"cubeChaoslanguageServer.trace.server": {
-					"scope": "window",
-					"type": "string",
-					"enum": [
-						"off",
-						"messages",
-						"verbose"
-					],
-					"default": "verbose",
-					"description": "Traces the communication between VS Code and the language server."
-				}
-			}
-		},
 		"languages": [
 			{
 				"id": "cubechaos",
@@ -67,14 +44,8 @@
 		"watch": "tsc -watch -p ./",
 		"test": "sh ./scripts/e2e.sh"
 	},
-	"dependencies": {
-		"vscode-languageclient": "^9.0.1",
-		"vscode-languageserver": "^9.0.1",
-		"vscode-languageserver-textdocument": "^1.0.11"
-	},
 	"devDependencies": {
 		"@types/node": "^16.18.34",
-		"@types/vscode": "^1.73.0",
-		"vscode-uri": "^3.0.2"
+		"@types/vscode": "^1.73.0"
 	}
 }

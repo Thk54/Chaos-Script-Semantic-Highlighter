@@ -1,41 +1,10 @@
 import * as vscode from 'vscode';
-/* import {
-	LanguageClient,
-	LanguageClientOptions,
-	ServerOptions,
-	TransportKind,
-} from 'vscode-languageclient/node';
-import * as languageClient from 'vscode-languageclient/node';
-import * as path from 'path'; */
-import { TextDocument } from 'vscode-languageserver-textdocument';
 
 const tokenTypes = new Map<string, number>();
 const tokenModifiers = new Map<string, number>();
 const fileMaping = new Map<vscode.Uri, ICompounds>();
 const compoundTypes = new Map <string, number>();
-/* enum ChaosTranslation {//green, salmon, pink, pale yellow, purple, off-text-white, teal, blue, light sky blue, and text-white
-	comment, //'comment',//green
-	string, //'string',//salmon
-	compoundCube, //'keyword',//pink
-	compoundDouble, //'number',//pale yellow
-	compoundAbility, //'regexp',//purple
-	compoundPerk, //'operator',//offwhite
-	e, //'namespace',//teal
-	f, //'type',//teal
-	g, //'struct',//teal
-	h, //'class',//teal
-	i, //'interface',//teal
-	compoundBoolean, //'enum',//teal
-	k, //'typeParameter',//teal
-	l, //'function',//pale yellow
-	m, //'method',//pale yellow
-	compoundPosition, //'decorator',//pale yellow
-	compoundAction, //'macro',//blue
-	p, //'variable',//light sky blue
-	q, //'parameter',//light sky blue
-	compoundDirection, //'property',//light sky blue
-	compoundType //'label'//text white
-} */
+
 
 
 const legend = (function() {
@@ -80,51 +49,20 @@ const legend = (function() {
 	return new vscode.SemanticTokensLegend(tokenTypesLegend, tokenModifiersLegend);
 })();
 
-
-//let client: LanguageClient
-export function activate(context: vscode.ExtensionContext) {
-/*	// The server is implemented in node
-	const serverModule = context.asAbsolutePath(
-		path.join('out', 'server.js')
-	);
-	// If the extension is launched in debug mode then the debug server options are used
-	// Otherwise the run options are used
-	const serverOptions: ServerOptions = {
-		run: {module: serverModule, transport: TransportKind.ipc, options: {execArgv:['--nolazy', '--inspect=6009']} },
-		debug: {module: serverModule, transport: TransportKind.ipc, options: {execArgv:['--nolazy', '--inspect=6009']} }
-	};
-		// Options to control the language client
-	const clientOptions: LanguageClientOptions = {
-		// Register the server for cube chaos documents
-		documentSelector: [{ scheme: 'file', language: 'cubechaos' }],
-		synchronize: {
-			// Notify the server about file changes to '.clientrc files contained in the workspace
-			fileEvents: vscode.workspace.createFileSystemWatcher('**[remove.me]/.chaos.txt')
-		}
-	}
-	// Create the language client and start the client.
-	client = new LanguageClient(
-		'CubeChaosLanguageServer',
-		'Cube Chaos Language Server',
-		serverOptions,
-		clientOptions,
-	);
-	// Start the client. This will also launch the server
-	client.start();
-*/
-	async function initializeCompounds() {
-		let files = await vscode.workspace.findFiles('**/*.txt')
-		for  (let txt of files){
-			vscode.workspace.openTextDocument(txt).then((document) => {
-			fileMaping.set(txt,extractDefinitionDetails(gatherCompounds(document)))
-
+async function initializeCompounds() {
+	let files = await vscode.workspace.findFiles('**/*.txt')
+	for  (let txt of files){
+		vscode.workspace.openTextDocument(txt).then((document) => {
+		fileMaping.set(txt,extractDefinitionDetails(gatherCompounds(document)))
 		})
-		}
 	}
+}
+
+export function activate(context: vscode.ExtensionContext) {
+
 	initializeCompounds()
 
 	context.subscriptions.push(vscode.languages.registerFoldingRangeProvider({ language: 'cubechaos' }, new FoldingRangeProvider()));
-	console.log('does this keep happening')
 	context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'cubechaos' }, new DocumentSymbolProvider()));
 	context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'cubechaos' }, new DocumentSemanticTokensProvider(), legend))
 }
@@ -173,11 +111,10 @@ interface RegExCompoundCaptures{
 	RegExPositions: RegExpMatchArray[];
 }
 
-/*interface ILineAndOffset{
-	lineNum:number;
-	offset:number;
-	originalOffset:number; 
-}*/
+interface token{
+	
+}
+
 
 class FoldingRangeProvider implements vscode.FoldingRangeProvider {
 	async provideFoldingRanges(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
@@ -199,34 +136,10 @@ class FoldingRangeProvider implements vscode.FoldingRangeProvider {
 				}
 				ranges.push(foldRange)
 			}
-		
 		}
 		return ranges
-		
-
-		/*const builder = new vscode.SemanticTokensBuilder();
-		allTokens.forEach((token) => {
-			builder.push(token.line, token.startCharacter, token.length, token.tokenType, this._encodeTokenModifiers(token.tokenModifiers));
-		});
-		return builder.build();*/
 	}
 }
-/*More archived code, realised this isn't even the right thing to be doing
-async function updateSemanticTokens(uri:vscode.Uri,document:vscode.TextDocument) {
-	const builder = new vscode.SemanticTokensBuilder();
-	Object.values(fileMaping.get(uri)).forEach(compounds => {
-		for (let compound of compounds){
-			createSemanticTokenFromICompound(compound,document,builder)
-		}
-	});
-	await builder.build()
-	let lol
-}
-
-async function createSemanticTokenFromICompound(compound:ICompound,document:vscode.TextDocument,builder:vscode.SemanticTokensBuilder) {
-	const startPos:vscode.Position = document.positionAt(compound.Contents.Index)
-	builder.push(startPos.line, startPos.character, compound.Contents.Content.length, compoundTypes.get(compound.Type));
-}*/
 
 function gatherCompounds(document: vscode.TextDocument): RegExCompoundCaptures {
 	let regExComments: RegExpMatchArray[] = []
@@ -384,21 +297,23 @@ class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
 	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
 		//update active file
-		fileMaping.set(document.uri, extractDefinitionDetails(gatherCompounds(document)))
-		fileMaping.get(document.uri)
+		const update = extractDefinitionDetails(gatherCompounds(document))
+		//determie tokens
+		fileMaping.set(document.uri, update)
+		for (let array of Object.values(update)){
+			for (let compound of array){
+
+			}
+		}
 	
 		let stupid:vscode.SemanticTokens
 
 	return stupid
-		
 
-		/*const builder = new vscode.SemanticTokensBuilder();
-		allTokens.forEach((token) => {
-			builder.push(token.line, token.startCharacter, token.length, token.tokenType, this._encodeTokenModifiers(token.tokenModifiers));
-		});
-		return builder.build();*/
 	}
-
+private async name() {
+	
+}
 	/*private _encodeTokenModifiers(strTokenModifiers: string[]): number {
 		let result = 0;
 		for (let i = 0; i < strTokenModifiers.length; i++) {

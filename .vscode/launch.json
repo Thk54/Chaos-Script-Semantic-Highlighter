@@ -6,16 +6,6 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Attach",
-			"port": 6009,
-			"request": "attach",
-			"skipFiles": [
-				"<node_internals>/**"
-			],
-			"type": "node"
-		},
-		
-		{
 			"name": "Run Extension",
 			"type": "extensionHost",
 			"request": "launch",
@@ -26,7 +16,6 @@
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js"
 			],
-			"autoAttachChildProcesses": true,
 			"preLaunchTask": "npm: watch"
 		},
 		{
