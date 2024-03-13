@@ -1,14 +1,19 @@
 import * as vscode from 'vscode';
-import {
+/* import {
 	LanguageClient,
 	LanguageClientOptions,
 	ServerOptions,
-	TransportKind
+	TransportKind,
 } from 'vscode-languageclient/node';
+import * as languageClient from 'vscode-languageclient/node';
+import * as path from 'path'; */
+import { TextDocument } from 'vscode-languageserver-textdocument';
 
 const tokenTypes = new Map<string, number>();
 const tokenModifiers = new Map<string, number>();
-enum ChaosTranslation {//green, salmon, pink, pale yellow, purple, off-text-white, teal, blue, light sky blue, and text-white
+const fileMaping = new Map<vscode.Uri, ICompounds>();
+const compoundTypes = new Map <string, number>();
+/* enum ChaosTranslation {//green, salmon, pink, pale yellow, purple, off-text-white, teal, blue, light sky blue, and text-white
 	comment, //'comment',//green
 	string, //'string',//salmon
 	compoundCube, //'keyword',//pink
@@ -30,7 +35,7 @@ enum ChaosTranslation {//green, salmon, pink, pale yellow, purple, off-text-whit
 	q, //'parameter',//light sky blue
 	compoundDirection, //'property',//light sky blue
 	compoundType //'label'//text white
-}
+} */
 
 
 const legend = (function() {
@@ -41,6 +46,31 @@ const legend = (function() {
 	];
 	tokenTypesLegend.forEach((tokenType, index) => tokenTypes.set(tokenType, index));
 
+	const chaosMappings = [//green, salmon, pink, pale yellow, purple, off-text-white, teal, blue, light sky blue, and text-white
+		'comment', //'comment',//green
+		'STRING', //'string',//salmon
+		'CUBE', //'keyword',//pink
+		'DOUBLE', //'number',//pale yellow
+		'ABILITY', //'regexp',//purple
+		'PERK', //'operator',//offwhite
+		'e', //'namespace',//teal
+		'f', //'type',//teal
+		'g', //'struct',//teal
+		'h', //'class',//teal
+		'i', //'interface',//teal
+		'BOOLEAN', //'enum',//teal
+		'k', //'typeParameter',//teal
+		'l', //'function',//pale yellow
+		'm', //'method',//pale yellow
+		'POSITION', //'decorator',//pale yellow
+		'ACTION', //'macro',//blue
+		'p', //'variable',//light sky blue
+		'q', //'parameter',//light sky blue
+		'DIRECTION', //'property',//light sky blue
+		'Type' //'label'//text white
+	]
+	chaosMappings.forEach((compoundtype,index)=>compoundTypes.set(compoundtype, index))
+
 	const tokenModifiersLegend = [
 		'declaration', 'documentation', 'readonly', 'static', 'abstract', 'deprecated',
 		'modification', 'async'
@@ -50,17 +80,18 @@ const legend = (function() {
 	return new vscode.SemanticTokensLegend(tokenTypesLegend, tokenModifiersLegend);
 })();
 
-let client: LanguageClient
 
+//let client: LanguageClient
 export function activate(context: vscode.ExtensionContext) {
-	// The server is implemented in node
-	const serverModule = vscode.Uri.joinPath(context.extensionUri, 'out', 'server.js').toString(true);
-
+/*	// The server is implemented in node
+	const serverModule = context.asAbsolutePath(
+		path.join('out', 'server.js')
+	);
 	// If the extension is launched in debug mode then the debug server options are used
 	// Otherwise the run options are used
 	const serverOptions: ServerOptions = {
-		run: { module: serverModule, transport: TransportKind.ipc },
-		debug: {module: serverModule, transport: TransportKind.ipc }
+		run: {module: serverModule, transport: TransportKind.ipc, options: {execArgv:['--nolazy', '--inspect=6009']} },
+		debug: {module: serverModule, transport: TransportKind.ipc, options: {execArgv:['--nolazy', '--inspect=6009']} }
 	};
 		// Options to control the language client
 	const clientOptions: LanguageClientOptions = {
@@ -68,7 +99,7 @@ export function activate(context: vscode.ExtensionContext) {
 		documentSelector: [{ scheme: 'file', language: 'cubechaos' }],
 		synchronize: {
 			// Notify the server about file changes to '.clientrc files contained in the workspace
-			fileEvents: vscode.workspace.createFileSystemWatcher('**/.clientrc')
+			fileEvents: vscode.workspace.createFileSystemWatcher('**[remove.me]/.chaos.txt')
 		}
 	}
 	// Create the language client and start the client.
@@ -76,14 +107,26 @@ export function activate(context: vscode.ExtensionContext) {
 		'CubeChaosLanguageServer',
 		'Cube Chaos Language Server',
 		serverOptions,
-		clientOptions
+		clientOptions,
 	);
 	// Start the client. This will also launch the server
 	client.start();
+*/
+	async function initializeCompounds() {
+		let files = await vscode.workspace.findFiles('**/*.txt')
+		for  (let txt of files){
+			vscode.workspace.openTextDocument(txt).then((document) => {
+			fileMaping.set(txt,extractDefinitionDetails(gatherCompounds(document)))
 
-	//context.subscriptions.push(vscode.languages.registerFoldingRangeProvider({ language: 'cubechaos' }, new vscode.FoldingRangeProvider()));
-	//context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'cubechaos' }, new DocumentSymbolProvider()));
-	//context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'cubechaos' }, new DocumentSemanticTokensProvider(), legend))
+		})
+		}
+	}
+	initializeCompounds()
+
+	context.subscriptions.push(vscode.languages.registerFoldingRangeProvider({ language: 'cubechaos' }, new FoldingRangeProvider()));
+	console.log('does this keep happening')
+	context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'cubechaos' }, new DocumentSymbolProvider()));
+	context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'cubechaos' }, new DocumentSemanticTokensProvider(), legend))
 }
 
 interface ICompounds {
@@ -120,6 +163,7 @@ interface IArguments {
 }
 
 interface RegExCompoundCaptures{
+	RegExComments: RegExpMatchArray[];
 	RegExAbilities: RegExpMatchArray[];
 	RegExActions: RegExpMatchArray[];
 	RegExBooleans: RegExpMatchArray[];
@@ -135,7 +179,57 @@ interface RegExCompoundCaptures{
 	originalOffset:number; 
 }*/
 
+class FoldingRangeProvider implements vscode.FoldingRangeProvider {
+	async provideFoldingRanges(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
+		const captureArray = gatherCompounds(document);
+		let ranges: vscode.FoldingRange[] = []
+		for (let captures of Object.entries(captureArray)){
+			for (let capture of captures[1]){
+				let foldRange:vscode.FoldingRange
+				if (capture.groups['CommentString']){
+					foldRange = new vscode.FoldingRange(
+						document.positionAt(capture.indices.groups['CommentString'][0]).line,
+						document.positionAt(capture.indices.groups['CommentString'][1]).line,
+						vscode.FoldingRangeKind.Comment)
+				} else {
+					foldRange = new vscode.FoldingRange(
+						document.positionAt(capture.index).line,
+						document.positionAt(capture.index + capture[0].length).line
+					)
+				}
+				ranges.push(foldRange)
+			}
+		
+		}
+		return ranges
+		
+
+		/*const builder = new vscode.SemanticTokensBuilder();
+		allTokens.forEach((token) => {
+			builder.push(token.line, token.startCharacter, token.length, token.tokenType, this._encodeTokenModifiers(token.tokenModifiers));
+		});
+		return builder.build();*/
+	}
+}
+/*More archived code, realised this isn't even the right thing to be doing
+async function updateSemanticTokens(uri:vscode.Uri,document:vscode.TextDocument) {
+	const builder = new vscode.SemanticTokensBuilder();
+	Object.values(fileMaping.get(uri)).forEach(compounds => {
+		for (let compound of compounds){
+			createSemanticTokenFromICompound(compound,document,builder)
+		}
+	});
+	await builder.build()
+	let lol
+}
+
+async function createSemanticTokenFromICompound(compound:ICompound,document:vscode.TextDocument,builder:vscode.SemanticTokensBuilder) {
+	const startPos:vscode.Position = document.positionAt(compound.Contents.Index)
+	builder.push(startPos.line, startPos.character, compound.Contents.Content.length, compoundTypes.get(compound.Type));
+}*/
+
 function gatherCompounds(document: vscode.TextDocument): RegExCompoundCaptures {
+	let regExComments: RegExpMatchArray[] = []
 	let regExAbilities: RegExpMatchArray[] = []
 	let regExActions: RegExpMatchArray[] = []
 	let regExBooleans: RegExpMatchArray[] = []
@@ -143,7 +237,7 @@ function gatherCompounds(document: vscode.TextDocument): RegExCompoundCaptures {
 	let regExDoubles: RegExpMatchArray[] = []
 	let regExCubes: RegExpMatchArray[] = []
 	let regExPositions: RegExpMatchArray[] = []
-	for (let match of document.getText().matchAll(/(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<CompoundType>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<CompoundName>[\S]*)\s(?<CompoundContents>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)\b[Ee][Nn][Dd]\b)/gsd)){
+	for (let match of document.getText().matchAll(/[\s^](?<CommentString>\/-\s.*?\s-\/)[\s$]|(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<CompoundType>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<CompoundName>[\S]*)\s(?<CompoundContents>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)\b[Ee][Nn][Dd]\b)/gsd)){
 		switch (match.groups['CompoundType']) {
 			case 'ABILITY':
 				regExAbilities.push(match)
@@ -167,11 +261,14 @@ function gatherCompounds(document: vscode.TextDocument): RegExCompoundCaptures {
 				regExPositions.push(match)
 				break;
 			default:
+				if (match.groups['CommentString']) {regExComments.push(match)} else {
 				console.log("Something has gone wrong or a new compound type was added");
+				};
 				break;
 		}
 	}
 	return{
+		RegExComments:regExComments,
 		RegExAbilities:regExAbilities,
 		RegExActions:regExActions,
 		RegExBooleans:regExBooleans,
@@ -210,7 +307,7 @@ function extractDefinitionDetails(compounds: RegExCompoundCaptures): ICompounds 
 	let positions: ICompound[] = []
 	for (let captures of Object.entries(compounds)) {
 		for (let capture of captures[1]){
-			switch (capture[1]) {
+			switch (capture.groups['CompoundType']) {
 				case 'ABILITY':
 					abilities.push(packIntoCompound(capture))
 					break;
@@ -233,8 +330,9 @@ function extractDefinitionDetails(compounds: RegExCompoundCaptures): ICompounds 
 					positions.push(packIntoCompound(capture))
 					break;
 				default:
-					console.log("Something has gone wrong or a new compound type was added");
-					break;
+					if (capture.groups['CommentString']) {break;} else {
+				console.log("Something has gone wrong or a new compound type was added");
+				};
 			}
 		}
 	}
@@ -285,10 +383,13 @@ class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 
 class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
 	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
-		const compounds = extractDefinitionDetails(gatherCompounds(document));
-		console.log(compounds);		
+		//update active file
+		fileMaping.set(document.uri, extractDefinitionDetails(gatherCompounds(document)))
+		fileMaping.get(document.uri)
+	
 		let stupid:vscode.SemanticTokens
-		return stupid
+
+	return stupid
 		
 
 		/*const builder = new vscode.SemanticTokensBuilder();

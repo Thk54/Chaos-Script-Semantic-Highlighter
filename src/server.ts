@@ -14,18 +14,176 @@ import {
 	DocumentDiagnosticReportKind,
 	type DocumentDiagnosticReport
 } from 'vscode-languageserver/node';
-
+import * as vscode from 'vscode'
 import {
 	TextDocument
 } from 'vscode-languageserver-textdocument';
+/*
+let compounds:ICompounds
 
+interface ICompounds {
+	Abilities: ICompound[];
+	Actions: ICompound[];
+	Booleans: ICompound[];
+	Directions: ICompound[];
+	Doubles: ICompound[];
+	Cubes: ICompound[];
+	Positions: ICompound[];
+}
+
+interface ICompound {
+	Type: string,
+	Name: IName,
+	Contents: IContents,
+	Arguments?: IArguments[]
+}
+
+interface IName {
+	Name: string,
+	Index: number
+}
+
+interface IContents {
+	Content: string,
+	Index: number
+}
+
+interface IArguments {
+	Type: string,
+	String: string,
+	Index: number
+}
+
+interface RegExCompoundCaptures{
+	RegExAbilities: RegExpMatchArray[];
+	RegExActions: RegExpMatchArray[];
+	RegExBooleans: RegExpMatchArray[];
+	RegExDirections: RegExpMatchArray[];
+	RegExDoubles: RegExpMatchArray[];
+	RegExCubes: RegExpMatchArray[];
+	RegExPositions: RegExpMatchArray[];
+}
+
+function gatherCompounds(document: TextDocuments<TextDocument>): RegExCompoundCaptures {
+	let regExAbilities: RegExpMatchArray[] = []
+	let regExActions: RegExpMatchArray[] = []
+	let regExBooleans: RegExpMatchArray[] = []
+	let regExDirections: RegExpMatchArray[] = []
+	let regExDoubles: RegExpMatchArray[] = []
+	let regExCubes: RegExpMatchArray[] = []
+	let regExPositions: RegExpMatchArray[] = []
+	for (let match of document.getText().matchAll(/(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<CompoundType>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<CompoundName>[\S]*)\s(?<CompoundContents>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)\b[Ee][Nn][Dd]\b)/gsd)){
+		switch (match.groups['CompoundType']) {
+			case 'ABILITY':
+				regExAbilities.push(match)
+				break;
+			case 'ACTION':
+				regExActions.push(match)
+				break;
+			case 'BOOLEAN':
+				regExBooleans.push(match)
+				break;
+			case 'DIRECTION':
+				regExDirections.push(match)
+				break;
+			case 'DOUBLE':
+				regExDoubles.push(match)
+				break;
+			case 'CUBE':
+				regExCubes.push(match)
+				break;
+			case 'POSITION':
+				regExPositions.push(match)
+				break;
+			default:
+				console.log("Something has gone wrong or a new compound type was added");
+				break;
+		}
+	}
+	return{
+		RegExAbilities:regExAbilities,
+		RegExActions:regExActions,
+		RegExBooleans:regExBooleans,
+		RegExDirections:regExDirections,
+		RegExDoubles:regExDoubles,
+		RegExCubes:regExCubes,
+		RegExPositions:regExPositions
+	}
+}
+function extractDefinitionDetails(compounds: RegExCompoundCaptures): ICompounds {
+	function packIntoCompound (capture:RegExpMatchArray): ICompound {
+		let args:IArguments[] = []
+///(?:\bText:\s.*?\b[Ee][Nn][Dd]\b)|(?:\bGeneric(?:Perk|Position|String|Word|Name|Action|Boolean|Direction|Double|Constant|Cube|Stacking|Time)\b)/gd
+///(?:\bText:\s.*?\b[Ee][Nn][Dd]\b)|(?:\b[Gg][eE][nN][eE][rR][iI][cC](?:[Pp][eE][rR][kK]|[Pp][oO][sS][iI][tT][iI][oO][nN]|[Ss][tT][rR][iI][nN][gG]|[Ww][oO][rR][dD]|[Nn][aA][mM][eE]|[Aa][cC][tT][iI][oO][nN]|[Bb][oO][oO][lL][eE][aA][nN]|[Dd][iI][rR][eE][cC][tT][iI][oO][nN]|[Dd][oO][uU][bB][lL][eE]|[Cc][oO][nN][sS][tT][aA][nN][tT]|[Cc][uU][bB][eE]|[Ss][tT][aA][cC][kK][iI][nN][gG]|[Tt][iI][mM][eE])\b)/gd
+		for(let generic of capture.groups['CompoundContents'].matchAll(/(?:\bText:\s.*?\b[Ee][Nn][Dd]\b)|(?<CompoundGenerics>\b[Gg][eE][nN][eE][rR][iI][cC](?:[Pp][eE][rR][kK]|[Pp][oO][sS][iI][tT][iI][oO][nN]|[Ss][tT][rR][iI][nN][gG]|[Ww][oO][rR][dD]|[Nn][aA][mM][eE]|[Aa][cC][tT][iI][oO][nN]|[Bb][oO][oO][lL][eE][aA][nN]|[Dd][iI][rR][eE][cC][tT][iI][oO][nN]|[Dd][oO][uU][bB][lL][eE]|[Cc][oO][nN][sS][tT][aA][nN][tT]|[Cc][uU][bB][eE]|[Ss][tT][aA][cC][kK][iI][nN][gG]|[Tt][iI][mM][eE])\b)/gd)){
+			if (generic.groups['CompoundGenerics'])
+				args.push({
+					String: generic.groups['CompoundGenerics'],
+					Type: generic.groups['CompoundGenerics'].slice(7),
+					Index: generic.indices.groups['CompoundGenerics'][0]+capture.index
+			})
+		}
+		return {
+			Type:capture.groups['CompoundType'],
+			Contents: {Content:capture.groups['CompoundContents'], Index:capture.indices.groups['CompoundContents'][0]},
+			Name: {Name:capture.groups['CompoundName'], Index:capture.indices.groups['CompoundName'][0]},
+			Arguments: args
+		}
+	}
+	let abilities: ICompound[] = []
+	let actions: ICompound[] = []
+	let booleans: ICompound[] = []
+	let directions: ICompound[] = []
+	let doubles: ICompound[] = []
+	let cubes: ICompound[] = []
+	let positions: ICompound[] = []
+	for (let captures of Object.entries(compounds)) {
+		for (let capture of captures[1]){
+			switch (capture[1]) {
+				case 'ABILITY':
+					abilities.push(packIntoCompound(capture))
+					break;
+				case 'ACTION':
+					actions.push(packIntoCompound(capture))
+					break;
+				case 'BOOLEAN':
+					booleans.push(packIntoCompound(capture))
+					break;
+				case 'DIRECTION':
+					directions.push(packIntoCompound(capture))
+					break;
+				case 'DOUBLE':
+					doubles.push(packIntoCompound(capture))
+					break;
+				case 'CUBE':
+					cubes.push(packIntoCompound(capture))
+					break;
+				case 'POSITION':
+					positions.push(packIntoCompound(capture))
+					break;
+				default:
+					console.log("Something has gone wrong or a new compound type was added");
+					break;
+			}
+		}
+	}
+	return{
+		Abilities:abilities,
+		Actions:actions,
+		Booleans:booleans,
+		Directions:directions,
+		Doubles:doubles,
+		Cubes:cubes,
+		Positions:positions
+	}
+}
+*/
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
 
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
-
 let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 let hasDiagnosticRelatedInformationCapability = false;
@@ -80,6 +238,7 @@ connection.onInitialized(() => {
 			connection.console.log('Workspace folder change event received.');
 		});
 	}
+	//compounds = gatherCompounds(documents)
 });
 
 // The example settings
@@ -119,7 +278,7 @@ function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
 	if (!result) {
 		result = connection.workspace.getConfiguration({
 			scopeUri: resource,
-			section: 'languageServerExample'
+			section: 'cubeChaoslanguageServer'
 		});
 		documentSettings.set(resource, result);
 	}
@@ -152,6 +311,7 @@ connection.languages.diagnostics.on(async (params) => {
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(change => {
+ console.log('wahfoiwefjsadf');
 	validateTextDocument(change.document);
 });
 
@@ -198,7 +358,7 @@ async function validateTextDocument(textDocument: TextDocument): Promise<Diagnos
 		diagnostics.push(diagnostic);
 	}
 	return diagnostics;
-}
+} 
 
 connection.onDidChangeWatchedFiles(_change => {
 	// Monitored files have change in VSCode
@@ -240,6 +400,8 @@ connection.onCompletionResolve(
 		return item;
 	}
 );
+
+
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
