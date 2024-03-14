@@ -370,6 +370,8 @@ private async builderTokens(builder:vscode.SemanticTokensBuilder,compound:ICompo
 			builder.push(tokenStart.line, tokenStart.character, word[0].length, typesOfCompounds.get(result.Type))
 		}
 	}
+	let nameStart = document.positionAt(compound.Name.Index)
+	builder.push(nameStart.line, nameStart.character, compound.Name.Name.length, typesOfCompounds.get(compound.Type))
 	return Promise
 }
 	/*private _encodeTokenModifiers(strTokenModifiers: string[]): number {
