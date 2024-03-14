@@ -67,42 +67,36 @@ async function addToFileToNameToCompoundListMap(compoundsAndMap:ICompounds,uri:v
 
 async function initializeCompounds() {
 	let files = await vscode.workspace.findFiles('**/*.txt')
-	let promises = []
+	let promises = [] //is actualy promises but the .then coerces it to any or something *shrug*
 	let definitionDetails:ICompounds
 	for  (let txt of files){
-		await vscode.workspace.openTextDocument(txt).then((document) => {
-			definitionDetails = extractDefinitionDetails(gatherCompounds(document))
-		})
-		let hasEntries = 0
-		for (let compTypeArray of Object.values(definitionDetails)){
-			hasEntries = hasEntries + compTypeArray.length
-		}
-		if (hasEntries) {
-			fileToCompoundsMap.set(txt,definitionDetails)
-			promises.push(addToFileToNameToCompoundListMap(definitionDetails,txt))
-		}
+		promises.push(presentTextDocumentFromURIToFunction(txt,addToMapsIfEntriesExist))
 	}
 	await Promise.allSettled(promises)
 	console.log('initial map done')
 }
+async function presentTextDocumentFromURIToFunction(uri:vscode.Uri,fuc:Function){
+	await vscode.workspace.openTextDocument(uri).then((document)=>{fuc(document)})
+	return Promise
+}
 
-/* async function addToMapsIfEntriesExist(uri:vscode.Uri) {
+async function addToMapsIfEntriesExist(document:vscode.TextDocument) {
 	let definitionDetails:ICompounds
-	await vscode.workspace.openTextDocument(uri).then((document) => {
-		definitionDetails = extractDefinitionDetails(gatherCompounds(document))
-	})
+	definitionDetails = extractDefinitionDetails(gatherCompounds(document))
+		
 	let hasEntries = 0
 	for (let compTypeArray of Object.values(definitionDetails)){
 		hasEntries = hasEntries + compTypeArray.length
 	}
 	if (hasEntries) {
-		fileToCompoundsMap.set(txt,definitionDetails)
-		promises.push(addToFileToNameToCompoundListMap(definitionDetails,txt))
-} */
+		fileToCompoundsMap.set(document.uri,definitionDetails)
+		addToFileToNameToCompoundListMap(definitionDetails,document.uri)
+	}
+}
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 	
-	initializeCompounds()
+	await initializeCompounds()
 	
 	context.subscriptions.push(vscode.languages.registerFoldingRangeProvider({ language: 'cubechaos' }, new FoldingRangeProvider()));
 	//context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'cubechaos' }, new DocumentSymbolProvider()));
@@ -345,10 +339,10 @@ class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 
 class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
 	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
-		//update active file
-		const update = extractDefinitionDetails(gatherCompounds(document))
-		//wait for map to be updated
-		await addToFileToNameToCompoundListMap(update,document.uri)
+		//update active file and wait for map to be updated
+		await addToMapsIfEntriesExist(document)
+		//get newly updated ICompounds
+		const update = fileToCompoundsMap.get(document.uri)
 		//determie tokens
 		const builder:vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder()
 		fileToCompoundsMap.set(document.uri, update)
@@ -366,7 +360,11 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 private async builderTokens(builder:vscode.SemanticTokensBuilder,compound:ICompound,document:vscode.TextDocument) {
 	const mainOffset = compound.Contents.Index
 	for (let word of compound.Contents.Content.matchAll(/(?<=[\s^])(?:Text:\s.*?\b[Ee][Nn][Dd])|\S+?(?=[\s$])/gis)){
-		let result = fileToNameToCompoundListMap.get(document.uri).get(word[0].toLowerCase())
+		let result 
+		for (let file of fileToNameToCompoundListMap.keys()){
+			result = fileToNameToCompoundListMap.get(file).get(word[0].toLowerCase())
+			if (result) break
+		}
 		if (result) {
 			let tokenStart = document.positionAt(word.index+mainOffset)
 			builder.push(tokenStart.line, tokenStart.character, word[0].length, typesOfCompounds.get(result.Type))
