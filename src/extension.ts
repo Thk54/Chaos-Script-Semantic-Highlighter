@@ -4,6 +4,7 @@ const tokenTypes = new Map<string, number>();
 const tokenModifiers = new Map<string, number>();
 const fileMaping = new Map<vscode.Uri, ICompounds>();
 const compoundTypes = new Map <string, number>();
+const compoundListMap = new Map<string,ICompound>();
 
 
 
@@ -54,8 +55,10 @@ async function initializeCompounds() {
 	for  (let txt of files){
 		vscode.workspace.openTextDocument(txt).then((document) => {
 		fileMaping.set(txt,extractDefinitionDetails(gatherCompounds(document)))
+		addNameMap(fileMaping.get(txt))
 		})
 	}
+	console.log('initial map done')
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -75,6 +78,7 @@ interface ICompounds {
 	Doubles: ICompound[];
 	Cubes: ICompound[];
 	Positions: ICompound[];
+	//NameMap: Map<string,ICompound>
 }
 
 interface ICompound {
@@ -111,8 +115,12 @@ interface RegExCompoundCaptures{
 	RegExPositions: RegExpMatchArray[];
 }
 
-interface token{
-	
+interface Token{
+	line:number,
+	character:number,
+	length:number,
+	type:number,
+	modifiers?:number
 }
 
 
@@ -150,7 +158,7 @@ function gatherCompounds(document: vscode.TextDocument): RegExCompoundCaptures {
 	let regExDoubles: RegExpMatchArray[] = []
 	let regExCubes: RegExpMatchArray[] = []
 	let regExPositions: RegExpMatchArray[] = []
-	for (let match of document.getText().matchAll(/[\s^](?<CommentString>\/-\s.*?\s-\/)[\s$]|(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<CompoundType>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<CompoundName>[\S]*)\s(?<CompoundContents>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)\b[Ee][Nn][Dd]\b)/gsd)){
+	for (let match of document.getText().matchAll(/[\s^](?<CommentString>\/-(?=\s).*?\s-\/)[\s$]|(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<CompoundType>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<CompoundName>[\S]*)\s(?<CompoundContents>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)\b[Ee][Nn][Dd]\b)/gsd)){
 		switch (match.groups['CompoundType']) {
 			case 'ABILITY':
 				regExAbilities.push(match)
@@ -257,6 +265,7 @@ function extractDefinitionDetails(compounds: RegExCompoundCaptures): ICompounds 
 		Doubles:doubles,
 		Cubes:cubes,
 		Positions:positions
+		//NameMap:new Map<string,ICompound>()
 	}
 }
 
@@ -294,25 +303,53 @@ class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 	}
 }
 
+function addNameMap(compoundsAndMap:ICompounds){
+	let compounds = compoundsAndMap
+	for (let compoundArray of Object.values(compounds)) {
+		for (let compound of compoundArray){
+			if (typeof(compound.Type) === typeof(''))
+				if (compound.Name.Name){
+					compoundListMap.set(compound.Name.Name.toLowerCase(),compound)
+				}	
+		}
+	}
+}
+
 class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
 	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
 		//update active file
 		const update = extractDefinitionDetails(gatherCompounds(document))
+		//build map
+		
 		//determie tokens
+		const builder:vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder()
 		fileMaping.set(document.uri, update)
+		let ararar = []
 		for (let array of Object.values(update)){
 			for (let compound of array){
-
+				ararar.push(this.builderTokens(builder,compound,document))
 			}
 		}
-	
+		let dafs
+		let ar = await Promise.allSettled(ararar)
 		let stupid:vscode.SemanticTokens
 
-	return stupid
+	return builder.build()
 
 	}
-private async name() {
+private async builderTokens(builder:vscode.SemanticTokensBuilder,compound:ICompound,doc:vscode.TextDocument) {
 	
+	const mainOffset = compound.Contents.Index
+	let regex
+	for (let word of compound.Contents.Content.matchAll(/(?<=[\s^])\S+?(?=\s)/gis)){
+		let result = compoundListMap.get(word[0].toLowerCase())
+		if (result) {
+			let tokenStart = doc.positionAt(word.index+mainOffset)
+			builder.push(tokenStart.line, tokenStart.character, word[0].length, compoundTypes.get(result.Type))
+			let aht
+		}
+	}
+	return Promise
 }
 	/*private _encodeTokenModifiers(strTokenModifiers: string[]): number {
 		let result = 0;
