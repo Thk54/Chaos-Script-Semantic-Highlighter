@@ -1,0 +1,353 @@
+Modding Info 
+
+Triggers: 
+AfterACubeCollides Action
+AfterACubeCreationIsBlocked Action
+AfterACubeDies Action
+AfterACubeHeals Action
+AfterACubeIsCreated Action
+AfterACubeLosesAnAbility Action
+AfterACubeMoves Action
+AfterACubeTakesDamage Action
+AfterACubeTeleports Action
+AfterAMapIsGenerated Action
+AfterBlockedTeleport Action
+AfterCampaignSomething
+AfterEndOfTheBattle Action
+AfterThisCreates Action
+AfterThisDealsDamage Action
+AfterThisDies Action
+AfterThisIsClicked Action
+AfterThisIsCreated Action
+AfterThisKills Action
+AfterThisMoves Action
+AfterThisMovesACube Action
+AfterThisTakesDamage Action
+AfterWorldSomething Action
+AfterYouClickAPerk Action
+AfterYouGainAPerk Action
+AfterYouGainOrLoseCurrency Action
+AfterYouLose Action
+AfterYouLoseAPerk Action
+AfterYouReroll Action
+AfterYouUpgradeAPerk Action
+AfterYouWin
+AiPlacement BOOLEAN
+AiPlacementRule Action
+AtTheStartOfTheBattle Action
+BeforeACubeDies Action
+BeforeACubeGainsAnAbility Action
+BeforeACubeHeals Action
+BeforeACubeIsAddedToAHand Action
+BeforeACubeIsAddedToInventory Action
+BeforeACubeMoves Action
+BeforeACubeMovesNegation Action
+BeforeACubeTakesDamage Action
+BeforeACubeVariableChanges Action
+BeforeCollision Action
+BeforeEndOfTheBattle Action
+BeforeManaIsGenerated Action
+BeforePercentChance Action
+BeforeThisDealsDamage Action
+BeforeThisDies Action
+BeforeThisHealsACube Action
+BeforeThisIsDrawn Action BOOLEAN
+BeforeThisIsHealed Action
+BeforeThisIsPlaced Action
+BeforeThisMoves Action
+BeforeThisMovesNegation Action
+BeforeThisTakesDamage Action
+BeforeTime Action
+BeforeYouLose Action
+BeforeYouTakeAStep Action
+BeforeYouWin Action
+Counter Action
+EveryTick Action
+Nothing DOUBLE
+
+Actions: 
+EveryXTimes DOUBLE Action
+Both Action Action
+If BOOLEAN Action
+TargetCube CUBE Action
+EveryCubeWhich BOOLEAN Action
+EveryCubeInHandOfFactionWhich DOUBLE BOOLEAN Action
+XShots DOUBLE Action
+XTimes DOUBLE Action
+SecretXTimes DOUBLE Action
+IfElse BOOLEAN Action Action
+XDelay DOUBLE Action
+Randomly Action Action
+Silent Action
+Secret Action
+Until BOOLEAN Action Action
+SetCaster CUBE Action
+SetStorage CUBE Action
+EveryCubeTouchingPosition POSITION Action
+TargetPerk PERK Action
+EveryPerkInInventoryWhich BOOLEAN Action
+EveryCubeInInventoryWhich BOOLEAN Action
+Cooldown DOUBLE Action
+EveryXTimesSteady DOUBLE Action
+SeperateEffect Action
+EveryXAmount DOUBLE Action
+XFeedY DOUBLE DOUBLE Action
+EveryMapNodeWhich BOOLEAN Action
+TakeXDamage DOUBLE
+TakeXDamageEffect DOUBLE int String
+ChangeMaxHp DOUBLE
+ChangeHp DOUBLE
+HealXDamage DOUBLE
+GainAbility Ability
+FactionXGainsYMana DOUBLE DOUBLE
+GenericAction
+SetFaction DOUBLE
+MoveInDirection DIRECTION
+NegateX DOUBLE
+CreateCubeOnPosition CUBE POSITION
+AddCubeToHandOfFaction CUBE DOUBLE
+AddCubeToHandOfFactionInfinitly CUBE DOUBLE
+ChangeMaxManaOfFaction DOUBLE DOUBLE
+CreateParticlesWithColourOnPosition DOUBLE POSITION
+CreateAoEParticlesColourRadiusPosition DOUBLE DOUBLE POSITION
+Die
+ChangeManaCost DOUBLE
+TeleportToPosition POSITION
+SwapWithPosition POSITION
+RemoveThisAbility
+Nothing
+Exile
+SetVariable String DOUBLE
+ChangeVariable String DOUBLE
+RemoveAbilityWithName String
+AccelerateX DOUBLE
+SetPositionPlacability POSITION DOUBLE
+GainAbilityText Ability
+RemoveCubeFromHandOfFaction CUBE DOUBLE
+GainAllAbilitiesOfCube CUBE
+GainRandomAbilityOfCube CUBE
+GainNthAbilityOfCube DOUBLE CUBE
+ChangeIncomingAdjacency POSITION DIRECTION POSITION
+NewAdjacency POSITION DIRECTION POSITION
+ResetAdjacency
+RemoveRow DOUBLE
+RemoveColumn DOUBLE
+AddRow DOUBLE
+AddColumn DOUBLE
+FactionPlacesCubeOnPosition DOUBLE CUBE POSITION
+ChangeWorldTime DOUBLE
+ChangeAbilityStacking String DOUBLE
+RemoveRandomAbility
+GainAbilityStacking Ability DOUBLE
+GainAffectedAbility
+GainThisAbility
+GainAllAbilitiesOfPerk PERK
+GainObtainAction Action
+AddPerkAbility Ability
+AddCubeToInventory CUBE
+RemoveCubeFromInventory CUBE
+AddCubeToDeck CUBE
+Win
+WinCampaign
+Lose
+ReadAScenario String
+ReadARandomEvent
+GrantXP DOUBLE
+EndCampaign
+LoseALife
+GainALife
+ChangeCampaignVariable String DOUBLE
+SetCampaignVariable String DOUBLE
+ObtainPerk PERK
+LosePerk PERK
+ChangeDeckSize DOUBLE
+FlipSprite BOOLEAN
+SystemTime
+GainRandomGeneratedAbility
+SetScore DOUBLE
+SetName STRING
+SetScoringScenario String
+Banish
+RemoveAllAbilities
+PlaySound String
+TriggerCampaignSomething String
+TeleportToMapNode DOUBLE
+LoadMapNode DOUBLE
+AddPathAB DOUBLE DOUBLE
+RemoveCubeFromDeck CUBE
+SetMapNodeScenario DOUBLE String
+SetMapNodeDifficulty DOUBLE DOUBLE
+CreateGhost
+SetSpriteToCube CUBE
+SetSpriteToPerk PERK
+DisablePerkAutoSort
+ReadAPartialScenario String
+TriggerWorldSomething String
+
+BOOLEAN: 
+IsEnemyToCaster CUBE
+IsAllyToCaster CUBE
+And BOOLEAN BOOLEAN
+HasAbilityWithName CUBE String
+IsToken CUBE
+CubeExists CUBE
+HasLimitedUses CUBE
+IsSameCube CUBE CUBE
+IsLarger DOUBLE DOUBLE
+IsSmaller DOUBLE DOUBLE
+IsEqual DOUBLE DOUBLE
+IsSameString STRING STRING
+IsSameDirection DIRECTION DIRECTION
+IsPositionEmpty POSITION
+IsSamePosition POSITION POSITION
+Not BOOLEAN
+Or BOOLEAN BOOLEAN
+True
+HadAnEffect
+X%Chance DOUBLE
+GenericBoolean
+IsAlreadyInInventory CUBE
+IsAlreadyInHandOfFaction CUBE DOUBLE
+PositionExists POSITION
+HasCategory CUBE String
+HasPerk PERK
+PerkIsType PERK String
+PerkIsUnique PERK
+PerkExists PERK
+HasPerkOrUpgrade PERK
+SeededX%Chance DOUBLE
+IsType String
+MapNodeIsType DOUBLE String
+XOr BOOLEAN BOOLEAN
+WorldExists
+StringContainsString STRING STRING
+
+CUBE: 
+Caster
+ARandomCubeWhich BOOLEAN
+Target
+Victim
+Culprit
+Test
+GenericCube
+CubeConstant String
+CopyOfCube CUBE
+ARandomCubeInLibraryWhich BOOLEAN
+ARandomCubeInHandOfFactionWhich DOUBLE BOOLEAN
+CubeInDirectionFromCube DIRECTION CUBE
+CombinationOf2Cubes CUBE CUBE
+CubeOfPosition POSITION
+ARandomRarityBasedCubeInLibraryWhich DOUBLE BOOLEAN
+TheFirstCubeInHandOfFactionWhich DOUBLE BOOLEAN
+TheFirstCubeInDirectionFromPositionWhich DIRECTION POSITION BOOLEAN
+WorldCube
+Storage
+APRandomCubeInLibraryWhich BOOLEAN
+ARandomCubeInInventoryWhich BOOLEAN
+TheXSlotInHandOfFaction DOUBLE DOUBLE
+CopyWithAction CUBE Action
+
+DIRECTION: 
+Forwards
+DirectionConstant int
+ReverseDirection DIRECTION
+EventDirection
+GenericDirection
+DirectionFromDouble DOUBLE
+RotateClock DIRECTION
+RotateCounterClock DIRECTION
+DirectionFromPosToPos POSITION POSITION
+
+DOUBLE: 
+DoubleConstant double
+TimeConstant int
+EventAmount
+EventFaction
+MaxHpOfCube CUBE
+HpOfCube CUBE
+RarityOfCube CUBE
+ManaCostOfCube CUBE
+FactionOfCube CUBE
+GetVariableOnCube String CUBE
+RemainingLives
+MaxManaOfFaction DOUBLE
+ManaOfFaction DOUBLE
+XOfPosition POSITION
+YOfPosition POSITION
+GenericDouble
+GenericConstant
+GenericTime
+GenericStacking
+HandSizeOfFaction DOUBLE
+AmountOfCubesWhich BOOLEAN
+WorldTime
+MaxWorldX
+StartingMaxWorldX
+MaxWorldY
+StartingMaxWorldY
+GetCampaignVariable String
+DistanceOfPositions POSITION POSITION
+PlacabilityOfPosition POSITION
+GetBestScore String
+ValueOfPerk PERK
+AmountOfPerksInInventoryWhich BOOLEAN
+AmountOfCubesInInventoryWhich BOOLEAN
+LetterCount STRING
+VowelCount STRING
+KonsonantCount STRING
+StackingDouble double
+GetStackingOfAbilityOnCube String CUBE
+AmountOfAbilitiesOfCube CUBE
+DescriptionValue double
+TimeSpeed
+ScalingOfCube CUBE
+PressureOfCube CUBE
+Test
+ARandomMapNodeWhich BOOLEAN
+DoubleFromDirection DIRECTION
+CopiableAbilitiesOfPerk PERK
+AmountOfCubesInHandOfFactionWhich DOUBLE BOOLEAN
+Addition DOUBLE DOUBLE
+Subtraction DOUBLE DOUBLE
+Division DOUBLE DOUBLE
+Lowest DOUBLE DOUBLE
+Highest DOUBLE DOUBLE
+Multiplication DOUBLE DOUBLE
+AbsoluteAmount DOUBLE
+RandomRoundBetweenXtoY DOUBLE DOUBLE
+RoundedDown DOUBLE
+Minus DOUBLE
+InvertedFaction DOUBLE
+% DOUBLE DOUBLE
+
+PERK: 
+Target
+Test
+PerkConstant String
+ARandomPerkInInventoryWhich BOOLEAN
+ARandomPerkInLibraryWhich BOOLEAN
+UpgradeOfPerk PERK
+GenericPerk
+
+POSITION: 
+PositionInDirectionFromPosition DIRECTION POSITION
+PositionOfCube CUBE
+OriginalPosition
+PositionXInfrontYBelowPosition DOUBLE DOUBLE POSITION
+PositionFromXAndY DOUBLE DOUBLE
+GenericPosition
+
+STRING: 
+ScenarioOfMapNode DOUBLE
+NameOfCube CUBE
+NameOfPerk PERK
+StringMissingLetterX STRING DOUBLE
+StringConstant String
+GenericString
+RandomName
+StringAddition STRING STRING
+GenericWord
+GenericName
+IfElse BOOLEAN STRING STRING
+StringNull
+CurrentScenario
