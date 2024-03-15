@@ -3,26 +3,43 @@ import * as vscode from 'vscode';
 
 const tokenTypes = new Map<string, number>();
 const tokenModifiers = new Map<string, number>();
-const typesOfCompounds = new Map <string, number>();
-const fileToCompoundsMap = new Map<vscode.Uri, ICompounds>();
+const typesLegend = new Map<string, number>();
+const typeMap = new Map<string,number>();
+function generateEmptyTypeMapArray():any[][] { //todo make this un-needed via [[]]
+	let emptyArray = []
+	for (let entry of typeMap){
+		emptyArray.push([])
+	}
+	return emptyArray
+}
+type typeToRegExMatches = Map<string,RegExpMatchArray[]>;
+const fileToCompoundsesMap = new Map<vscode.Uri, typeToCompoundsMap>();
+type typeToCompoundsMap = Map<string,ICompound[]>;
 const fileToNameToCompoundListMap = new Map<vscode.Uri,Map<string,ICompound>>();
 let tempInitalized:boolean = false
 
-
-const legend = (function() {
-	const tokenTypesLegend = [
-		'comment', 'string', 'keyword', 'number', 'regexp', 'operator', 'namespace',
-		'type', 'struct', 'class', 'interface', 'enum', 'typeParameter', 'function',
-		'method', 'decorator', 'macro', 'variable', 'parameter', 'property', 'label'
-	];
-	tokenTypesLegend.forEach((tokenType, index) => tokenTypes.set(tokenType, index));
+const generateMaps = (function() {
+	const typeKeyArray = [
+		'COMMENT',
+		'ABILITY',
+		'ACTION',
+		'BOOLEAN',
+		'CUBE',
+		'DIRECTION',
+		'DOUBLE',
+		'PERK',
+		'POSITION',
+		'STRING',
+		'TRIGGER'
+	]
+	typeKeyArray.forEach((compoundtype,index)=>typeMap.set(compoundtype, index))
 
 	const chaosMappings = [//green, salmon, pink, pale yellow, purple, off-text-white, teal, blue, light sky blue, and text-white
-		'comment', //'comment',//green
-		'STRING', //'string',//salmon
+		'COMMENT', //'comment',//green
+		'ABILITY', //'string',//salmon
 		'CUBE', //'keyword',//pink
 		'DOUBLE', //'number',//pale yellow
-		'ABILITY', //'regexp',//purple
+		'STRING', //'regexp',//purple
 		'PERK', //'operator',//offwhite
 		'TRIGGER', //'namespace',//teal
 		'f', //'type',//teal
@@ -40,7 +57,16 @@ const legend = (function() {
 		'DIRECTION', //'property',//light sky blue
 		'TYPE' //'label'//text white
 	]
-	chaosMappings.forEach((compoundtype,index)=>typesOfCompounds.set(compoundtype, index))
+	chaosMappings.forEach((compoundtype,index)=>typesLegend.set(compoundtype, index))
+})();
+
+const legend = (function() {
+	const tokenTypesLegend = [
+		'comment', 'string', 'keyword', 'number', 'regexp', 'operator', 'namespace',
+		'type', 'struct', 'class', 'interface', 'enum', 'typeParameter', 'function',
+		'method', 'decorator', 'macro', 'variable', 'parameter', 'property', 'label'
+	];
+	tokenTypesLegend.forEach((tokenType, index) => tokenTypes.set(tokenType, index));
 
 	const tokenModifiersLegend = [
 		'declaration', 'documentation', 'readonly', 'static', 'abstract', 'deprecated',
@@ -69,54 +95,42 @@ async function parseModdinginfo(document:vscode.TextDocument){
 				Arguments: args
 			})
 		}
-
 		return compounds
 	}
-	let compounds:TrigsStringsPerks = {Abilities:[],Actions:[],Booleans:[],Directions:[],Doubles:[],Cubes:[],Positions:[],Triggers:[],Strings:[],Perks:[]}
+	let compoundsMap = generateEmptyTypeMapArray()
 	for (let match of document.getText().matchAll(/^(Triggers|Actions|BOOLEAN|CUBE|DIRECTION|DOUBLE|PERK|POSITION|STRING): (?:$\s^(?:.(?!\:))+$)+/gim)){
-console.log(match[1].toUpperCase())
+	let sectionType = match[1].toUpperCase()
 		switch (match[1].toUpperCase()) {
 			case 'ACTIONS':
-				compounds.Actions = pack(match[0].split(/[\r\n]/))
-				break;
-			case 'BOOLEAN':
-				compounds.Booleans = pack(match[0].split(/[\r\n]/))
-				break;
-			case 'DIRECTION':
-				compounds.Directions = pack(match[0].split(/[\r\n]/))
-				break;
-			case 'DOUBLE':
-				compounds.Doubles = pack(match[0].split(/[\r\n]/))
-				break;
-			case 'CUBE':
-				compounds.Cubes = pack(match[0].split(/[\r\n]/))
-				break;
-			case 'POSITION':
-				compounds.Positions = pack(match[0].split(/[\r\n]/))
+				compoundsMap[typeMap.get('ACTION')] = pack(match[0].split(/[\r\n]/))
 				break;
 			case 'TRIGGERS':
-				compounds.Triggers = pack(match[0].split(/[\r\n]/))
-				break;
-			case 'STRING':
-				compounds.Strings = pack(match[0].split(/[\r\n]/))
-				break;
-			case 'PERK':
-				compounds.Perks = pack(match[0].split(/[\r\n]/))
+				compoundsMap[typeMap.get('TRIGGER')] = pack(match[0].split(/[\r\n]/))
 				break;
 			default:
-				console.log("Something has gone wrong or a new compound type was added");
+				if (typeMap.get(sectionType)) {
+					compoundsMap[typeMap.get(sectionType)] = pack(match[0].split(/[\r\n]/))}
+					else {console.log("Something has gone wrong or a new compound type was added (parseModdinginfo)");}
 				break;
 		}
 	}
+	if (compoundsMap) {
+		let returnMap:typeToCompoundsMap = new Map
+		for (let compounds of compoundsMap){
+			if (compounds.length){
+				returnMap.set(compounds[0].Type,compounds)
+			}
+		}
+		fileToCompoundsesMap.set(document.uri,returnMap)
+		addToFileToNameToCompoundListMap(returnMap,document.uri)
+	}
 	//while (!(compounds.Actions&&compounds.Booleans&&compounds.Doubles&&compounds.Cubes&&compounds.Positions&&compounds.Triggers&&compounds.Strings&&compounds.Perks)) {let wait}
 	//await Promise.allSettled(await compounds['Abilities'])
-	fileToCompoundsMap.set(document.uri,compounds)
-	addToFileToNameToCompoundListMap(compounds,document.uri)
 	return Promise
 }
 
 async function initializeCompounds(context:vscode.ExtensionContext) {
-	let moddinginfo = vscode.workspace.findFiles('*.built-ins')
+	generateMaps
 	let files = vscode.workspace.findFiles('**/*.txt')
 	let promises = []
 	promises.push(await presentTextDocumentFromURIToReturnlessFunction(context.extensionUri.with({path:context.extensionUri.path + '/ModdingInfo.txt.built-ins'}), parseModdinginfo))
@@ -128,10 +142,10 @@ async function initializeCompounds(context:vscode.ExtensionContext) {
 	tempInitalized = true
 }
 
-async function addToFileToNameToCompoundListMap(compoundsAndMap:ICompounds,uri:vscode.Uri){
+async function addToFileToNameToCompoundListMap(compoundsAndMap:typeToCompoundsMap,uri:vscode.Uri){
 	const nameToCompoundMap = new Map<string,ICompound>();
-	for (let compoundArray of Object.values(compoundsAndMap)) {
-		for (let compound of compoundArray){
+	for (let compoundArray of compoundsAndMap) {
+		for (let compound of compoundArray[1]){
 			if (compound.Name.Name){
 				nameToCompoundMap.set(compound.Name.Name.toLowerCase(),compound)
 			}	
@@ -150,30 +164,31 @@ async function presentTextDocumentFromURIToReturnlessFunction(uri:vscode.Uri,fuc
 }
 
 async function addToMapsIfEntriesExist(document:vscode.TextDocument) {
-	let definitionDetails:ICompounds
-	definitionDetails = extractDefinitionDetails(gatherCompounds(document))
-		
-	let hasEntries = 0
-	for (let compTypeArray of Object.values(definitionDetails)){
-		hasEntries = hasEntries + compTypeArray.length
-	}
-	if (hasEntries) {
-		fileToCompoundsMap.set(document.uri,definitionDetails)
+	const definitionDetails:typeToCompoundsMap = extractDefinitionDetails(gatherCompounds(document))
+	if (definitionDetails.size) {
+		fileToCompoundsesMap.set(document.uri,definitionDetails)
 		addToFileToNameToCompoundListMap(definitionDetails,document.uri)
 	}
 }
 
-function gatherCompounds(document: vscode.TextDocument): RegExCompoundCaptures {
-	let regExComments: RegExpMatchArray[] = []
+function gatherCompounds(document: vscode.TextDocument): typeToRegExMatches {
+	let regExes = generateEmptyTypeMapArray()
+	/*let regExComments: RegExpMatchArray[] = []
 	let regExAbilities: RegExpMatchArray[] = []
 	let regExActions: RegExpMatchArray[] = []
 	let regExBooleans: RegExpMatchArray[] = []
 	let regExDirections: RegExpMatchArray[] = []
 	let regExDoubles: RegExpMatchArray[] = []
 	let regExCubes: RegExpMatchArray[] = []
-	let regExPositions: RegExpMatchArray[] = []
+	let regExPositions: RegExpMatchArray[] = []*/
 	for (let match of document.getText().matchAll(/[\s^](?<CommentString>\/-(?=\s).*?\s-\/)[\s$]|(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<CompoundType>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<CompoundName>[\S]*)\s(?<CompoundContents>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)\b[Ee][Nn][Dd]\b)/gsd)){
-		switch (match.groups['CompoundType']) {
+		if (typeof(typeMap.get(match.groups['CompoundType'])) === "number"){
+		regExes[typeMap.get(match.groups['CompoundType'])].push(match)
+		} else {
+			if (match.groups['CommentString']) {regExes[typeMap.get('COMMENT')].push(match)}
+			else {console.log("Something has gone wrong or a new compound type was added (gatherCompounds)");}
+		}
+		/*switch (match.groups['CompoundType']) {
 		case 'ABILITY':
 			regExAbilities.push(match)
 			break;
@@ -200,60 +215,80 @@ function gatherCompounds(document: vscode.TextDocument): RegExCompoundCaptures {
 				console.log("Something has gone wrong or a new compound type was added");
 			};
 		break;
+		}*/
+	}
+	regExes = regExes.filter((value:any)=>(value.length))
+	if (regExes) {
+		let returnMap:typeToRegExMatches = new Map
+		for (let matches of regExes){
+			if (matches.length){
+				if (matches[0]?.groups['CompoundType']) {
+				returnMap.set(matches[0].groups['CompoundType'],matches)
+				} else { if (matches[0]?.groups['CommentString']) {returnMap.set('COMMENT',matches)}
+				else {console.log("Something has gone wrong or a new compound type was added (makeReturnMap)");}
+			}
+			}
 		}
+		return returnMap
 	}
-	return{
-		RegExComments:regExComments,
-		RegExAbilities:regExAbilities,
-		RegExActions:regExActions,
-		RegExBooleans:regExBooleans,
-		RegExDirections:regExDirections,
-		RegExDoubles:regExDoubles,
-		RegExCubes:regExCubes,
-		RegExPositions:regExPositions
-	}
+	return
+	
 }
 
-function extractDefinitionDetails(compounds: RegExCompoundCaptures): ICompounds {
-let abilities: ICompound[] = []
+function extractDefinitionDetails(compounds: typeToRegExMatches): typeToCompoundsMap {
+let compoundses = generateEmptyTypeMapArray()
+/*let abilities: ICompound[] = []
 let actions: ICompound[] = []
 let booleans: ICompound[] = []
 let directions: ICompound[] = []
 let doubles: ICompound[] = []
 let cubes: ICompound[] = []
-let positions: ICompound[] = []
-for (let captures of Object.entries(compounds)) {
+let positions: ICompound[] = []*/
+for (let captures of compounds) {
 	for (let capture of captures[1]){
-		switch (capture.groups['CompoundType']) {
+		if (capture.groups['CompoundType']){
+		compoundses[typeMap.get(capture.groups['CompoundType'])].push(packIntoICompound(capture))}
+		else if (capture.groups['CommentString']){break;} 
+		else {console.log("Something has gone wrong or a new compound type was added");};
+		/*switch (capture.groups['CompoundType']) {
 			case 'ABILITY':
-				abilities.push(packIntoICompound(capture))
+				compoundses[Compound.ABILITY].push(packIntoICompound(capture))
 				break;
 			case 'ACTION':
-				actions.push(packIntoICompound(capture))
+				compoundses[Compound.ACTION].push(packIntoICompound(capture))
 				break;
 			case 'BOOLEAN':
-				booleans.push(packIntoICompound(capture))
+				compoundses[Compound.BOOLEAN].push(packIntoICompound(capture))
 				break;
 			case 'DIRECTION':
-				directions.push(packIntoICompound(capture))
+				compoundses[Compound.DIRECTION].push(packIntoICompound(capture))
 				break;
 			case 'DOUBLE':
-				doubles.push(packIntoICompound(capture))
+				compoundses[Compound.DOUBLE].push(packIntoICompound(capture))
 				break;
 			case 'CUBE':
-				cubes.push(packIntoICompound(capture))
+				compoundses[Compound.].push(packIntoICompound(capture))
 				break;
 			case 'POSITION':
-				positions.push(packIntoICompound(capture))
+				compoundses[Compound].push(packIntoICompound(capture))
 				break;
 			default:
 				if (capture.groups['CommentString']) {break;} else {
 					console.log("Something has gone wrong or a new compound type was added");
 				};
-			}
+			}*/
 		}
 	}
-	return{
+	compoundses = compoundses.filter((value:any)=>(value.length))
+	if (compoundses) {
+		let returnMap:typeToCompoundsMap = new Map
+		for (let matches of compoundses){
+			returnMap.set(matches[0].Type,matches)
+		}
+		return returnMap
+	}
+	return
+	/*return{
 		Abilities:abilities,
 		Actions:actions,
 		Booleans:booleans,
@@ -261,7 +296,7 @@ for (let captures of Object.entries(compounds)) {
 		Doubles:doubles,
 		Cubes:cubes,
 		Positions:positions
-	}
+	}*/
 	function packIntoICompound (capture:RegExpMatchArray): ICompound {
 		let args:IArguments[] = []
 		///(?:\bText:\s.*?\b[Ee][Nn][Dd]\b)|(?:\bGeneric(?:Perk|Position|String|Word|Name|Action|Boolean|Direction|Double|Constant|Cube|Stacking|Time)\b)/gd
@@ -291,7 +326,7 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 
-type ICompounds = {
+/*type ICompoundses = {
 	Abilities?: ICompound[];
 	Actions?: ICompound[];
 	Booleans?: ICompound[];
@@ -304,11 +339,11 @@ type ICompounds = {
 	//Perks?: ICompound[];
 }
 
-interface TrigsStringsPerks extends ICompounds {
+interface TrigsStringsPerks extends ICompoundses {
 	Triggers?: ICompound[];
 	Strings?: ICompound[];
 	Perks?: ICompound[];
-}
+}*/
 
 interface ICompound {
 	Type: string,
@@ -420,12 +455,12 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 		//update active file and wait for map to be updated
 		await addToMapsIfEntriesExist(document)
 		//get newly updated ICompounds
-		const update = fileToCompoundsMap.get(document.uri)
+		 
 		//determie tokens
 		const builder:vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder()
 		//fileToCompoundsMap.set(document.uri, update)
 		let promises = []
-		for (let array of Object.values(update)){
+		for (let array of fileToCompoundsesMap.get(document.uri).values()){
 			for (let compound of array){
 				promises.push(this.builderTokens(builder,compound,document))
 			}
@@ -445,11 +480,11 @@ private async builderTokens(builder:vscode.SemanticTokensBuilder,compound:ICompo
 		}
 		if (result) {
 			let tokenStart = document.positionAt(word.index+mainOffset)
-			builder.push(tokenStart.line, tokenStart.character, word[0].length, typesOfCompounds.get(result.Type))
+			builder.push(tokenStart.line, tokenStart.character, word[0].length, typesLegend.get(result.Type))
 		}
 	}
 	let nameStart = document.positionAt(compound.Name.Index)
-	builder.push(nameStart.line, nameStart.character, compound.Name.Name.length, typesOfCompounds.get(compound.Type))
+	builder.push(nameStart.line, nameStart.character, compound.Name.Name.length, typesLegend.get(compound.Type))
 	return Promise
 }
 	/*private _encodeTokenModifiers(strTokenModifiers: string[]): number {
