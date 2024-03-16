@@ -460,7 +460,8 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 		const builder:vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder()
 		//fileToCompoundsMap.set(document.uri, update)
 		let promises = []
-		for (let array of fileToCompoundsesMap.get(document.uri).values()){
+		if (fileToCompoundsesMap.get(document.uri)?.values())
+		for (let array of fileToCompoundsesMap.get(document.uri)?.values()){
 			for (let compound of array){
 				promises.push(this.builderTokens(builder,compound,document))
 			}

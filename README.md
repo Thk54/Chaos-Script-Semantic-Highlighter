@@ -1,5 +1,7 @@
 Cube Chaos Semantic Highlighter
 
+0.0.3 Perk, String, and Trigger highlighting now supported
+
 0.0.2 Added static file based built-ins highlighting (see ModdingInfo.txt.built-ins in extension folder)
 Support for Perk, String, and Trigger highlighting pending still.
 

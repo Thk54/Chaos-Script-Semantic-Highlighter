@@ -4,7 +4,6 @@
 	"description": "Semantic highlighter for Cube Chaos mod files.",
 	"version": "0.0.3",
 	"publisher": "Thk",
-	"private": true,
 	"license": "MIT",
 	"engines": {
 		"vscode": "^1.74.0"
