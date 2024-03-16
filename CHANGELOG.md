@@ -1,5 +1,8 @@
 ## Release Notes
 
+## [0.0.7]
+ModdingInfo.txt.built-ins no longer cares what kind of line endings the file has (Thanks git I thought I could trust that file to be as I left it, you showed me)
+
 ## [0.0.6]
 Convinced perks it was ok to let semantic tokens into their bodies also added detection for .c.txt and .cc.txt
 
