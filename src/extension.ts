@@ -104,18 +104,18 @@ async function parseModdinginfo(document:vscode.TextDocument){
 		return compounds
 	}
 	let compoundsMap = []
-	for (let match of document.getText().matchAll(/^(Triggers|Actions|BOOLEAN|CUBE|DIRECTION|DOUBLE|PERK|POSITION|STRING): (?:$\s^(?:.(?!\:))+$)+/gim)){
+	for (let match of document.getText().matchAll(/^(Triggers|Actions|BOOLEAN|CUBE|DIRECTION|DOUBLE|PERK|POSITION|STRING): (?:$\s\s?^(?:.(?!\:))+$)+/gim)){
 	let sectionType = match[1].toUpperCase()
 		switch (match[1].toUpperCase()) {
 			case 'ACTIONS':
-				compoundsMap[compoundTypeMap.get('ACTION')] = pack(match[0].split(/[\r\n]/))
+				compoundsMap[compoundTypeMap.get('ACTION')] = pack(match[0].split(/[\r\n]+/))
 				break;
 			case 'TRIGGERS':
-				compoundsMap[compoundTypeMap.get('TRIGGER')] = pack(match[0].split(/[\r\n]/))
+				compoundsMap[compoundTypeMap.get('TRIGGER')] = pack(match[0].split(/[\r\n]+/))
 				break;
 			default:
 				if (compoundTypeMap.get(sectionType)) {
-					compoundsMap[compoundTypeMap.get(sectionType)] = pack(match[0].split(/[\r\n]/))}
+					compoundsMap[compoundTypeMap.get(sectionType)] = pack(match[0].split(/[\r\n]+/))}
 					else {console.log("Something has gone wrong or a new compound type was added (parseModdinginfo)");}
 				break;
 		}
@@ -221,7 +221,7 @@ function gatherDefinitions(document: vscode.TextDocument): typeToRegExMatches[] 
 	(?:(?:(?<![Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<NameOfDefine>[\S]*)\s(?<ContentsOfDefine>.*?(?:\b(?:(?:Ability)?Text|Description|TODO|FlavourText):\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))
 	capture compounds
 	|(?:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)))\b[Ee][Nn][Dd]\b) */
-	for (let match of text.matchAll(/(?:\b(?<TypeOfDefine>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s(?:(?:(?<![Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<NameOfDefine>[\S]*)\s(?<ContentsOfDefine>.*?(?:\b(?:(?:Ability)?Text|Description|TODO|FlavourText):\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)))\b[Ee][Nn][Dd]\b)/gsd)){
+	for (let match of text.matchAll(/(?:\b(?<TypeOfDefine>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s(?:(?:(?<![Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<NameOfDefine>[\S]*)\s(?<ContentsOfDefine>.*?(?:\b(?:(?:(?:Ability)?Text|Description|TODO|FlavourText):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)))\b[Ee][Nn][Dd]\b)/gsd)){
 	// todo: handle |[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo]|[Dd][Oo][Aa][Cc][Tt][Ii][Oo][Nn]|[Aa][Rr][Tt][Oo][Vv][Ee][Rr][Rr][Ii][Dd][Ee]
 		let index = defineTypeMap.get(match.groups['TypeOfDefine'].toUpperCase()) //compounds are maped to 0 and so fall though to the else if
 		if (index){ 
@@ -472,11 +472,17 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 	}
 private async builderTokens(builder:vscode.SemanticTokensBuilder,compound:ICompound,document:vscode.TextDocument) {
 	const mainOffset = compound.Contents.Index
-	for (let word of compound.Contents.Content.matchAll(/(?<=[\s^])(?:Text:\s.*?\b[Ee][Nn][Dd])|\S+?(?=[\s$])/gis)){
+	for (let word of compound.Contents.Content.matchAll(/(?<=[\s^])\b(?:(?:(?:Ability)?Text|Description|TODO|FlavourText):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b|\S+?(?=[\s$])/gis)){
 		let result 
 		for (let file of fileToNameToCompoundListMap.keys()){
 			result = fileToNameToCompoundListMap.get(file).get(word[0].toLowerCase())
 			if (result) break
+		}
+		if (!result){
+			for (let file of fileToNameToCompoundListMap.keys()){
+				result = fileToNameToCompoundListMap.get(file).get(word[0].toLowerCase())
+				if (result) break
+			}
 		}
 		if (result) {
 			let tokenStart = document.positionAt(word.index+mainOffset)
