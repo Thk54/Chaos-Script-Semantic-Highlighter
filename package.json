@@ -2,9 +2,13 @@
 	"name": "cube-chaos-semantic-highlighter",
 	"displayName": "Cube Chaos Semantic Highlighter",
 	"description": "Semantic highlighter for Cube Chaos mod files.",
-	"version": "0.0.5",
+	"version": "0.0.6",
 	"publisher": "Thk",
 	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Thk54/Cube-Chaos-Semantic-Highlighter.git"
+	},
 	"engines": {
 		"vscode": "^1.74.0"
 	},
@@ -23,6 +27,8 @@
 				"extensions": [
 					".chaos",
 					".txt",
+					".cc.txt",
+					".c.txt",
 					".chaos.txt"
 				],
 				"configuration": "./language-configuration.json"
@@ -39,9 +45,7 @@
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
-		"lint": "eslint \"src/**/*.ts\"",
-		"watch": "tsc -watch -p ./",
-		"test": "sh ./scripts/e2e.sh"
+		"watch": "tsc -watch -p ./"
 	},
 	"devDependencies": {
 		"@types/node": "^16.18.34",

@@ -262,11 +262,11 @@ let definedses:any = []
 for (let captures of defines) {
 	for (let capture of captures[1]){
 		if (capture.groups['TypeOfDefine']){
-			if (typeof(defineTypeMap.get(capture.groups['TypeOfDefine'])) === 'number'){
+			if (typeof(defineTypeMap.get(capture.groups['TypeOfDefine'].toUpperCase())) === 'number'){
 				let index = defineTypeMap.get(capture.groups['TypeOfDefine'])
 				if (!definedses[index]) definedses[index] = []
 				definedses[defineTypeMap.get(capture.groups['TypeOfDefine'])].push(packIntoIDefined(capture))}
-			else {console.log("Something has gone wrong or a new compound type was added");};
+			else {console.log("Something has gone wrong or a new compound type was added defines");};
 			}
 		}
 	}
@@ -298,7 +298,7 @@ for (let captures of compounds) {
 				if (!compoundses[index]) compoundses[index] = []
 				compoundses[compoundTypeMap.get(capture.groups['TypeOfCompound'])].push(packIntoICompound(capture))}
 				else if (capture.groups['CommentString']){break;} 
-				else {console.log("Something has gone wrong or a new compound type was added");};
+				else {console.log("Something has gone wrong or a new compound type was added compounds");};
 			}
 		}
 	}
@@ -480,11 +480,11 @@ private async builderTokens(builder:vscode.SemanticTokensBuilder,compound:ICompo
 		}
 		if (result) {
 			let tokenStart = document.positionAt(word.index+mainOffset)
-			if (!(typeof(typesLegend.get(result.Type))==="number")){
+			if (!(typeof(typesLegend.get(result.Type.toUpperCase()))==="number")){
 				console.log('Unhandled Type: '+result.Type+' defaulting to "TYPE"')
 				result.Type = 'TYPE'
 			}
-			builder.push(tokenStart.line, tokenStart.character, word[0].length, typesLegend.get(result.Type))
+			builder.push(tokenStart.line, tokenStart.character, word[0].length, typesLegend.get(result.Type.toUpperCase()))
 		}
 	}
 	let nameStart = document.positionAt(compound.Name.Index)

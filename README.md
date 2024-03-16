@@ -1,5 +1,7 @@
 Cube Chaos Semantic Highlighter
 
+0.0.6 switching to changelog
+
 0.0.5.1 Fixed folding
 0.0.5 Scenario definitions  are now ignored the same way comments are, so numbers should be safe from being cubes
 
