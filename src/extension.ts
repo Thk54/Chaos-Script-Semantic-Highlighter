@@ -6,13 +6,6 @@ const tokenModifiers = new Map<string, number>();
 const typesLegend = new Map<string, number>();
 const compoundTypeMap = new Map<string,number>();
 const defineTypeMap = new Map<string,number>();
-function generateEmptyTypeMapArray():any[][] { //todo make this un-needed via [[]]
-	let emptyArray = []
-	for (let entry of compoundTypeMap){
-		emptyArray.push([])
-	}
-	return emptyArray
-}
 type typeToRegExMatches = Map<string,RegExpMatchArray[]>;
 const fileToCompoundsesMap = new Map<vscode.Uri, typeToCompoundsMap>();
 type typeToCompoundsMap = Map<string,ICompound[]>;
@@ -91,8 +84,8 @@ const legend = (function() {
 })();
 
 async function parseModdinginfo(document:vscode.TextDocument){
-	const pack:Function =  function (lines:string[]):ICompound[] {// todo get this to work async
-		let compounds:ICompound[] = []
+	const pack:Function =  function (lines:string[]):IBuiltins[] {// todo get this to work async
+		let compounds:IBuiltins[] = []
 		let type = lines[0].toUpperCase().match(/(.*?)S?: /)[1] //todo fix plural types
 		lines.shift()
 		for (let line of lines){
@@ -110,7 +103,7 @@ async function parseModdinginfo(document:vscode.TextDocument){
 		}
 		return compounds
 	}
-	let compoundsMap = generateEmptyTypeMapArray()
+	let compoundsMap = []
 	for (let match of document.getText().matchAll(/^(Triggers|Actions|BOOLEAN|CUBE|DIRECTION|DOUBLE|PERK|POSITION|STRING): (?:$\s^(?:.(?!\:))+$)+/gim)){
 	let sectionType = match[1].toUpperCase()
 		switch (match[1].toUpperCase()) {
@@ -130,7 +123,7 @@ async function parseModdinginfo(document:vscode.TextDocument){
 	if (compoundsMap) {
 		let returnMap:typeToCompoundsMap = new Map
 		for (let compounds of compoundsMap){
-			if (compounds.length){
+			if (compounds?.length){
 				returnMap.set(compounds[0].Type,compounds)
 			}
 		}
@@ -296,13 +289,17 @@ for (let captures of defines) {
 }
 
 function extractCompoundDetails(compounds: typeToRegExMatches): typeToCompoundsMap {
-let compoundses = generateEmptyTypeMapArray()
+let compoundses:any = []
 for (let captures of compounds) {
 	for (let capture of captures[1]){
 		if (capture.groups['TypeOfCompound']){
-		compoundses[compoundTypeMap.get(capture.groups['TypeOfCompound'])].push(packIntoICompound(capture))}
-		else if (capture.groups['CommentString']){break;} 
-		else {console.log("Something has gone wrong or a new compound type was added");};
+			if (typeof(compoundTypeMap.get(capture.groups['TypeOfCompound'])) === 'number'){
+				let index = compoundTypeMap.get(capture.groups['TypeOfCompound'])
+				if (!compoundses[index]) compoundses[index] = []
+				compoundses[compoundTypeMap.get(capture.groups['TypeOfCompound'])].push(packIntoICompound(capture))}
+				else if (capture.groups['CommentString']){break;} 
+				else {console.log("Something has gone wrong or a new compound type was added");};
+			}
 		}
 	}
 	compoundses = compoundses.filter((value:any)=>(value.length))
@@ -342,14 +339,17 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'cubechaos' }, new DocumentSemanticTokensProvider(), legend))
 }
 
-interface IDefined extends ICompound{
+interface IBuiltins{
+	Type: string,
+	Name: IName
+	Arguments?: IArguments[]
 }
 
-interface ICompound {
-	Type: string,
-	Name: IName,
-	Contents?: IContents,
-	Arguments?: IArguments[]
+interface IDefined extends IBuiltins{
+	Contents: IContents,
+}
+
+interface ICompound extends IDefined{
 }
 
 interface IName {
@@ -382,7 +382,7 @@ class FoldingRangeProvider implements vscode.FoldingRangeProvider {
 		let ranges: vscode.FoldingRange[] = []
 		for (let captureArray of captureArrayArray){
 			if (captureArray){
-			for (let captures of Object.entries(captureArray)){
+			for (let captures of captureArray){
 				for (let capture of captures[1]){
 					let foldRange:vscode.FoldingRange
 					if (capture.groups['CommentString']){
