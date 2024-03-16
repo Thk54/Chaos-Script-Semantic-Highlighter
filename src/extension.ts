@@ -215,14 +215,15 @@ function gatherDefinitions(document: vscode.TextDocument): typeToRegExMatches[] 
 	let compoundRegExes:any = []
 	let otherRegExes:any = []
 	let text:string = document.getText()
-	let comments = text.matchAll(/(?<=[\s^])\/-(?=\s).*?\s-\/(?=[\s$])/gs) // Find all the comments
+	let comments = text.matchAll(/(?:(?<=[\s^])\/-(?=\s).*?\s-\/(?=[\s$])|(?:\b[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo]:\s[\s\S]*?\s[Ss][Ee][Nn][Dd]\b))/gs) // Find all the comments
+	//todo actually handle |[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo]
 	if (comments){
 		for (let comment of comments) {
 			text = text.replace(comment[0], ''.padEnd(comment[0].length)) // replace them with spaces to preserve character count
 		}
 	}
 	/*all the known defenition flags (regex flags: gsd)
-	(?:\b(?<TypeOfDefine>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s
+	(?:\b(?<TypeOfDefine>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s
 	captureing all of everything that isn't a compound(, scenario, doaction, or artoverride)
 	(?:(?:(?<![Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<NameOfDefine>[\S]*)\s(?<ContentsOfDefine>.*?(?:\b(?:(?:Ability)?Text|Description|TODO|FlavourText):\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))
 	capture compounds

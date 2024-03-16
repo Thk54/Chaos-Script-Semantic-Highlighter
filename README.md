@@ -1,5 +1,7 @@
 Cube Chaos Semantic Highlighter
 
+0.0.4.1 Scenario defintions are now ignored the same way comments are, so numbers should be safe from being cubes
+
 0.0.4 Cube and Perk defintion contents now also get highlighting. (TextTooltips do too shhhhh)
 Because of scenario defintions various numbers are highlighted as cubes right now 
 
