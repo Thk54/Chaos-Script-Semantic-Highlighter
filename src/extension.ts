@@ -4,10 +4,11 @@ import * as vscode from 'vscode';
 const tokenTypes = new Map<string, number>();
 const tokenModifiers = new Map<string, number>();
 const typesLegend = new Map<string, number>();
-const typeMap = new Map<string,number>();
+const compoundTypeMap = new Map<string,number>();
+const defineTypeMap = new Map<string,number>();
 function generateEmptyTypeMapArray():any[][] { //todo make this un-needed via [[]]
 	let emptyArray = []
-	for (let entry of typeMap){
+	for (let entry of compoundTypeMap){
 		emptyArray.push([])
 	}
 	return emptyArray
@@ -15,24 +16,36 @@ function generateEmptyTypeMapArray():any[][] { //todo make this un-needed via [[
 type typeToRegExMatches = Map<string,RegExpMatchArray[]>;
 const fileToCompoundsesMap = new Map<vscode.Uri, typeToCompoundsMap>();
 type typeToCompoundsMap = Map<string,ICompound[]>;
+const fileToDefinedsesMap = new Map<vscode.Uri, typeToDefinedsMap>();
+type typeToDefinedsMap = Map<string,IDefined[]>
 const fileToNameToCompoundListMap = new Map<vscode.Uri,Map<string,ICompound>>();
 let tempInitalized:boolean = false
 
 const generateMaps = (function() {
-	const typeKeyArray = [
-		'COMMENT',
+	const compoundTypeKeyArray = [
+		'TRIGGER',
 		'ABILITY',
 		'ACTION',
 		'BOOLEAN',
 		'CUBE',
 		'DIRECTION',
+		'POSITION',
 		'DOUBLE',
 		'PERK',
-		'POSITION',
 		'STRING',
-		'TRIGGER'
+		'COMMENT'
 	]
-	typeKeyArray.forEach((TypeOfCompound,index)=>typeMap.set(TypeOfCompound, index))
+	compoundTypeKeyArray.forEach((TypeOfCompound,index)=>compoundTypeMap.set(TypeOfCompound, index))
+
+	const defineTypeKeyArray = [
+		'COMPOUND',//important that this maps to zero for else fallthough
+		'CUBE',
+		'PERK',
+		'SCENARIO',
+		'ARTOVERRIDE',
+		'TEXTTOOLTIP'
+	]
+	defineTypeKeyArray.forEach((TypeOfDefine,index)=>defineTypeMap.set(TypeOfDefine, index))
 
 	const chaosMappings = [//green, salmon, pink, pale yellow, purple, off-text-white, teal, blue, light sky blue, and text-white
 		'COMMENT', //'comment',//green
@@ -102,14 +115,14 @@ async function parseModdinginfo(document:vscode.TextDocument){
 	let sectionType = match[1].toUpperCase()
 		switch (match[1].toUpperCase()) {
 			case 'ACTIONS':
-				compoundsMap[typeMap.get('ACTION')] = pack(match[0].split(/[\r\n]/))
+				compoundsMap[compoundTypeMap.get('ACTION')] = pack(match[0].split(/[\r\n]/))
 				break;
 			case 'TRIGGERS':
-				compoundsMap[typeMap.get('TRIGGER')] = pack(match[0].split(/[\r\n]/))
+				compoundsMap[compoundTypeMap.get('TRIGGER')] = pack(match[0].split(/[\r\n]/))
 				break;
 			default:
-				if (typeMap.get(sectionType)) {
-					compoundsMap[typeMap.get(sectionType)] = pack(match[0].split(/[\r\n]/))}
+				if (compoundTypeMap.get(sectionType)) {
+					compoundsMap[compoundTypeMap.get(sectionType)] = pack(match[0].split(/[\r\n]/))}
 					else {console.log("Something has gone wrong or a new compound type was added (parseModdinginfo)");}
 				break;
 		}
@@ -156,6 +169,20 @@ async function addToFileToNameToCompoundListMap(compoundsAndMap:typeToCompoundsM
 	}
 	return Promise
 }
+async function addToFileToDefineNameListMap(definedsAndMap:typeToDefinedsMap,uri:vscode.Uri){
+	const nameToDefinedMap = new Map<string,IDefined>();
+	for (let definedsArray of definedsAndMap) {
+		for (let defined of definedsArray[1]){
+			if (defined.Name.Name){
+				nameToDefinedMap.set(defined.Name.Name.toLowerCase(),defined)
+			}	
+		}
+	}
+	if (nameToDefinedMap.size !== 0) {
+		fileToNameToCompoundListMap.set(uri,nameToDefinedMap)
+	}
+	return Promise
+}
 
 
 async function presentTextDocumentFromURIToReturnlessFunction(uri:vscode.Uri,fuc:Function){
@@ -164,15 +191,29 @@ async function presentTextDocumentFromURIToReturnlessFunction(uri:vscode.Uri,fuc
 }
 
 async function addToMapsIfEntriesExist(document:vscode.TextDocument) {
-	const definitionDetails:typeToCompoundsMap = extractDefinitionDetails(gatherCompounds(document))
-	if (definitionDetails.size) {
-		fileToCompoundsesMap.set(document.uri,definitionDetails)
-		addToFileToNameToCompoundListMap(definitionDetails,document.uri)
+	const results:typeToRegExMatches[] = gatherDefinitions(document)
+	if (results) {
+		if (!(typeof(results[0])==='undefined')){
+			const compoundDetails:typeToCompoundsMap = extractCompoundDetails(results[0])
+			if (compoundDetails.size) {
+				fileToCompoundsesMap.set(document.uri,compoundDetails)
+				addToFileToNameToCompoundListMap(compoundDetails,document.uri)
+			}
+		}
+		if (!(typeof(results[1])==='undefined')){
+			const DefinedDetails:typeToDefinedsMap = extractDefinedNames(results[1])
+			if (results[1].size) {
+				fileToDefinedsesMap.set(document.uri,DefinedDetails)
+				for (let entry of DefinedDetails)
+				addToFileToDefineNameListMap(DefinedDetails,document.uri)
+			}
+		}
 	}
 }
 
-function gatherCompounds(document: vscode.TextDocument): typeToRegExMatches {
-	let regExes = generateEmptyTypeMapArray()
+function gatherDefinitions(document: vscode.TextDocument): typeToRegExMatches[] {
+	let compoundRegExes:any = []
+	let otherRegExes:any = []
 	let text:string = document.getText()
 	let comments = text.matchAll(/(?<=[\s^])\/-(?=\s).*?\s-\/(?=[\s$])/gs) // Find all the comments
 	if (comments){
@@ -181,45 +222,84 @@ function gatherCompounds(document: vscode.TextDocument): typeToRegExMatches {
 		}
 	}
 	/*all the known defenition flags (regex flags: gsd)
-	(?:\b(?<TypeOfDefined>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s
+	(?:\b(?<TypeOfDefine>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s
 	captureing all of everything that isn't a compound(, scenario, doaction, or artoverride)
-	(?:(?:(?<![Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<NameOfDefined>[\S]*)\s(?<ContentsOfDefined>.*?(?:\b(?:(?:Ability)?Text|Description|TODO|FlavourText):\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))
+	(?:(?:(?<![Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<NameOfDefine>[\S]*)\s(?<ContentsOfDefine>.*?(?:\b(?:(?:Ability)?Text|Description|TODO|FlavourText):\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))
 	capture compounds
 	|(?:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)))\b[Ee][Nn][Dd]\b) */
-	for (let match of text.matchAll(/(?:\b(?<TypeOfDefined>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s(?:(?:(?<![Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<NameOfDefined>[\S]*)\s(?<ContentsOfDefined>.*?(?:\b(?:(?:Ability)?Text|Description|TODO|FlavourText):\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)))\b[Ee][Nn][Dd]\b)/gsd)){
+	for (let match of text.matchAll(/(?:\b(?<TypeOfDefine>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s(?:(?:(?<![Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<NameOfDefine>[\S]*)\s(?<ContentsOfDefine>.*?(?:\b(?:(?:Ability)?Text|Description|TODO|FlavourText):\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)))\b[Ee][Nn][Dd]\b)/gsd)){
 	// todo: handle |[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo]|[Dd][Oo][Aa][Cc][Tt][Ii][Oo][Nn]|[Aa][Rr][Tt][Oo][Vv][Ee][Rr][Rr][Ii][Dd][Ee]
-		if (typeof(typeMap.get(match.groups['TypeOfCompound'])) === "number"){
-			regExes[typeMap.get(match.groups['TypeOfCompound'])].push(match)
-		} else {
-			console.log("Something has gone wrong or a new compound type was added (gatherCompounds)");
-			console.log('TypeOfCompound: '+ match.groups['TypeOfCompound'])
+		let index = defineTypeMap.get(match.groups['TypeOfDefine'].toUpperCase()) //compounds are maped to 0 and so fall though to the else if
+		if (index){ 
+			if (!otherRegExes[index]) otherRegExes[index] = []
+			otherRegExes[index].push(match)
+		} else if (typeof(compoundTypeMap.get(match.groups['TypeOfCompound'])) === "number"){
+			let index = compoundTypeMap.get(match.groups['TypeOfCompound'])
+			if (!compoundRegExes[index]) compoundRegExes[index] = []
+			compoundRegExes[index].push(match)
+		} else {console.log("Something has gone wrong in gatherCompounds on regex match: "+match[0]);}
+	}
+	compoundRegExes = compoundRegExes.filter((value:any)=>(value?.length))
+	let results:typeToRegExMatches[] = []
+	if (compoundRegExes.length) {
+		let returnMap:typeToRegExMatches = new Map
+		for (let matches of compoundRegExes){
+			if (matches[0]?.groups['TypeOfCompound']) {
+			returnMap.set(matches[0].groups['TypeOfCompound'],matches)
+			} else {console.log("Something has gone wrong in compoundRegExes->results on matches: "+matches);		}
+		results[0] = returnMap
 		}
 	}
-	regExes = regExes.filter((value:any)=>(value?.length))
-	if (regExes) {
+	otherRegExes = otherRegExes.filter((value:any)=>(value?.length))
+	if (otherRegExes.length) {
 		let returnMap:typeToRegExMatches = new Map
-		for (let matches of regExes){
-			if (matches.length){
-				if (matches[0]?.groups['TypeOfCompound']) {
-				returnMap.set(matches[0].groups['TypeOfCompound'],matches)
-				} else { if (matches[0]?.groups['CommentString']) {returnMap.set('COMMENT',matches)}
-				else {console.log("Something has gone wrong or a new compound type was added (makeReturnMap)");
-				console.log('TypeOfCompound: '+ matches[0].groups['TypeOfCompound'])}
+		for (let matches of otherRegExes){
+			if (matches[0]?.groups['TypeOfDefine']) {
+			returnMap.set(matches[0].groups['TypeOfDefine'],matches)
+			} else {console.log("Something has gone wrong in compoundRegExes->results on matches: "+matches);		}
+		results[1] = returnMap
+		}
+	}
+	if (results.length) return results
+}
+
+function extractDefinedNames(defines: typeToRegExMatches):typeToDefinedsMap{
+let definedses:any = []
+for (let captures of defines) {
+	for (let capture of captures[1]){
+		if (capture.groups['TypeOfDefine']){
+			if (typeof(defineTypeMap.get(capture.groups['TypeOfDefine'])) === 'number'){
+				let index = defineTypeMap.get(capture.groups['TypeOfDefine'])
+				if (!definedses[index]) definedses[index] = []
+				definedses[defineTypeMap.get(capture.groups['TypeOfDefine'])].push(packIntoIDefined(capture))}
+			else {console.log("Something has gone wrong or a new compound type was added");};
 			}
-			}
+		}
+	}
+	definedses = definedses.filter((value:any)=>(value.length))
+	if (definedses) {
+		let returnMap:typeToDefinedsMap = new Map
+		for (let matches of definedses){
+			returnMap.set(matches[0].Type,matches)
 		}
 		return returnMap
 	}
 	return
-	
+	function packIntoIDefined (capture:RegExpMatchArray): IDefined {
+		return {
+		Type:capture.groups['TypeOfDefine'],
+		Contents: {Content:capture.groups['ContentsOfDefine'], Index:capture.indices.groups['ContentsOfDefine'][0]},
+		Name: {Name:capture.groups['NameOfDefine'], Index:capture.indices.groups['NameOfDefine'][0]}
+		}
+	}
 }
 
-function extractDefinitionDetails(compounds: typeToRegExMatches): typeToCompoundsMap {
+function extractCompoundDetails(compounds: typeToRegExMatches): typeToCompoundsMap {
 let compoundses = generateEmptyTypeMapArray()
 for (let captures of compounds) {
 	for (let capture of captures[1]){
 		if (capture.groups['TypeOfCompound']){
-		compoundses[typeMap.get(capture.groups['TypeOfCompound'])].push(packIntoICompound(capture))}
+		compoundses[compoundTypeMap.get(capture.groups['TypeOfCompound'])].push(packIntoICompound(capture))}
 		else if (capture.groups['CommentString']){break;} 
 		else {console.log("Something has gone wrong or a new compound type was added");};
 		}
@@ -261,6 +341,9 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'cubechaos' }, new DocumentSemanticTokensProvider(), legend))
 }
 
+interface IDefined extends ICompound{
+}
+
 interface ICompound {
 	Type: string,
 	Name: IName,
@@ -284,17 +367,6 @@ interface IArguments {
 	Index?: number
 }
 
-interface RegExCompoundCaptures{
-	RegExComments: RegExpMatchArray[];
-	RegExAbilities: RegExpMatchArray[];
-	RegExActions: RegExpMatchArray[];
-	RegExBooleans: RegExpMatchArray[];
-	RegExDirections: RegExpMatchArray[];
-	RegExDoubles: RegExpMatchArray[];
-	RegExCubes: RegExpMatchArray[];
-	RegExPositions: RegExpMatchArray[];
-}
-
 interface Token{
 	line:number,
 	character:number,
@@ -305,24 +377,28 @@ interface Token{
 
 class FoldingRangeProvider implements vscode.FoldingRangeProvider {
 	async provideFoldingRanges(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
-		const captureArray = gatherCompounds(document);
+		const captureArrayArray = gatherDefinitions(document);
 		let ranges: vscode.FoldingRange[] = []
-		for (let captures of Object.entries(captureArray)){
-			for (let capture of captures[1]){
-				let foldRange:vscode.FoldingRange
-				if (capture.groups['CommentString']){
-					foldRange = new vscode.FoldingRange(
-					document.positionAt(capture.indices.groups['CommentString'][0]).line,
-					document.positionAt(capture.indices.groups['CommentString'][1]).line,
-					vscode.FoldingRangeKind.Comment)
-				} else {
-					foldRange = new vscode.FoldingRange(
-					document.positionAt(capture.index).line,
-					document.positionAt(capture.index + capture[0].length).line
-				)}
-				ranges.push(foldRange)
+		for (let captureArray of captureArrayArray){
+			if (captureArray){
+			for (let captures of Object.entries(captureArray)){
+				for (let capture of captures[1]){
+					let foldRange:vscode.FoldingRange
+					if (capture.groups['CommentString']){
+						foldRange = new vscode.FoldingRange(
+						document.positionAt(capture.indices.groups['CommentString'][0]).line,
+						document.positionAt(capture.indices.groups['CommentString'][1]).line,
+						vscode.FoldingRangeKind.Comment)
+					} else {
+						foldRange = new vscode.FoldingRange(
+						document.positionAt(capture.index).line,
+						document.positionAt(capture.index + capture[0].length).line
+					)}
+					ranges.push(foldRange)
+				}
 			}
 		}
+	}
 		return ranges
 	}
 }
@@ -382,6 +458,12 @@ class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensPro
 				promises.push(this.builderTokens(builder,compound,document))
 			}
 		}
+		if (fileToDefinedsesMap.get(document.uri)?.values())
+		for (let array of fileToDefinedsesMap.get(document.uri)?.values()){
+			for (let defined of array){
+				promises.push(this.builderTokens(builder,defined,document))
+			}
+		}
 		await Promise.allSettled(promises)
 		let lamo = []
 		return builder.build()
@@ -397,6 +479,10 @@ private async builderTokens(builder:vscode.SemanticTokensBuilder,compound:ICompo
 		}
 		if (result) {
 			let tokenStart = document.positionAt(word.index+mainOffset)
+			if (!(typeof(typesLegend.get(result.Type))==="number")){
+				console.log('Unhandled Type: '+result.Type+' defaulting to "TYPE"')
+				result.Type = 'TYPE'
+			}
 			builder.push(tokenStart.line, tokenStart.character, word[0].length, typesLegend.get(result.Type))
 		}
 	}
@@ -418,4 +504,3 @@ private async builderTokens(builder:vscode.SemanticTokensBuilder,compound:ICompo
 	} */
 
 }
-let lol = ''.matchAll(/(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)\b[Ee][Nn][Dd]\b)/gsd)
