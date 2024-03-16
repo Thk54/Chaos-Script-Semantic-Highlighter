@@ -32,7 +32,7 @@ const generateMaps = (function() {
 		'STRING',
 		'TRIGGER'
 	]
-	typeKeyArray.forEach((compoundtype,index)=>typeMap.set(compoundtype, index))
+	typeKeyArray.forEach((TypeOfCompound,index)=>typeMap.set(TypeOfCompound, index))
 
 	const chaosMappings = [//green, salmon, pink, pale yellow, purple, off-text-white, teal, blue, light sky blue, and text-white
 		'COMMENT', //'comment',//green
@@ -57,7 +57,7 @@ const generateMaps = (function() {
 		'DIRECTION', //'property',//light sky blue
 		'TYPE' //'label'//text white
 	]
-	chaosMappings.forEach((compoundtype,index)=>typesLegend.set(compoundtype, index))
+	chaosMappings.forEach((TypeOfCompound,index)=>typesLegend.set(TypeOfCompound, index))
 })();
 
 const legend = (function() {
@@ -173,59 +173,38 @@ async function addToMapsIfEntriesExist(document:vscode.TextDocument) {
 
 function gatherCompounds(document: vscode.TextDocument): typeToRegExMatches {
 	let regExes = generateEmptyTypeMapArray()
-	/*let regExComments: RegExpMatchArray[] = []
-	let regExAbilities: RegExpMatchArray[] = []
-	let regExActions: RegExpMatchArray[] = []
-	let regExBooleans: RegExpMatchArray[] = []
-	let regExDirections: RegExpMatchArray[] = []
-	let regExDoubles: RegExpMatchArray[] = []
-	let regExCubes: RegExpMatchArray[] = []
-	let regExPositions: RegExpMatchArray[] = []*/
-	for (let match of document.getText().matchAll(/[\s^](?<CommentString>\/-(?=\s).*?\s-\/)[\s$]|(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<CompoundType>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<CompoundName>[\S]*)\s(?<CompoundContents>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)\b[Ee][Nn][Dd]\b)/gsd)){
-		if (typeof(typeMap.get(match.groups['CompoundType'])) === "number"){
-		regExes[typeMap.get(match.groups['CompoundType'])].push(match)
-		} else {
-			if (match.groups['CommentString']) {regExes[typeMap.get('COMMENT')].push(match)}
-			else {console.log("Something has gone wrong or a new compound type was added (gatherCompounds)");}
+	let text:string = document.getText()
+	let comments = text.matchAll(/(?<=[\s^])\/-(?=\s).*?\s-\/(?=[\s$])/gs) // Find all the comments
+	if (comments){
+		for (let comment of comments) {
+			text = text.replace(comment[0], ''.padEnd(comment[0].length)) // replace them with spaces to preserve character count
 		}
-		/*switch (match.groups['CompoundType']) {
-		case 'ABILITY':
-			regExAbilities.push(match)
-			break;
-		case 'ACTION':
-			regExActions.push(match)
-			break;
-		case 'BOOLEAN':
-			regExBooleans.push(match)
-			break;
-		case 'DIRECTION':
-			regExDirections.push(match)
-			break;
-		case 'DOUBLE':
-			regExDoubles.push(match)
-			break;
-		case 'CUBE':
-			regExCubes.push(match)
-			break;
-		case 'POSITION':
-			regExPositions.push(match)
-			break;
-		default:
-			if (match.groups['CommentString']) {regExComments.push(match)} else {
-				console.log("Something has gone wrong or a new compound type was added");
-			};
-		break;
-		}*/
 	}
-	regExes = regExes.filter((value:any)=>(value.length))
+	/*all the known defenition flags (regex flags: gsd)
+	(?:\b(?<TypeOfDefined>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s
+	captureing all of everything that isn't a compound(, scenario, doaction, or artoverride)
+	(?:(?:(?<![Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<NameOfDefined>[\S]*)\s(?<ContentsOfDefined>.*?(?:\b(?:(?:Ability)?Text|Description|TODO|FlavourText):\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))
+	capture compounds
+	|(?:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)))\b[Ee][Nn][Dd]\b) */
+	for (let match of text.matchAll(/(?:\b(?<TypeOfDefined>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s(?:(?:(?<![Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<NameOfDefined>[\S]*)\s(?<ContentsOfDefined>.*?(?:\b(?:(?:Ability)?Text|Description|TODO|FlavourText):\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)))\b[Ee][Nn][Dd]\b)/gsd)){
+	// todo: handle |[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo]|[Dd][Oo][Aa][Cc][Tt][Ii][Oo][Nn]|[Aa][Rr][Tt][Oo][Vv][Ee][Rr][Rr][Ii][Dd][Ee]
+		if (typeof(typeMap.get(match.groups['TypeOfCompound'])) === "number"){
+			regExes[typeMap.get(match.groups['TypeOfCompound'])].push(match)
+		} else {
+			console.log("Something has gone wrong or a new compound type was added (gatherCompounds)");
+			console.log('TypeOfCompound: '+ match.groups['TypeOfCompound'])
+		}
+	}
+	regExes = regExes.filter((value:any)=>(value?.length))
 	if (regExes) {
 		let returnMap:typeToRegExMatches = new Map
 		for (let matches of regExes){
 			if (matches.length){
-				if (matches[0]?.groups['CompoundType']) {
-				returnMap.set(matches[0].groups['CompoundType'],matches)
+				if (matches[0]?.groups['TypeOfCompound']) {
+				returnMap.set(matches[0].groups['TypeOfCompound'],matches)
 				} else { if (matches[0]?.groups['CommentString']) {returnMap.set('COMMENT',matches)}
-				else {console.log("Something has gone wrong or a new compound type was added (makeReturnMap)");}
+				else {console.log("Something has gone wrong or a new compound type was added (makeReturnMap)");
+				console.log('TypeOfCompound: '+ matches[0].groups['TypeOfCompound'])}
 			}
 			}
 		}
@@ -237,46 +216,12 @@ function gatherCompounds(document: vscode.TextDocument): typeToRegExMatches {
 
 function extractDefinitionDetails(compounds: typeToRegExMatches): typeToCompoundsMap {
 let compoundses = generateEmptyTypeMapArray()
-/*let abilities: ICompound[] = []
-let actions: ICompound[] = []
-let booleans: ICompound[] = []
-let directions: ICompound[] = []
-let doubles: ICompound[] = []
-let cubes: ICompound[] = []
-let positions: ICompound[] = []*/
 for (let captures of compounds) {
 	for (let capture of captures[1]){
-		if (capture.groups['CompoundType']){
-		compoundses[typeMap.get(capture.groups['CompoundType'])].push(packIntoICompound(capture))}
+		if (capture.groups['TypeOfCompound']){
+		compoundses[typeMap.get(capture.groups['TypeOfCompound'])].push(packIntoICompound(capture))}
 		else if (capture.groups['CommentString']){break;} 
 		else {console.log("Something has gone wrong or a new compound type was added");};
-		/*switch (capture.groups['CompoundType']) {
-			case 'ABILITY':
-				compoundses[Compound.ABILITY].push(packIntoICompound(capture))
-				break;
-			case 'ACTION':
-				compoundses[Compound.ACTION].push(packIntoICompound(capture))
-				break;
-			case 'BOOLEAN':
-				compoundses[Compound.BOOLEAN].push(packIntoICompound(capture))
-				break;
-			case 'DIRECTION':
-				compoundses[Compound.DIRECTION].push(packIntoICompound(capture))
-				break;
-			case 'DOUBLE':
-				compoundses[Compound.DOUBLE].push(packIntoICompound(capture))
-				break;
-			case 'CUBE':
-				compoundses[Compound.].push(packIntoICompound(capture))
-				break;
-			case 'POSITION':
-				compoundses[Compound].push(packIntoICompound(capture))
-				break;
-			default:
-				if (capture.groups['CommentString']) {break;} else {
-					console.log("Something has gone wrong or a new compound type was added");
-				};
-			}*/
 		}
 	}
 	compoundses = compoundses.filter((value:any)=>(value.length))
@@ -288,20 +233,11 @@ for (let captures of compounds) {
 		return returnMap
 	}
 	return
-	/*return{
-		Abilities:abilities,
-		Actions:actions,
-		Booleans:booleans,
-		Directions:directions,
-		Doubles:doubles,
-		Cubes:cubes,
-		Positions:positions
-	}*/
 	function packIntoICompound (capture:RegExpMatchArray): ICompound {
 		let args:IArguments[] = []
 		///(?:\bText:\s.*?\b[Ee][Nn][Dd]\b)|(?:\bGeneric(?:Perk|Position|String|Word|Name|Action|Boolean|Direction|Double|Constant|Cube|Stacking|Time)\b)/gd
 		///(?:\bText:\s.*?\b[Ee][Nn][Dd]\b)|(?:\b[Gg][eE][nN][eE][rR][iI][cC](?:[Pp][eE][rR][kK]|[Pp][oO][sS][iI][tT][iI][oO][nN]|[Ss][tT][rR][iI][nN][gG]|[Ww][oO][rR][dD]|[Nn][aA][mM][eE]|[Aa][cC][tT][iI][oO][nN]|[Bb][oO][oO][lL][eE][aA][nN]|[Dd][iI][rR][eE][cC][tT][iI][oO][nN]|[Dd][oO][uU][bB][lL][eE]|[Cc][oO][nN][sS][tT][aA][nN][tT]|[Cc][uU][bB][eE]|[Ss][tT][aA][cC][kK][iI][nN][gG]|[Tt][iI][mM][eE])\b)/gd
-		for(let generic of capture.groups['CompoundContents'].matchAll(/(?:\bText:\s.*?\b[Ee][Nn][Dd]\b)|(?<CompoundGenerics>\b[Gg][eE][nN][eE][rR][iI][cC](?:[Pp][eE][rR][kK]|[Pp][oO][sS][iI][tT][iI][oO][nN]|[Ss][tT][rR][iI][nN][gG]|[Ww][oO][rR][dD]|[Nn][aA][mM][eE]|[Aa][cC][tT][iI][oO][nN]|[Bb][oO][oO][lL][eE][aA][nN]|[Dd][iI][rR][eE][cC][tT][iI][oO][nN]|[Dd][oO][uU][bB][lL][eE]|[Cc][oO][nN][sS][tT][aA][nN][tT]|[Cc][uU][bB][eE]|[Ss][tT][aA][cC][kK][iI][nN][gG]|[Tt][iI][mM][eE])\b)/gd)){
+		for(let generic of capture.groups['ContentsOfCompound'].matchAll(/(?:\bText:\s.*?\b[Ee][Nn][Dd]\b)|(?<CompoundGenerics>\b[Gg][eE][nN][eE][rR][iI][cC](?:[Pp][eE][rR][kK]|[Pp][oO][sS][iI][tT][iI][oO][nN]|[Ss][tT][rR][iI][nN][gG]|[Ww][oO][rR][dD]|[Nn][aA][mM][eE]|[Aa][cC][tT][iI][oO][nN]|[Bb][oO][oO][lL][eE][aA][nN]|[Dd][iI][rR][eE][cC][tT][iI][oO][nN]|[Dd][oO][uU][bB][lL][eE]|[Cc][oO][nN][sS][tT][aA][nN][tT]|[Cc][uU][bB][eE]|[Ss][tT][aA][cC][kK][iI][nN][gG]|[Tt][iI][mM][eE])\b)/gd)){
 			if (generic.groups['CompoundGenerics'])
 			args.push({
 		String: generic.groups['CompoundGenerics'],
@@ -310,9 +246,9 @@ for (let captures of compounds) {
 			})
 		}
 	return {
-	Type:capture.groups['CompoundType'],
-	Contents: {Content:capture.groups['CompoundContents'], Index:capture.indices.groups['CompoundContents'][0]},
-	Name: {Name:capture.groups['CompoundName'], Index:capture.indices.groups['CompoundName'][0]},
+	Type:capture.groups['TypeOfCompound'],
+	Contents: {Content:capture.groups['ContentsOfCompound'], Index:capture.indices.groups['ContentsOfCompound'][0]},
+	Name: {Name:capture.groups['NameOfCompound'], Index:capture.indices.groups['NameOfCompound'][0]},
 	Arguments: args
 	}
 	}
@@ -324,26 +260,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	//context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'cubechaos' }, new DocumentSymbolProvider()));
 	context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'cubechaos' }, new DocumentSemanticTokensProvider(), legend))
 }
-
-
-/*type ICompoundses = {
-	Abilities?: ICompound[];
-	Actions?: ICompound[];
-	Booleans?: ICompound[];
-	Directions?: ICompound[];
-	Doubles?: ICompound[];
-	Cubes?: ICompound[];
-	Positions?: ICompound[];
-	//Triggers?: ICompound[];
-	//Strings?: ICompound[];
-	//Perks?: ICompound[];
-}
-
-interface TrigsStringsPerks extends ICompoundses {
-	Triggers?: ICompound[];
-	Strings?: ICompound[];
-	Perks?: ICompound[];
-}*/
 
 interface ICompound {
 	Type: string,
@@ -428,19 +344,19 @@ class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 		First try to capture comments
 		(?:\s|^((/-)\s.*?\s-/)\s|$)|
 		Try to capture all of any compounds
-		(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<compoundType>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<compoundName>[\S]*)\s.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?\b[Ee][Nn][Dd]\b)|
+		(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?\b[Ee][Nn][Dd]\b)|
 		Try to capture most of other definition flags
 		//todo
 		/gsd */
-		for (let match of document.getText().matchAll(/(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<CompoundType>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<CompoundName>[\S]*)\s(?<CompoundContents>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)\b[Ee][Nn][Dd]\b)/gsd)){
+		for (let match of document.getText().matchAll(/(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)\b[Ee][Nn][Dd]\b)/gsd)){
 			let compoundStartPos = document.positionAt(match.index)
 			let compoundEndPos = document.positionAt(match.index+match.length)
 			let compoundRange = new vscode.Range(compoundStartPos,compoundEndPos)
-			let symbolStartPos = document.positionAt(match.indices.groups['CompoundName'][0])
-			let symbolEndPos = document.positionAt(match.indices.groups['CompoundName'][1])
+			let symbolStartPos = document.positionAt(match.indices.groups['NameOfCompound'][0])
+			let symbolEndPos = document.positionAt(match.indices.groups['NameOfCompound'][1])
 			let symbolRange = new vscode.Range(symbolStartPos,symbolEndPos)
-			let symbolName = match.groups['CompoundName']
-			let symbolDetail = match.groups['CompoundType']
+			let symbolName = match.groups['NameOfCompound']
+			let symbolDetail = match.groups['TypeOfCompound']
 			let symbolKind = 11// todo make this number dynamic
 			docs.push(new vscode.DocumentSymbol(symbolName,symbolDetail,symbolKind,compoundRange,symbolRange))
 		}
@@ -486,7 +402,7 @@ private async builderTokens(builder:vscode.SemanticTokensBuilder,compound:ICompo
 	}
 	let nameStart = document.positionAt(compound.Name.Index)
 	builder.push(nameStart.line, nameStart.character, compound.Name.Name.length, typesLegend.get(compound.Type))
-	return Promise
+	//return Promise
 }
 	/*private _encodeTokenModifiers(strTokenModifiers: string[]): number {
 		let result = 0;
@@ -502,3 +418,4 @@ private async builderTokens(builder:vscode.SemanticTokensBuilder,compound:ICompo
 	} */
 
 }
+let lol = ''.matchAll(/(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)\b[Ee][Nn][Dd]\b)/gsd)

@@ -1,114 +1,114 @@
 General Definition Headers:
--CUBE:
--COMPOUND:
--PERK:
--SCENARIO:
--DOACTION:
--ARTOVERRIDE:
--TEXTTOOLTIP:
+CUBE:
+COMPOUND:
+PERK:
+SCENARIO:
+DOACTION:
+ARTOVERRIDE:
+TEXTTOOLTIP:
 (Not case sensitive)
 
 Scenario Base Definition Flags:
--STARTINGPOINT
--RANDOMEVENT
--Info:
--OVERRIDE
--MaxScore: (not sure if this one still works)
--LevelRequirement:
--CubeImage:
--PerkImage: (Only needs one image)
--Debug
+STARTINGPOINT
+RANDOMEVENT
+Info:
+OVERRIDE
+MaxScore: (not sure if this one still works)
+LevelRequirement:
+CubeImage:
+PerkImage: (Only needs one image)
+Debug
 
 Compound types: 
--ABILITY
--ACTION
--BOOLEAN
--DIRECTION
--DOUBLE
--CUBE
--POSITION
+ABILITY
+ACTION
+BOOLEAN
+DIRECTION
+DOUBLE
+CUBE
+POSITION
 
 Ability Compound Flags:
--Visual:
--Text:
--ExtraTrigger:
--CubeColourShift:
--NO_DUPLICATES
--LOCAL (Can also be used for other compounds)
--INVISIBLE
--VISIBLE
--OVERRIDE
+Visual:
+Text:
+ExtraTrigger:
+CubeColourShift:
+NO_DUPLICATES
+LOCAL (Can also be used for other compounds)
+INVISIBLE
+VISIBLE
+OVERRIDE
 
 Ability Help Visual Types:
--Area
--Arrow
--Sword
--Square
--Target
--Mist
--Plus
+Area
+Arrow
+Sword
+Square
+Target
+Mist
+Plus
 
 Perk Flags:
--Ability:
--WorldAbility:
--CampaignAbility:
--AbilityText:
--ExtraTrigger:
--Invisible:
--Visible:
--PerkBarSplit:
--End
--ObtainAction:
--ClickAction:
--RemoveAction:
--PerkRequirement:
--PerkRequirementAmount:
--LevelRequirement:
--Requirement:
--Debug
--DebugN
--Unique
--ReferenceCube:
--UpgradeFrom:
--IsUpgradeFrom:
--RemoveUponObtaining
--Description:
--TODO: (Text is ignored until the next End)
--UNUSED (This flag does nothing)
--BelongsTo:
--OVERRIDE
--Value:
+Ability:
+WorldAbility:
+CampaignAbility:
+AbilityText:
+ExtraTrigger:
+Invisible:
+Visible:
+PerkBarSplit:
+End
+ObtainAction:
+ClickAction:
+RemoveAction:
+PerkRequirement:
+PerkRequirementAmount:
+LevelRequirement:
+Requirement:
+Debug
+DebugN
+Unique
+ReferenceCube:
+UpgradeFrom:
+IsUpgradeFrom:
+RemoveUponObtaining
+Description:
+TODO: (Text is ignored until the next End)
+UNUSED (This flag does nothing)
+BelongsTo:
+OVERRIDE
+Value:
 
 Cube Flags:
--Ability:
--RNGAbility: 
--End
--AiPlacementRule:
--AiPlacementAdd:
--AiPlacementAbility:
--IDENT
--ADDEDAICOST
--TYPE
--Variable:
--LevelReq:
--Debug
--DebugE
--Visual:
--Animation:
--OVERRIDE
--Text:
--ExtraTrigger:
--FlavourText:
--Invisible (Makes last ability invisible)
--UNUSUED (Does nothing)
+Ability:
+RNGAbility: 
+End
+AiPlacementRule:
+AiPlacementAdd:
+AiPlacementAbility:
+IDENT
+ADDEDAICOST
+TYPE
+Variable:
+LevelReq:
+Debug
+DebugE
+Visual:
+Animation:
+OVERRIDE
+Text:
+ExtraTrigger:
+FlavourText:
+Invisible (Makes last ability invisible)
+UNUSUED (Does nothing)
 
 Animation Types:
--CLOCK
--TRIGGER
--HP
--DOUBLE
--BOOLEAN
--TIME
+CLOCK
+TRIGGER
+HP
+DOUBLE
+BOOLEAN
+TIME
 
 Scenario Flags:
 -
