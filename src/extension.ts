@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { addToMapsIfEntriesExist } from './mapsManager';
 import { gatherDefinitions } from './parser';
 import { typesLegend, fileToCompoundsesMap, fileToDefinedsesMap, fileToNameToCompoundListMap, fileToNameToDefinedListMap, ICompound } from './constants';
+import { types } from 'util';
 
 
 export async function presentTextDocumentFromURIToReturnlessFunction(uri:vscode.Uri,fuc:Function){
@@ -67,6 +68,7 @@ export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTo
 }
 async function builderTokens(builder:vscode.SemanticTokensBuilder,compound:ICompound,document:vscode.TextDocument) {
 	const mainOffset = compound.Contents.Index
+
 	for (let word of compound.Contents.Content.matchAll(/(?<=[\s^])\b(?:(?:(?:Ability)?Text|Description|TODO|FlavourText):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b|\S+?(?=[\s$])/gis)){
 		let result 
 		for (let file of fileToNameToCompoundListMap.keys()){

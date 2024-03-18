@@ -7,10 +7,71 @@
 			"*.static": {
 				"foreground": "#ff0000",
 				"fontStyle": "bold"
+			}/*,
+			"comment": {
+				"foreground": "#6A9955", //comment
 			},
-			"ABILITY": {
-				"foreground": "#00aa00"
-			}
+			"string": {
+				"foreground": "#ce9178", //string
+			},
+			"keyword.control": {
+				"foreground": "#C586C0", //keyword
+			},
+			"constant.numeric": {
+				"foreground": "#b5cea8", //number
+			},
+			"constant.regexp": {
+				"foreground": "#646695", //regexp
+			},
+			"keyword.operator": {
+				"foreground": "#d4d4d4", //operator
+			},
+			"entity.name.namespace": {
+				"foreground": "#4EC9B0", //namespace
+			},
+			"entity.name.type": {
+				"foreground": "#4EC9B0", //type
+			},
+			"entity.name.type.struct": {
+				"foreground": "#4EC9B0", //struct
+			},
+			"entity.name.type.class": {
+				"foreground": "#4EC9B0", //class
+			},
+			"entity.name.type.interface": {
+				"foreground": "#4EC9B0", //interface
+			},
+			"entity.name.type.enum": {
+				"foreground": "#4EC9B0", //enum
+			},
+			"entity.name.type.parameter": {
+				"foreground": "#4EC9B0", //typeParameter
+			},
+			"entity.name.function": {
+				"foreground": "#DCDCAA", //function
+			},
+			"entity.name.function1": {
+				"foreground": "#DCDCAA", //decorator
+			},
+			"entity.name.function.member": {
+				"foreground": "#DCDCAA", //method
+			},
+			"entity.name.function.preprocessor": {
+				"foreground": "#569cd6", //macro
+			},
+			"variable.other.readwrite": {
+				"foreground": "#9CDCFE", //variable
+			},
+			"variable.parameter": {
+				"foreground": "#9CDCFE", //parameter
+			},
+			"variable.other.property": {
+				"foreground": "#9CDCFE", //property
+			},
+			"N.A": { //label
+			},
+			"N.A1": { //modifier
+			}*/
 		}
 	}
 }

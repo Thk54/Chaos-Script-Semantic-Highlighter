@@ -2,8 +2,11 @@ import * as vscode from 'vscode';
 import { addToMapsIfEntriesExist, addToFileToNameToCompoundListMap } from './mapsManager';
 import { presentTextDocumentFromURIToReturnlessFunction, FoldingRangeProvider, DocumentSemanticTokensProvider } from './extension';
 import { IBuiltins, IArguments, typeToCompoundsMap, fileToCompoundsesMap, legend, generateMaps, compoundTypeMap } from './constants';
+import {buildRegexes} from './regexes'
 
 export async function activate(context: vscode.ExtensionContext) {
+	generateMaps;
+	console.log(buildRegexes())
 	await initialize(context);
 	context.subscriptions.push(vscode.languages.registerFoldingRangeProvider({ language: 'cubechaos' }, new FoldingRangeProvider()));
 	//context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'cubechaos' }, new DocumentSymbolProvider()));
@@ -11,7 +14,6 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 export async function initialize/*Compounds*/(context: vscode.ExtensionContext) {
-	generateMaps;
 	let files = vscode.workspace.findFiles('**/*.txt');
 	let promises = [];
 	promises.push(await presentTextDocumentFromURIToReturnlessFunction(context.extensionUri.with({ path: context.extensionUri.path + '/ModdingInfo.txt.built-ins' }), parseModdinginfo));

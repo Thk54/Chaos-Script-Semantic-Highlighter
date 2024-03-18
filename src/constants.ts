@@ -12,18 +12,18 @@ export const fileToDefinedsesMap = new Map<vscode.Uri, typeToDefinedsMap>();
 export type typeToDefinedsMap = Map<string, IDefined[]>;
 export const fileToNameToCompoundListMap = new Map<vscode.Uri, Map<string, ICompound>>();
 export const fileToNameToDefinedListMap = new Map<vscode.Uri, Map<string, IDefined>>();
-
 export const legend = (function () {
 	const tokenTypesLegend = [
 		'comment', 'string', 'keyword', 'number', 'regexp', 'operator', 'namespace',
 		'type', 'struct', 'class', 'interface', 'enum', 'typeParameter', 'function',
-		'method', 'decorator', 'macro', 'variable', 'parameter', 'property', 'label'
+		'method', 'decorator', 'macro', 'variable', 'parameter', 'property', 'label',
+		'modifier', 'event', 'enumMember'
 	];
 	tokenTypesLegend.forEach((tokenType, index) => tokenTypes.set(tokenType, index));
 
 	const tokenModifiersLegend = [
-		'declaration', 'documentation', 'readonly', 'static', 'abstract', 'deprecated',
-		'modification', 'async'
+		'declaration', 'definition', 'documentation', 'readonly', 'static', 'abstract', 
+		'deprecated', 'modification', 'async', 'defaultLibrary'
 	];
 	tokenModifiersLegend.forEach((tokenModifier, index) => tokenModifiers.set(tokenModifier, index));
 
@@ -40,18 +40,18 @@ export const generateMaps = (function () {
 		'POSITION',
 		'DOUBLE',
 		'PERK',
-		'STRING',
-		'COMMENT'
+		'STRING'
 	];
 	compoundTypeKeyArray.forEach((TypeOfCompound, index) => compoundTypeMap.set(TypeOfCompound, index));
-
+	
 	const defineTypeKeyArray = [
 		'COMPOUND', //important that this maps to zero for else fallthough
 		'CUBE',
 		'PERK',
 		'SCENARIO',
 		'ARTOVERRIDE',
-		'TEXTTOOLTIP'
+		'TEXTTOOLTIP',
+		'COMMENT'
 	];
 	defineTypeKeyArray.forEach((TypeOfDefine, index) => defineTypeMap.set(TypeOfDefine, index));
 
@@ -83,17 +83,22 @@ export const generateMaps = (function () {
 
 export interface IBuiltins {
 	Type: string;
-	Name: IName;
+	Name: IBuiltInName;
 	Arguments?: IArguments[];
+}
+export interface IBuiltInName {
+	Name: string;
 }
 
 export interface IDefined extends IBuiltins {
+	//Capture: string;
 	Contents: IContents;
+	Name: IName;
 }
 
 export interface ICompound extends IDefined {
 }
-interface IName {
+interface IName extends IBuiltInName{
 	Name: string;
 	Index?: number;
 }

@@ -80,12 +80,17 @@ export function gatherDefinitions(document: vscode.TextDocument): typeToRegExMat
 	let compoundRegExes: any = [];
 	let otherRegExes: any = [];
 	let text: string = document.getText();
-	let comments = text.matchAll(/(?:(?<=[\s^])\/-(?=\s).*?\s-\/(?=[\s$])|(?:\b[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo]:\s[\s\S]*?\s[Ss][Ee][Nn][Dd]\b))/gs); // Find all the comments
-
-	//todo actually handle |[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo]
+	let comments = text.matchAll(/(?<=[\s^])\/-(?=\s).*?\s-\/(?=[\s$])/gs); // Find all the comments
 	if (comments) {
 		for (let comment of comments) {
 			text = text.replace(comment[0], ''.padEnd(comment[0].length)); // replace them with spaces to preserve character count
+		}
+	}
+	
+	let scenarios = text.matchAll(/\b[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo]:\s[\s\S]*?\b[Ss][Ee][Nn][Dd]\b/gs);
+	if (scenarios) {
+		for (let scenario of scenarios) {//todo actually handle |[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo]
+			text = text.replace(scenario[0], ''.padEnd(scenario[0].length)); // replace them with spaces to preserve character count
 		}
 	}
 	/*all the known defenition flags (regex flags: gsd)
