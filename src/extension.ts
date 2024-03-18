@@ -12,6 +12,7 @@ type typeToCompoundsMap = Map<string,ICompound[]>;
 const fileToDefinedsesMap = new Map<vscode.Uri, typeToDefinedsMap>();
 type typeToDefinedsMap = Map<string,IDefined[]>
 const fileToNameToCompoundListMap = new Map<vscode.Uri,Map<string,ICompound>>();
+const fileToNameTDefinedListMap = new Map<vscode.Uri,Map<string,IDefined>>();
 let tempInitalized:boolean = false
 
 const generateMaps = (function() {
@@ -136,6 +137,7 @@ async function parseModdinginfo(document:vscode.TextDocument){
 }
 
 async function initializeCompounds(context:vscode.ExtensionContext) {
+	generateRegEx()
 	generateMaps
 	let files = vscode.workspace.findFiles('**/*.txt')
 	let promises = []
@@ -172,7 +174,7 @@ async function addToFileToDefineNameListMap(definedsAndMap:typeToDefinedsMap,uri
 		}
 	}
 	if (nameToDefinedMap.size !== 0) {
-		fileToNameToCompoundListMap.set(uri,nameToDefinedMap)
+		fileToNameTDefinedListMap.set(uri,nameToDefinedMap)
 	}
 	return Promise
 }
@@ -203,8 +205,20 @@ async function addToMapsIfEntriesExist(document:vscode.TextDocument) {
 		}
 	}
 }
+function generateRegEx(){
+	caseInsensify('4654')
+	function caseInsensify(input:string):string {
+		let result:string = ''
+		for (let character of Object.values(input).map((value:string)=>{if(value.toUpperCase() !== value.toLowerCase()){'['+value.toUpperCase()+value.toLowerCase()+']'}else{value}})){
+			result += character
+		}
+		return result
+	}
+	let life
+}
 
 function gatherDefinitions(document: vscode.TextDocument): typeToRegExMatches[] {
+	let stupdi = (/reg/.source + /ex/.source)
 	let compoundRegExes:any = []
 	let otherRegExes:any = []
 	let text:string = document.getText()
@@ -216,12 +230,12 @@ function gatherDefinitions(document: vscode.TextDocument): typeToRegExMatches[] 
 		}
 	}
 	/*all the known defenition flags (regex flags: gsd)
-	(?:\b(?<TypeOfDefine>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s
+	(?:\b(?<TypeOfDefine>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s
 	captureing all of everything that isn't a compound(, scenario, doaction, or artoverride)
 	(?:(?:(?<![Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<NameOfDefine>[\S]*)\s(?<ContentsOfDefine>.*?(?:\b(?:(?:Ability)?Text|Description|TODO|FlavourText):\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))
 	capture compounds
 	|(?:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)))\b[Ee][Nn][Dd]\b) */
-	for (let match of text.matchAll(/(?:\b(?<TypeOfDefine>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s(?:(?:(?<![Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<NameOfDefine>[\S]*)\s(?<ContentsOfDefine>.*?(?:\b(?:(?:(?:Ability)?Text|Description|TODO|FlavourText):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)))\b[Ee][Nn][Dd]\b)/gsd)){
+	for (let match of text.matchAll(/(?:\b(?<TypeOfDefine>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s(?:(?:(?<![Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<NameOfDefine>[\S]*)\s(?<ContentsOfDefine>.*?(?:\b(?:(?:(?:Ability)?Text|Description|TODO|FlavourText):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\b(?:Text:|GainAbilityText)\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)))\b[Ee][Nn][Dd]\b)/gsd)){
 	// todo: handle |[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo]|[Dd][Oo][Aa][Cc][Tt][Ii][Oo][Nn]|[Aa][Rr][Tt][Oo][Vv][Ee][Rr][Rr][Ii][Dd][Ee]
 		let index = defineTypeMap.get(match.groups['TypeOfDefine'].toUpperCase()) //compounds are maped to 0 and so fall though to the else if
 		if (index){ 
@@ -479,8 +493,8 @@ private async builderTokens(builder:vscode.SemanticTokensBuilder,compound:ICompo
 			if (result) break
 		}
 		if (!result){
-			for (let file of fileToNameToCompoundListMap.keys()){
-				result = fileToNameToCompoundListMap.get(file).get(word[0].toLowerCase())
+			for (let file of fileToNameTDefinedListMap.keys()){
+				result = fileToNameTDefinedListMap.get(file).get(word[0].toLowerCase())
 				if (result) break
 			}
 		}
