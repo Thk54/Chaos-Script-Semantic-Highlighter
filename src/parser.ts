@@ -89,18 +89,12 @@ export function gatherDefinitions(document: vscode.TextDocument): typeToRegExMat
 	
 	let scenarios = text.matchAll(/\b[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo]:\s[\s\S]*?\b[Ss][Ee][Nn][Dd]\b/gs);
 	if (scenarios) {
-		for (let scenario of scenarios) {//todo actually handle |[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo]
+		for (let scenario of scenarios) {//todo actually handle |[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo] and DOACTION
 			text = text.replace(scenario[0], ''.padEnd(scenario[0].length)); // replace them with spaces to preserve character count
 		}
 	}
-	/*all the known defenition flags (regex flags: gsd)
-	(?:\b(?<TypeOfDefine>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s
-	captureing all of everything that isn't a compound(, scenario, doaction, or artoverride)
-	(?:(?:(?<![Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<NameOfDefine>[\S]*)\s(?<ContentsOfDefine>.*?(?:\b(?:(?:Ability)?Text|Description|TODO|FlavourText):\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))
-	capture compounds
-	|(?:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)))\b[Ee][Nn][Dd]\b) */
-	for (let match of text.matchAll(/(?:\b(?<TypeOfDefine>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s(?:(?:(?<![Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<NameOfDefine>[\S]*)\s(?<ContentsOfDefine>.*?(?:\b(?:(?:(?:Ability)?Text|Description|TODO|FlavourText):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\b(?:Text:|GainAbilityText)\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)))\b[Ee][Nn][Dd]\b)/gsd)) {
-		// todo: handle |[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo]|[Dd][Oo][Aa][Cc][Tt][Ii][Oo][Nn]|[Aa][Rr][Tt][Oo][Vv][Ee][Rr][Rr][Ii][Dd][Ee]
+	// ./regexes.primaryCapture()
+	for (let match of text.matchAll(/\b(?<TypeOfDefine>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Aa][Rr][Tt][Oo][Vv][Ee][Rr][Rr][Ii][Dd][Ee]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s(?:(?:(?:(?<=[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<TypeOfCompound>TRIGGER|ABILITY|ACTION|BOOLEAN|CUBE|DIRECTION|POSITION|DOUBLE|PERK|STRING)\s*(?<NameOfCompound>\S*)\s(?<ContentsOfCompound>.*?(?:\b(?:(?:Text):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:(?<=[Cc][Uu][Bb][Ee]:\s)\s*(?<NameOfCube>\S+)\s+(?<ContentsOfCube>.*?(?:\b(?:(?:(?:Flavour)?Text):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:(?<=[Pp][Ee][Rr][Kk]:\s)\s*(?<NameOfPerk>\S+)\s+(?<ContentsOfPerk>.*?(?:\b(?:(?:AbilityText|Description|TODO):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:(?<=[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]:\s)\s*(?<NameOfTextTooltip>\S+)\s+(?<ContentOfTextTooltip>.*?)))\b[Ee][Nn][Dd]\b)|(?:(?<=[Aa][Rr][Tt][Oo][Vv][Ee][Rr][Rr][Ii][Dd][Ee]:\s)\s*(?:(?:ALL\s+(?<ArtOverrideFolder>\S+)\s+(?<ArtOverrideSubstring>\S+))|(?:PERK\s+(?<ArtOverridePerk>\S+))|(?:CUBE\s+(?<ArtOverrideCube>\S+))|(?<ArtOverrideName>\S+))(?=[\s$]))/dgs)) {
 		let index = defineTypeMap.get(match.groups['TypeOfDefine'].toUpperCase()); //compounds are maped to 0 and so fall though to the else if
 		if (index) {
 			if (!otherRegExes[index]) otherRegExes[index] = [];

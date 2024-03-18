@@ -50,7 +50,7 @@ function primaryCapture():RegExp{
 	return RegExp(definesDeclarationCapture()+unnamedCapture(/*End termintated defines*/unnamedCapture(compoundSubCapture()+'|'+cubeSubCapture()+'|'+perkSubCapture()+'|'+textTooltipSubCapture())+'\\b'+caseInsensify('End')+'\\b')+'|'+artoverrideSubCapture(),"gsd")
 }
 function definesDeclarationCapture():string{
-	let possibleDefines:string[] = ['compound', 'cube', 'perk', 'scenario', 'artoverride', 'texttooltip']
+	let possibleDefines:string[] = ['compound', 'cube', 'perk', /* 'scenario', */ 'artoverride', 'texttooltip']
 	return (/\b/.source+namedCapture('TypeOfDefine',caseInsensify(possibleDefines).join('|'))+/:\s/.source)
 }
 
@@ -72,7 +72,7 @@ function perkSubCapture():string{
 	return unnamedCapture(lookBehindify(caseInsensify('perk')+':\\s')+'\\s*'+namedCapture('NameOfPerk', '\\S+')+'\\s+'+namedCapture('ContentsOfPerk','.*?'+internalUsersOfEndHandler(normalEndUser,gainAbilityText)))
 }
 function textTooltipSubCapture():string{
-	return unnamedCapture(lookBehindify(caseInsensify('TextTooltip')+':\\s')+'\\s*'+namedCapture('NameOfTextTooltip', '\\S+')+'\\s.*?')
+	return unnamedCapture(lookBehindify(caseInsensify('TextTooltip')+':\\s')+'\\s*'+namedCapture('NameOfTextTooltip', '\\S+')+'\\s+'+namedCapture('ContentOfTextTooltip', '.*?'))
 }
 function artoverrideSubCapture():string{
 	//Possible first args: [name], CUBE, PERK, ALL
