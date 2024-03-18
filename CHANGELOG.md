@@ -1,5 +1,8 @@
 ## Release Notes
 
+## [0.1.1]
+Split extension over multiple files for better organization
+
 ## [0.0.8]
 Actualy gave stuff diffrent names so it stopped overwriteing each other and stopped just doing the same thing again if it didn't work the first time when figureing out if a word should be a token
 
