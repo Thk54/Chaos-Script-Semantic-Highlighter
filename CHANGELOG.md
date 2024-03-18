@@ -1,5 +1,8 @@
 ## Release Notes
 
+## [0.0.8]
+Actualy gave stuff diffrent names so it stopped overwriteing each other and stopped just doing the same thing again if it didn't work the first time when figureing out if a word should be a token
+
 ## [0.0.7]
 ModdingInfo.txt.built-ins no longer cares what kind of line endings the file has (Thanks git I thought I could trust that file to be as I left it, you showed me)
 

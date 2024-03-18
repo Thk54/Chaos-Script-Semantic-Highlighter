@@ -12,7 +12,7 @@ type typeToCompoundsMap = Map<string,ICompound[]>;
 const fileToDefinedsesMap = new Map<vscode.Uri, typeToDefinedsMap>();
 type typeToDefinedsMap = Map<string,IDefined[]>
 const fileToNameToCompoundListMap = new Map<vscode.Uri,Map<string,ICompound>>();
-const fileToNameTDefinedListMap = new Map<vscode.Uri,Map<string,IDefined>>();
+const fileToNameToDefinedListMap = new Map<vscode.Uri,Map<string,IDefined>>();
 let tempInitalized:boolean = false
 
 const generateMaps = (function() {
@@ -174,7 +174,7 @@ async function addToFileToDefineNameListMap(definedsAndMap:typeToDefinedsMap,uri
 		}
 	}
 	if (nameToDefinedMap.size !== 0) {
-		fileToNameTDefinedListMap.set(uri,nameToDefinedMap)
+		fileToNameToDefinedListMap.set(uri,nameToDefinedMap)
 	}
 	return Promise
 }
@@ -439,7 +439,18 @@ class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 		Try to capture most of other definition flags
 		//todo
 		/gsd */
-		for (let match of document.getText().matchAll(/(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)\b[Ee][Nn][Dd]\b)/gsd)){
+		for (let list of fileToNameToDefinedListMap){
+			for (let defined of list[1]){
+				let iDefined = defined[1]
+				let defineStartPos
+				iDefined.Contents
+			}
+		}
+		for (let list of fileToNameToCompoundListMap){
+			for (let compound of list[1]){
+				
+			}
+		}
 			let compoundStartPos = document.positionAt(match.index)
 			let compoundEndPos = document.positionAt(match.index+match.length)
 			let compoundRange = new vscode.Range(compoundStartPos,compoundEndPos)
@@ -450,7 +461,7 @@ class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 			let symbolDetail = match.groups['TypeOfCompound']
 			let symbolKind = 11// todo make this number dynamic
 			docs.push(new vscode.DocumentSymbol(symbolName,symbolDetail,symbolKind,compoundRange,symbolRange))
-		}
+		
 
 		return docs
 	}
@@ -493,8 +504,8 @@ private async builderTokens(builder:vscode.SemanticTokensBuilder,compound:ICompo
 			if (result) break
 		}
 		if (!result){
-			for (let file of fileToNameTDefinedListMap.keys()){
-				result = fileToNameTDefinedListMap.get(file).get(word[0].toLowerCase())
+			for (let file of fileToNameToDefinedListMap.keys()){
+				result = fileToNameToDefinedListMap.get(file).get(word[0].toLowerCase())
 				if (result) break
 			}
 		}
