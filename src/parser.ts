@@ -1,83 +1,58 @@
 import * as vscode from "vscode";
-import { IDefined, ICompound, IArguments, typeToDefinedsMap, typeToRegExMatches, typeToCompoundsMap, defineTypeMap, compoundTypeMap } from './constants';
+import { IDefined, ICompound, IArguments } from './constants';
 
 
-export function extractCompoundDetails(compounds: typeToRegExMatches): typeToCompoundsMap {
-	let compoundses: any = [];
-	for (let captures of compounds) {
-		for (let capture of captures[1]) {
-			if (capture.groups['TypeOfCompound']) {
-				if (typeof (compoundTypeMap.get(capture.groups['TypeOfCompound'])) === 'number') {
-					let index = compoundTypeMap.get(capture.groups['TypeOfCompound']);
-					if (!compoundses[index]) compoundses[index] = [];
-					compoundses[compoundTypeMap.get(capture.groups['TypeOfCompound'])].push(packIntoICompound(capture));
-				}
-				else if (capture.groups['CommentString']) { break; }
-				else { console.log("Something has gone wrong or a new compound type was added compounds"); };
-			}
+function packIntoIDefined(capture: RegExpMatchArray): IDefined{
+	//let output:IDefined[] = []
+	//for (let capture of captures){
+		let defineType:string = capture.groups['TypeOfDefine'].toUpperCase()
+		switch (defineType) {
+		case 'COMPOUND':
+			return (packIntoICompound(capture))
+		case 'ARTOVERRIDE':
+			//ArtOverrideFolder ArtOverrideSubstring ArtOverridePerk ArtOverrideCube ArtOverrideName
+			let name = capture.groups['ArtOverrideName'] ? 'ArtOverrideName' : capture.groups['ArtOverrideCube'] ? 'ArtOverrideCube' : capture.groups['ArtOverridePerk'] ? 'ArtOverridePerk' : capture.groups['ArtOverrideFolder']&&capture.groups['ArtOverrideSubstring'] ? ('Files in folder: "'+capture.groups['ArtOverrideFolder']+'" containing "'+capture.groups['ArtOverrideSubstring']+'"') : '< Malformed >';
+			if (name === '< Malformed >') console.log("This shouldn't be possible (Pack ArtOverride) returning: \"< Malformed >\"")
+			/* if (capture.groups['ArtOverrideName']) {name = 'ArtOverrideName'}
+			else if (capture.groups['ArtOverrideCube']){name = 'ArtOverrideCube'}
+			else if (capture.groups['ArtOverridePerk']){name = 'ArtOverridePerk'}
+			else if (capture.groups['ArtOverrideFolder']&&capture.groups['ArtOverrideSubstring']){name = ('Files in folder: "'+capture.groups['ArtOverrideFolder']+'" containing "'+capture.groups['ArtOverrideSubstring']+'"')} else {console.log("This shouldn't be possible (Pack ArtOverride) returning: \"< Malformed >\"");name = '< Malformed >'} */
+			return ( {
+				Type: {Define:defineType}, // "[Boolean] ? [thing] : [thing2]" is an if else statement
+				Contents: {Capture:capture[0], Content: capture[0].slice(12).trimStart(), Index: capture.index+(capture[0].length-capture[0].slice(12).trimStart().length) },
+				Name: { Name: capture?.groups[name] ? name : capture.groups[name].toLowerCase(), Index: capture?.groups[name] ? capture[0].match(/\S*\s*\S*$/).index+capture.index : capture.indices.groups[name][0] }
+			})
+		default:
+			return ( {
+				Type: {Define:defineType},
+				Contents: {Capture:capture[0], Content: capture.groups['ContentsOf'+defineType], Index: capture.indices.groups['ContentsOf'+defineType][0] },
+				Name: { Name: capture.groups['NameOf'+defineType].toLowerCase(), Index: capture.indices.groups['NameOf'+defineType][0] }
+			})
 		}
-	}
-	compoundses = compoundses.filter((value: any) => (value.length));
-	if (compoundses) {
-		let returnMap: typeToCompoundsMap = new Map;
-		for (let matches of compoundses) {
-			returnMap.set(matches[0].Type, matches);
-		}
-		return returnMap;
-	}
-	return;
-	function packIntoICompound(capture: RegExpMatchArray): ICompound {
-		let args: IArguments[] = [];
-		///(?:\bText:\s.*?\b[Ee][Nn][Dd]\b)|(?:\bGeneric(?:Perk|Position|String|Word|Name|Action|Boolean|Direction|Double|Constant|Cube|Stacking|Time)\b)/gd
-		///(?:\bText:\s.*?\b[Ee][Nn][Dd]\b)|(?:\b[Gg][eE][nN][eE][rR][iI][cC](?:[Pp][eE][rR][kK]|[Pp][oO][sS][iI][tT][iI][oO][nN]|[Ss][tT][rR][iI][nN][gG]|[Ww][oO][rR][dD]|[Nn][aA][mM][eE]|[Aa][cC][tT][iI][oO][nN]|[Bb][oO][oO][lL][eE][aA][nN]|[Dd][iI][rR][eE][cC][tT][iI][oO][nN]|[Dd][oO][uU][bB][lL][eE]|[Cc][oO][nN][sS][tT][aA][nN][tT]|[Cc][uU][bB][eE]|[Ss][tT][aA][cC][kK][iI][nN][gG]|[Tt][iI][mM][eE])\b)/gd
-		for (let generic of capture.groups['ContentsOfCompound'].matchAll(/(?:\bText:\s.*?\b[Ee][Nn][Dd]\b)|(?<CompoundGenerics>\b[Gg][eE][nN][eE][rR][iI][cC](?:[Pp][eE][rR][kK]|[Pp][oO][sS][iI][tT][iI][oO][nN]|[Ss][tT][rR][iI][nN][gG]|[Ww][oO][rR][dD]|[Nn][aA][mM][eE]|[Aa][cC][tT][iI][oO][nN]|[Bb][oO][oO][lL][eE][aA][nN]|[Dd][iI][rR][eE][cC][tT][iI][oO][nN]|[Dd][oO][uU][bB][lL][eE]|[Cc][oO][nN][sS][tT][aA][nN][tT]|[Cc][uU][bB][eE]|[Ss][tT][aA][cC][kK][iI][nN][gG]|[Tt][iI][mM][eE])\b)/gd)) {
-			if (generic.groups['CompoundGenerics'])
-				args.push({
-					String: generic.groups['CompoundGenerics'],
-					Type: generic.groups['CompoundGenerics'].slice(7),
-					Index: generic.indices.groups['CompoundGenerics'][0] + capture.index
-				});
-		}
-		return {
-			Type: capture.groups['TypeOfCompound'],
-			Contents: { Content: capture.groups['ContentsOfCompound'], Index: capture.indices.groups['ContentsOfCompound'][0] },
-			Name: { Name: capture.groups['NameOfCompound'], Index: capture.indices.groups['NameOfCompound'][0] },
-			Arguments: args
-		};
-	}
-}export function extractDefinedNames(defines: typeToRegExMatches): typeToDefinedsMap {
-	let definedses: any = [];
-	for (let captures of defines) {
-		for (let capture of captures[1]) {
-			if (capture.groups['TypeOfDefine']) {
-				if (typeof (defineTypeMap.get(capture.groups['TypeOfDefine'].toUpperCase())) === 'number') {
-					let index = defineTypeMap.get(capture.groups['TypeOfDefine']);
-					if (!definedses[index]) definedses[index] = [];
-					definedses[defineTypeMap.get(capture.groups['TypeOfDefine'])].push(packIntoIDefined(capture));
-				}
-				else { console.log("Something has gone wrong or a new compound type was added defines"); };
-			}
-		}
-	}
-	definedses = definedses.filter((value: any) => (value.length));
-	if (definedses) {
-		let returnMap: typeToDefinedsMap = new Map;
-		for (let matches of definedses) {
-			returnMap.set(matches[0].Type, matches);
-		}
-		return returnMap;
-	}
-	return;
-	function packIntoIDefined(capture: RegExpMatchArray): IDefined {
-		return {
-			Type: capture.groups['TypeOfDefine'],
-			Contents: { Content: capture.groups['ContentsOfDefine'], Index: capture.indices.groups['ContentsOfDefine'][0] },
-			Name: { Name: capture.groups['NameOfDefine'], Index: capture.indices.groups['NameOfDefine'][0] }
-		};
-	}
+	//}
+	//return output
 }
-export function gatherDefinitions(document: vscode.TextDocument): typeToRegExMatches[] {
-	let compoundRegExes: any = [];
+export function packIntoICompound(capture: RegExpMatchArray): ICompound {
+	let args: IArguments[] = [];
+	// ./regexes.genericCapture()
+	for (let generic of capture.groups['ContentsOfCompound'].matchAll(/(?:\b(?:Text:|GainAbilityText)\s.*?\b[Ee][Nn][Dd]\b)|(?<CompoundGenerics>[Gg][Ee][Nn][Ee][Rr][Ii][Cc](?:[Pp][Ee][Rr][Kk]|[Pp][Oo][Ss][Ii][Tt][Ii][Oo][Nn]|[Ss][Tt][Rr][Ii][Nn][Gg]|[Ww][Oo][Rr][Dd]|[Nn][Aa][Mm][Ee]|[Aa][Cc][Tt][Ii][Oo][Nn]|[Bb][Oo][Oo][Ll][Ee][Aa][Nn]|[Dd][Ii][Rr][Ee][Cc][Tt][Ii][Oo][Nn]|[Dd][Oo][Uu][Bb][Ll][Ee]|[Cc][Oo][Nn][Ss][Tt][Aa][Nn][Tt]|[Cc][Uu][Bb][Ee]|[Ss][Tt][Aa][Cc][Kk][Ii][Nn][Gg]|[Tt][Ii][Mm][Ee])\b)/dg)) {
+		if (generic.groups['CompoundGenerics'])
+			args.push({
+				String: generic.groups['CompoundGenerics'],
+				Type: generic.groups['CompoundGenerics'].slice(7),
+				Index: generic.indices.groups['CompoundGenerics'][0] + capture.index
+			});
+	}
+	return {
+		Type: {Define:'COMPOUND', Compound:capture.groups['TypeOfCompound'].toUpperCase()},
+		Contents: {Capture:capture[0], Content: capture.groups['ContentsOfCompound'], Index: capture.indices.groups['ContentsOfCompound'][0] },
+		Name: { Name: capture.groups['NameOfCompound'].toLowerCase(), Index: capture.indices.groups['NameOfCompound'][0] },
+		Arguments: args
+	};
+}
+
+export function gatherDefinitions(document: vscode.TextDocument): IDefined[] {
+	let iDefineds:IDefined[] = []
 	let otherRegExes: any = [];
 	let text: string = document.getText();
 	let comments = text.matchAll(/(?<=[\s^])\/-(?=\s).*?\s-\/(?=[\s$])/gs); // Find all the comments
@@ -94,8 +69,16 @@ export function gatherDefinitions(document: vscode.TextDocument): typeToRegExMat
 		}
 	}
 	// ./regexes.primaryCapture()
+/* groups: 
+TypeOfDefine 
+	TypeOfCompound NameOfCompound ContentsOfCompound 
+	NameOfCube ContentsOfCube 
+	NameOfPerk ContentsOfPerk 
+	NameOfTextTooltip ContentOfTextTooltip 
+ArtOverrideFolder ArtOverrideSubstring ArtOverridePerk ArtOverrideCube ArtOverrideName */
 	for (let match of text.matchAll(/\b(?<TypeOfDefine>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Aa][Rr][Tt][Oo][Vv][Ee][Rr][Rr][Ii][Dd][Ee]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s(?:(?:(?:(?<=[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<TypeOfCompound>TRIGGER|ABILITY|ACTION|BOOLEAN|CUBE|DIRECTION|POSITION|DOUBLE|PERK|STRING)\s*(?<NameOfCompound>\S*)\s(?<ContentsOfCompound>.*?(?:\b(?:(?:Text):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:(?<=[Cc][Uu][Bb][Ee]:\s)\s*(?<NameOfCube>\S+)\s+(?<ContentsOfCube>.*?(?:\b(?:(?:(?:Flavour)?Text):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:(?<=[Pp][Ee][Rr][Kk]:\s)\s*(?<NameOfPerk>\S+)\s+(?<ContentsOfPerk>.*?(?:\b(?:(?:AbilityText|Description|TODO):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:(?<=[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]:\s)\s*(?<NameOfTextTooltip>\S+)\s+(?<ContentOfTextTooltip>.*?)))\b[Ee][Nn][Dd]\b)|(?:(?<=[Aa][Rr][Tt][Oo][Vv][Ee][Rr][Rr][Ii][Dd][Ee]:\s)\s*(?:(?:ALL\s+(?<ArtOverrideFolder>\S+)\s+(?<ArtOverrideSubstring>\S+))|(?:PERK\s+(?<ArtOverridePerk>\S+))|(?:CUBE\s+(?<ArtOverrideCube>\S+))|(?<ArtOverrideName>\S+))(?=[\s$]))/dgs)) {
-		let index = defineTypeMap.get(match.groups['TypeOfDefine'].toUpperCase()); //compounds are maped to 0 and so fall though to the else if
+		iDefineds.push(packIntoIDefined(match))
+/* 		let index = defineTypeMap.get(match.groups['TypeOfDefine'].toUpperCase()); //compounds are maped to 0 and so fall though to the else if
 		if (index) {
 			if (!otherRegExes[index]) otherRegExes[index] = [];
 			otherRegExes[index].push(match);
@@ -103,9 +86,10 @@ export function gatherDefinitions(document: vscode.TextDocument): typeToRegExMat
 			let index = compoundTypeMap.get(match.groups['TypeOfCompound']);
 			if (!compoundRegExes[index]) compoundRegExes[index] = [];
 			compoundRegExes[index].push(match);
-		} else { console.log("Something has gone wrong in gatherCompounds on regex match: " + match[0]); }
+		} else { console.log("Something has gone wrong in gatherCompounds on regex match: " + match[0]); } */
 	}
-	compoundRegExes = compoundRegExes.filter((value: any) => (value?.length));
+	return iDefineds
+	/* compoundRegExes = compoundRegExes.filter((value: any) => (value?.length));
 	let results: typeToRegExMatches[] = [];
 	if (compoundRegExes.length) {
 		let returnMap: typeToRegExMatches = new Map;
@@ -126,6 +110,5 @@ export function gatherDefinitions(document: vscode.TextDocument): typeToRegExMat
 			results[1] = returnMap;
 		}
 	}
-	if (results.length) return results;
+	if (results.length) return results; */
 }
-

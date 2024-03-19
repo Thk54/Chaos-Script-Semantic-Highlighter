@@ -83,11 +83,11 @@ async function builderTokens(builder:vscode.SemanticTokensBuilder,compound:IComp
 		}
 		if (result) {
 			let tokenStart = document.positionAt(word.index+mainOffset)
-			if (!(typeof(typesLegend.get(result.Type.toUpperCase()))==="number")){
+			if (!(typeof(typesLegend.get(result.Type))==="number")){
 				console.log('Unhandled Type: '+result.Type+' defaulting to "TYPE"')
-				result.Type = 'TYPE'
+				result.Type.Define = 'TYPE'
 			}
-			builder.push(tokenStart.line, tokenStart.character, word[0].length, typesLegend.get(result.Type.toUpperCase()))
+			builder.push(tokenStart.line, tokenStart.character, word[0].length, typesLegend.get(result.Type))
 		}
 	}
 	let nameStart = document.positionAt(compound.Name.Index)

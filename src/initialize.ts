@@ -14,15 +14,17 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 export async function initialize/*Compounds*/(context: vscode.ExtensionContext) {
-	let files = vscode.workspace.findFiles('**/*.txt');
+	using files = vscode.workspace.findFiles('**/*.txt');
 	let promises = [];
-	promises.push(await presentTextDocumentFromURIToReturnlessFunction(context.extensionUri.with({ path: context.extensionUri.path + '/ModdingInfo.txt.built-ins' }), parseModdinginfo));
+	promises.push(await /* todo test if this await is necessary */presentTextDocumentFromURIToReturnlessFunction(context.extensionUri.with({ path: context.extensionUri.path + '/ModdingInfo.txt.built-ins' }), parseModdinginfo));
 	for (let txt of await files) {
 		promises.push(presentTextDocumentFromURIToReturnlessFunction(txt, addToMapsIfEntriesExist));
 	}
 	await Promise.allSettled(promises);
 	console.log('initial map done');
-}export async function parseModdinginfo(document: vscode.TextDocument) {
+}
+
+export async function parseModdinginfo(document: vscode.TextDocument) {
 	const pack: Function = function (lines: string[]): IBuiltins[] {
 		let compounds: IBuiltins[] = [];
 		let type = lines[0].toUpperCase().match(/(.*?)S?: /)[1]; //todo fix plural types
@@ -35,7 +37,7 @@ export async function initialize/*Compounds*/(context: vscode.ExtensionContext) 
 				args.push({ Type: generic[0].toUpperCase() });
 			}
 			compounds.push({
-				Type: type,
+				Type: {Define:'COMPOUND', Compound:type},
 				Name: { Name: name[0] },
 				Arguments: args
 			});
@@ -43,7 +45,7 @@ export async function initialize/*Compounds*/(context: vscode.ExtensionContext) 
 		return compounds;
 	};
 	let compoundsMap = [];
-	for (let match of document.getText().matchAll(/^(Triggers|Actions|BOOLEAN|CUBE|DIRECTION|DOUBLE|PERK|POSITION|STRING): (?:$\s\s?^(?:.(?!\:))+$)+/gim)) {
+	for (let match of document.getText().matchAll(/^(Triggers?|Actions?|BOOLEAN|CUBE|DIRECTION|DOUBLE|PERK|POSITION|STRING): (?:$\s\s?^(?:.(?!\:))+$)+/gim)) {
 		let sectionType = match[1].toUpperCase();
 		switch (match[1].toUpperCase()) {
 			case 'ACTIONS':

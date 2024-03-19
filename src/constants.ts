@@ -1,8 +1,10 @@
 import * as vscode from "vscode";
-
 export const tokenTypes = new Map<string, number>();
 export const tokenModifiers = new Map<string, number>();
-export const typesLegend = new Map<string, number>();
+export const typesLegend = new Map<IType, number>();
+
+type fileToDefines = Map<vscode.Uri,IDefined>
+
 export const compoundTypeMap = new Map<string, number>();
 export const defineTypeMap = new Map<string, number>();
 export type typeToRegExMatches = Map<string, RegExpMatchArray[]>;
@@ -54,59 +56,61 @@ export const generateMaps = (function () {
 		'COMMENT'
 	];
 	defineTypeKeyArray.forEach((TypeOfDefine, index) => defineTypeMap.set(TypeOfDefine, index));
-
-	const chaosMappings = [
-		'COMMENT', //'comment',//green
-		'ABILITY', //'string',//salmon
-		'CUBE', //'keyword',//pink
-		'DOUBLE', //'number',//pale yellow
-		'STRING', //'regexp',//purple
-		'PERK', //'operator',//offwhite
-		'TRIGGER', //'namespace',//teal
-		'f', //'type',//teal
-		'g', //'struct',//teal
-		'h', //'class',//teal
-		'i', //'interface',//teal
-		'BOOLEAN', //'enum',//teal
-		'k', //'typeParameter',//teal
-		'l', //'function',//pale yellow
-		'm', //'method',//pale yellow
-		'POSITION', //'decorator',//pale yellow
-		'ACTION', //'macro',//blue
-		'p', //'variable',//light sky blue
-		'q', //'parameter',//light sky blue
-		'DIRECTION', //'property',//light sky blue
-		'TYPE' //'label'//text white
+	const chaosMappings:IType[] = [
+		{Define:'COMMENT'}, //'comment',//green
+		{Define:'COMPOUND', Compound:'ABILITY'}, //'string',//salmon
+		{Define:'COMPOUND', Compound:'CUBE'}, //'keyword',//pink
+		{Define:'COMPOUND', Compound:'DOUBLE'}, //'number',//pale yellow
+		{Define:'COMPOUND', Compound:'STRING'}, //'regexp',//purple
+		{Define:'COMPOUND', Compound:'PERK'}, //'operator',//offwhite
+		{Define:'COMPOUND', Compound:'TRIGGER'}, //'namespace',//teal
+		{Define:'TEXTTOOLTIP'}, //'type',//teal
+		{Define:'g'}, //'struct',//teal
+		{Define:'h'}, //'class',//teal
+		{Define:'i'}, //'interface',//teal
+		{Define:'COMPOUND', Compound:'BOOLEAN'}, //'enum',//teal
+		{Define:'k'}, //'typeParameter',//teal
+		{Define:'ARTOVERRIDE'}, //'function',//pale yellow
+		{Define:'SCENARIO'}, //'method',//pale yellow
+		{Define:'COMPOUND', Compound:'POSITION'}, //'decorator',//pale yellow
+		{Define:'COMPOUND', Compound:'ACTION'}, //'macro',//blue
+		{Define:'PERK'}, //'variable',//light sky blue
+		{Define:'CUBE'}, //'parameter',//light sky blue
+		{Define:'COMPOUND', Compound:'DIRECTION'}, //'property',//light sky blue
+		{Define:'COMPOUND', Compound:'TYPE'} //'label'//text white 
 	];
 	chaosMappings.forEach((TypeOfCompound, index) => typesLegend.set(TypeOfCompound, index));
 })();
 
 export interface IBuiltins {
-	Type: string;
+	Type: IType;
 	Name: IBuiltInName;
 	Arguments?: IArguments[];
 }
 export interface IBuiltInName {
 	Name: string;
 }
-
-export interface IDefined extends IBuiltins {
-	//Capture: string;
+export interface IDefined {
+	Type: IType;
 	Contents: IContents;
 	Name: IName;
 }
-
-export interface ICompound extends IDefined {
+export interface ICompound extends IDefined, IBuiltins {
+	Name: IName;
+}
+interface IType {
+	Define:string
+	Compound?:string
 }
 interface IName extends IBuiltInName{
 	Name: string;
 	Index?: number;
 }
 interface IContents {
+	Capture: string;
 	Content: string;
 	Index: number;
 }
-
 export interface IArguments {
 	Type: string;
 	String?: string;

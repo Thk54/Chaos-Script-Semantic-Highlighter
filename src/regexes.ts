@@ -32,8 +32,7 @@ export function buildRegexes():RegExp[]{
 	outputRegexes.push(commentCapture())
 	outputRegexes.push(scenarioCapture())
 	outputRegexes.push(primaryCapture())
-	console.log(primaryCapture())
-	outputRegexes.push(new RegExp(compoundSubCapture()))
+	outputRegexes.push(genericsCapture())
 	return outputRegexes
 }
 
@@ -53,7 +52,6 @@ function definesDeclarationCapture():string{
 	let possibleDefines:string[] = ['compound', 'cube', 'perk', /* 'scenario', */ 'artoverride', 'texttooltip']
 	return (/\b/.source+namedCapture('TypeOfDefine',caseInsensify(possibleDefines).join('|'))+/:\s/.source)
 }
-
 ///(?:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\b(?:Text:|GainAbilityText)\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)\b[Ee][Nn][Dd]\b)/
 function compoundSubCapture():string{
 	let normalEndUser = ['Text']
@@ -81,6 +79,10 @@ return (unnamedCapture(lookBehindify(caseInsensify('artoverride')+':\\s')+'\\s*'
 	unnamedCapture('PERK\\s+'+namedCapture('ArtOverridePerk', '\\S+')), 
 	unnamedCapture('CUBE\\s+'+namedCapture('ArtOverrideCube', '\\S+')), 
 	namedCapture('ArtOverrideName','\\S+')].join('|'))+blankAhead))
+}
+function genericsCapture():RegExp{
+	let genericTypes = ['Perk', 'Position', 'String', 'Word', 'Name', 'Action', 'Boolean', 'Direction', 'Double', 'Constant', 'Cube', 'Stacking', 'Time']
+	return RegExp('(?:\\b(?:Text:|GainAbilityText)\\s.*?\\b[Ee][Nn][Dd]\\b)|'+namedCapture('CompoundGenerics', caseInsensify('Generic')+unnamedCapture(caseInsensify(genericTypes).join('|'))+'\\b'),'gd')
 }
 function unnamedCapture(input:string):string{
 	return ('(?:'+input+')')

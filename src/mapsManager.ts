@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ICompound, IDefined, typeToRegExMatches, typeToCompoundsMap, fileToCompoundsesMap, typeToDefinedsMap,
-	fileToDefinedsesMap, fileToNameToCompoundListMap, fileToNameToDefinedListMap } from './constants';
-import { gatherDefinitions, extractDefinedNames, extractCompoundDetails } from './parser';
+	fileToDefinedsesMap, fileToNameToCompoundListMap, fileToNameToDefinedListMap, compoundTypeMap, defineTypeMap } from './constants';
+import { gatherDefinitions, packIntoICompound } from "./parser";
 
 
 export async function addToMapsIfEntriesExist(document: vscode.TextDocument) {
@@ -23,7 +23,8 @@ export async function addToMapsIfEntriesExist(document: vscode.TextDocument) {
 			}
 		}
 	}
-}export async function addToFileToNameToCompoundListMap(compoundsAndMap: typeToCompoundsMap, uri: vscode.Uri) {
+}
+export async function addToFileToNameToCompoundListMap(compoundsAndMap: typeToCompoundsMap, uri: vscode.Uri) {
 	const nameToCompoundMap = new Map<string, ICompound>();
 	for (let compoundArray of compoundsAndMap) {
 		for (let compound of compoundArray[1]) {
@@ -50,5 +51,61 @@ export async function addToFileToDefineNameListMap(definedsAndMap: typeToDefined
 		fileToNameToDefinedListMap.set(uri, nameToDefinedMap);
 	}
 	return Promise;
+}
+export function extractDefinedNames(defines: typeToRegExMatches): typeToDefinedsMap {
+	let definedses: any = [];
+	for (let captures of defines) {
+		for (let capture of captures[1]) {
+			if (capture.groups['TypeOfDefine']) {
+				if (typeof (defineTypeMap.get(capture.groups['TypeOfDefine'].toUpperCase())) === 'number') {
+					let index = defineTypeMap.get(capture.groups['TypeOfDefine']);
+					if (!definedses[index]) definedses[index] = [];
+					definedses[defineTypeMap.get(capture.groups['TypeOfDefine'])].push(packIntoIDefined(capture));
+				}
+				else { console.log("Something has gone wrong or a new compound type was added defines"); };
+			}
+		}
+	}
+	definedses = definedses.filter((value: any) => (value.length));
+	if (definedses) {
+		let returnMap: typeToDefinedsMap = new Map;
+		for (let matches of definedses) {
+			returnMap.set(matches[0].Type, matches);
+		}
+		return returnMap;
+	}
+	return;
+	function packIntoIDefined(capture: RegExpMatchArray): IDefined {
+		return {
+			Type: { Define: capture.groups['TypeOfDefine'] },
+			Contents: { Capture: capture[0], Content: capture.groups['ContentsOfDefine'], Index: capture.indices.groups['ContentsOfDefine'][0] },
+			Name: { Name: capture.groups['NameOfDefine'], Index: capture.indices.groups['NameOfDefine'][0] }
+		};
+	}
+}
+export function extractCompoundDetails(compounds: typeToRegExMatches): typeToCompoundsMap {
+	let compoundses: any = [];
+	for (let captures of compounds) {
+		for (let capture of captures[1]) {
+			if (capture.groups['TypeOfCompound']) {
+				if (typeof (compoundTypeMap.get(capture.groups['TypeOfCompound'])) === 'number') {
+					let index = compoundTypeMap.get(capture.groups['TypeOfCompound']);
+					if (!compoundses[index]) compoundses[index] = [];
+					compoundses[compoundTypeMap.get(capture.groups['TypeOfCompound'])].push(packIntoICompound(capture));
+				}
+				else if (capture.groups['CommentString']) { break; }
+				else { console.log("Something has gone wrong or a new compound type was added compounds"); };
+			}
+		}
+	}
+	compoundses = compoundses.filter((value: any) => (value.length));
+	if (compoundses) {
+		let returnMap: typeToCompoundsMap = new Map;
+		for (let matches of compoundses) {
+			returnMap.set(matches[0].Type, matches);
+		}
+		return returnMap;
+	}
+	return;
 }
 
