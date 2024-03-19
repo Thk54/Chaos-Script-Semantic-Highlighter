@@ -1,12 +1,22 @@
 import * as vscode from 'vscode';
-import { ICompound, IDefined, typeToRegExMatches, typeToCompoundsMap, fileToCompoundsesMap, typeToDefinedsMap,
-	fileToDefinedsesMap, fileToNameToCompoundListMap, fileToNameToDefinedListMap, compoundTypeMap, defineTypeMap, fileToDefines } from './constants';
+import { ICompound, IDefined, fileToDefines, fileToNameToCompoundDefine, fileToNameToDefine } from './constants';
 import { gatherDefinitions } from "./parser";
 
 
-export async function addToFileToIDefineIfEntries(document: vscode.TextDocument) {
+export async function updateFilesMapsIfEntries(document: vscode.TextDocument) {
 	const iDefineds: IDefined[] = await gatherDefinitions(document);
 	if (iDefineds.length) {
 		fileToDefines.set(document.uri, iDefineds)
+		let nameToCompound = new Map<string,ICompound>();
+		let nameToDefine = new Map<string,IDefined>();
+		for (let defined of iDefineds){
+			if (defined.Type.Define === 'COMPOUND') {
+				nameToCompound.set(defined.Name.Name, defined)
+			} else {
+				nameToDefine.set(defined.Name.Name, defined)
+			}
+		}
+		if (nameToCompound.size) fileToNameToCompoundDefine.set(document.uri, nameToCompound)
+		if (nameToDefine.size) fileToNameToDefine.set(document.uri, nameToCompound)
 	}
 }

@@ -1,4 +1,3 @@
-import * as consts from "./constants"
 const blankBehind = /(?<=[\s^])/.source
 const blankAhead = /(?=[\s$])/.source
 
@@ -33,6 +32,9 @@ export function buildRegexes():RegExp[]{
 	outputRegexes.push(scenarioCapture())
 	outputRegexes.push(primaryCapture())
 	outputRegexes.push(genericsCapture())
+	for (let regex of outputRegexes){
+		console.log(regex)
+	}
 	return outputRegexes
 }
 
@@ -46,39 +48,39 @@ function scenarioCapture():RegExp{
 }
 
 function primaryCapture():RegExp{
-	return RegExp(definesDeclarationCapture()+unnamedCapture(/*End termintated defines*/unnamedCapture(compoundSubCapture()+'|'+cubeSubCapture()+'|'+perkSubCapture()+'|'+textTooltipSubCapture())+'\\b'+caseInsensify('End')+'\\b')+'|'+artoverrideSubCapture(),"gsd")
+	return RegExp(definesDeclarationCapture()+unnamedCapture(/*End termintated defines*/unnamedCapture(compoundSubCapture()+'|'+cubeSubCapture()+'|'+perkSubCapture()+'|'+textTooltipSubCapture())+'\\b'+caseInsensify('End')+'\\b')/*+'|'+artoverrideSubCapture()*/,"gsd")
 }
 function definesDeclarationCapture():string{
 	let possibleDefines:string[] = ['compound', 'cube', 'perk', /* 'scenario', */ 'artoverride', 'texttooltip']
-	return (/\b/.source+namedCapture('TypeOfDefine',caseInsensify(possibleDefines).join('|'))+/:\s/.source)
+	return (/\b/.source+namedCapture('TypeOfDEFINE',caseInsensify(possibleDefines).join('|'))+/:\s/.source)
 }
-///(?:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s(?<ContentsOfCompound>.*?(?:\b(?:Text:|GainAbilityText)\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)\b[Ee][Nn][Dd]\b)/
+///(?:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*?)\s(?<ContentsOfCompound>.*?(?:\b(?:Text:|GainAbilityText)\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)\b[Ee][Nn][Dd]\b)/
 function compoundSubCapture():string{
 	let normalEndUser = ['Text']
 	let gainAbilityText = ['GainAbilityText']
 	let compoundNames = ['TRIGGER', 'ABILITY', 'ACTION', 'BOOLEAN', 'CUBE', 'DIRECTION', 'POSITION', 'DOUBLE', 'PERK', 'STRING']
-	return unnamedCapture(lookBehindify(caseInsensify('Compound')+':\\s')+'\\s*'+namedCapture('TypeOfCompound', compoundNames.join('|'))+'\\s*'+namedCapture('NameOfCompound', '\\S*')+'\\s'+namedCapture('ContentsOfCompound', '.*?'+internalUsersOfEndHandler(normalEndUser,gainAbilityText)))//+'\\b[Ee][Nn][Dd]\\b'
+	return unnamedCapture(lookBehindify(caseInsensify('Compound')+':\\s')+'\\s*'+namedCapture('TypeOfCOMPOUND', compoundNames.join('|'))+'\\s*'+namedCapture('NameOfCOMPOUND', '\\S*')+'\\s'+namedCapture('ContentsOfCOMPOUND', '.*?'+internalUsersOfEndHandler(normalEndUser,gainAbilityText)))//+'\\b[Ee][Nn][Dd]\\b'
 }
 function cubeSubCapture():string{
 	let normalEndUser = ['(?:Flavour)?Text'] //FlavorText: and Text:
 	let gainAbilityText = ['GainAbilityText']
-	return unnamedCapture(lookBehindify(caseInsensify('cube')+':\\s')+'\\s*'+namedCapture('NameOfCube', '\\S+')+'\\s+'+namedCapture('ContentsOfCube','.*?'+internalUsersOfEndHandler(normalEndUser,gainAbilityText)))
+	return unnamedCapture(lookBehindify(caseInsensify('cube')+':\\s')+'\\s*'+namedCapture('NameOfCUBE', '\\S+')+'\\s+'+namedCapture('ContentsOfCUBE','.*?'+internalUsersOfEndHandler(normalEndUser,gainAbilityText)))
 }
 function perkSubCapture():string{
 	let normalEndUser = ['AbilityText','Description','TODO']
 	let gainAbilityText = ['GainAbilityText']
-	return unnamedCapture(lookBehindify(caseInsensify('perk')+':\\s')+'\\s*'+namedCapture('NameOfPerk', '\\S+')+'\\s+'+namedCapture('ContentsOfPerk','.*?'+internalUsersOfEndHandler(normalEndUser,gainAbilityText)))
+	return unnamedCapture(lookBehindify(caseInsensify('perk')+':\\s')+'\\s*'+namedCapture('NameOfPERK', '\\S+')+'\\s+'+namedCapture('ContentsOfPERK','.*?'+internalUsersOfEndHandler(normalEndUser,gainAbilityText)))
 }
 function textTooltipSubCapture():string{
-	return unnamedCapture(lookBehindify(caseInsensify('TextTooltip')+':\\s')+'\\s*'+namedCapture('NameOfTextTooltip', '\\S+')+'\\s+'+namedCapture('ContentOfTextTooltip', '.*?'))
+	return unnamedCapture(lookBehindify(caseInsensify('TextTooltip')+':\\s')+'\\s*'+namedCapture('NameOfTEXTTOOLTIP', '\\S+')+'\\s+'+namedCapture('ContentsOfTEXTTOOLTIP', '.*?'))
 }
-function artoverrideSubCapture():string{
+function artoverrideSubCapture():string{//wildly misbehaiving
 	//Possible first args: [name], CUBE, PERK, ALL
 return (unnamedCapture(lookBehindify(caseInsensify('artoverride')+':\\s')+'\\s*'+unnamedCapture(
-	[unnamedCapture('ALL\\s+'+namedCapture('ArtOverrideFolder', '\\S+')+'\\s+'+namedCapture('ArtOverrideSubstring', '\\S+')), 
-	unnamedCapture('PERK\\s+'+namedCapture('ArtOverridePerk', '\\S+')), 
-	unnamedCapture('CUBE\\s+'+namedCapture('ArtOverrideCube', '\\S+')), 
-	namedCapture('ArtOverrideName','\\S+')].join('|'))+blankAhead))
+	[unnamedCapture('ALL\\s+'+namedCapture('ARTOVERRIDEFolder', '\\S+')+'\\s+'+namedCapture('ARTOVERRIDESubstring', '\\S+')), 
+	unnamedCapture('PERK\\s+'+namedCapture('ARTOVERRIDEPerk', '\\S+')), 
+	unnamedCapture('CUBE\\s+'+namedCapture('ARTOVERRIDECube', '\\S+')), 
+	namedCapture('ARTOVERRIDEName','\\S+')].join('|'))+blankAhead))
 }
 function genericsCapture():RegExp{
 	let genericTypes = ['Perk', 'Position', 'String', 'Word', 'Name', 'Action', 'Boolean', 'Direction', 'Double', 'Constant', 'Cube', 'Stacking', 'Time']

@@ -1,8 +1,11 @@
 import * as vscode from 'vscode';
-import { addToFileToIDefineIfEntries } from './mapsManager';
+import { updateFilesMapsIfEntries } from './mapsManager';
 import { gatherDefinitions } from './parser';
-import { typesLegend, fileToCompoundsesMap, fileToDefinedsesMap, fileToNameToCompoundListMap, fileToNameToDefinedListMap, ICompound } from './constants';
+import { typesLegend, fileToDefines, IType, IDefined, fileToNameToCompoundDefine, fileToNameToDefine } from './constants';
 
+export function typeStringifyer(type:IType){
+	return type.Define === 'COMPOUND' ? (type.Define+type.Compound) : type.Define
+}
 
 export async function presentTextDocumentFromURIToReturnlessFunction(uri:vscode.Uri,fuc:Function){
 	await vscode.workspace.openTextDocument(uri).then((document)=>{fuc(document)})
@@ -26,24 +29,16 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
 export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
 	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
 		//update active file and wait for map to be updated
-		await addToFileToIDefineIfEntries(document)
+		await updateFilesMapsIfEntries(document)
 		//get newly updated ICompounds
 		 
 		//determie tokens
 		const builder:vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder()
 		//fileToCompoundsMap.set(document.uri, update)
 		let promises = []
-		if (fileToCompoundsesMap.get(document.uri)?.values())
-		for (let array of fileToCompoundsesMap.get(document.uri)?.values()){
-			for (let compound of array){
-				promises.push(builderTokens(builder,compound,document))
-			}
-		}
-		if (fileToDefinedsesMap.get(document.uri)?.values())
-		for (let array of fileToDefinedsesMap.get(document.uri)?.values()){
-			for (let defined of array){
-				promises.push(builderTokens(builder,defined,document))
-			}
+		if (fileToDefines.get(document.uri)?.values())
+		for (let defines of fileToDefines.get(document.uri)?.values()){
+				promises.push(builderTokens(builder,defines,document))
 		}
 		await Promise.allSettled(promises)
 		let lamo = []
@@ -51,32 +46,32 @@ export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTo
 
 	}
 }
-async function builderTokens(builder:vscode.SemanticTokensBuilder,compound:ICompound,document:vscode.TextDocument) {
+async function builderTokens(builder:vscode.SemanticTokensBuilder,compound:IDefined,document:vscode.TextDocument) {
 	const mainOffset = compound.Contents.Index
-
-	for (let word of compound.Contents.Content.matchAll(/(?<=[\s^])\b(?:(?:(?:Ability)?Text|Description|TODO|FlavourText):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b|\S+?(?=[\s$])/gis)){
-		let result 
-		for (let file of fileToNameToCompoundListMap.keys()){
-			result = fileToNameToCompoundListMap.get(file).get(word[0].toLowerCase())
+	for (let word of compound.Contents.Content.matchAll(/(?<=[\s^])\b(?:(?:(?:Ability|Flavour)?Text|Description|TODO):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b|\S+?(?=[\s$])/gis)){
+		let result
+		for (let file of fileToNameToCompoundDefine.keys()){
+			result = fileToNameToCompoundDefine.get(file).get(word[0].toLowerCase())
 			if (result) break
 		}
 		if (!result){
-			for (let file of fileToNameToDefinedListMap.keys()){
-				result = fileToNameToDefinedListMap.get(file).get(word[0].toLowerCase())
+			for (let file of fileToNameToDefine.keys()){
+				result = fileToNameToDefine.get(file).get(word[0].toLowerCase())
 				if (result) break
 			}
 		}
 		if (result) {
 			let tokenStart = document.positionAt(word.index+mainOffset)
-			if (!(typeof(typesLegend.get(result.Type))==="number")){
-				console.log('Unhandled Type: '+result.Type+' defaulting to "TYPE"')
-				result.Type.Define = 'TYPE'
+			if (!(typeof(typesLegend.get(typeStringifyer(result.Type)))==="number")){
+				console.log('Unhandled Type: '+result.Type+' defaulting to "UHANDLED"')
+				result.Type.Define = 'UHANDLED'
+				result.Type.Compound = 'UHANDLED'
 			}
-			builder.push(tokenStart.line, tokenStart.character, word[0].length, typesLegend.get(result.Type))
+			builder.push(tokenStart.line, tokenStart.character, word[0].length, typesLegend.get(typeStringifyer(result.Type)))
 		}
 	}
 	let nameStart = document.positionAt(compound.Name.Index)
-	builder.push(nameStart.line, nameStart.character, compound.Name.Name.length, typesLegend.get(compound.Type))
+	builder.push(nameStart.line, nameStart.character, compound.Name.Name.length, typesLegend.get(typeStringifyer(compound.Type)))
 	//return Promise
 	/*private _encodeTokenModifiers(strTokenModifiers: string[]): number {
 		let result = 0;
