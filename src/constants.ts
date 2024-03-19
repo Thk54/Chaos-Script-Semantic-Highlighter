@@ -3,7 +3,7 @@ export const tokenTypes = new Map<string, number>();
 export const tokenModifiers = new Map<string, number>();
 export const typesLegend = new Map<IType, number>();
 
-type fileToDefines = Map<vscode.Uri,IDefined>
+export const fileToDefines = new Map<vscode.Uri,IBuiltins[]>();
 
 export const compoundTypeMap = new Map<string, number>();
 export const defineTypeMap = new Map<string, number>();
@@ -107,9 +107,13 @@ interface IName extends IBuiltInName{
 	Index?: number;
 }
 interface IContents {
-	Capture: string;
+	Capture: ICapture;
 	Content: string;
 	Index: number;
+}
+interface ICapture {
+	Text:string;
+	Index:number
 }
 export interface IArguments {
 	Type: string;

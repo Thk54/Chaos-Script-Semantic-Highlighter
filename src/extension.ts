@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
-import { addToMapsIfEntriesExist } from './mapsManager';
+import { addToFileToIDefineIfEntries } from './mapsManager';
 import { gatherDefinitions } from './parser';
 import { typesLegend, fileToCompoundsesMap, fileToDefinedsesMap, fileToNameToCompoundListMap, fileToNameToDefinedListMap, ICompound } from './constants';
-import { types } from 'util';
 
 
 export async function presentTextDocumentFromURIToReturnlessFunction(uri:vscode.Uri,fuc:Function){
@@ -12,36 +11,22 @@ export async function presentTextDocumentFromURIToReturnlessFunction(uri:vscode.
 
 export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
 	async provideFoldingRanges(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
-		const captureArrayArray = gatherDefinitions(document);
 		let ranges: vscode.FoldingRange[] = []
-		for (let captureArray of captureArrayArray){
-			if (captureArray){
-			for (let captures of captureArray){
-				for (let capture of captures[1]){
-					let foldRange:vscode.FoldingRange
-					if (capture.groups['CommentString']){
-						foldRange = new vscode.FoldingRange(
-						document.positionAt(capture.indices.groups['CommentString'][0]).line,
-						document.positionAt(capture.indices.groups['CommentString'][1]).line,
-						vscode.FoldingRangeKind.Comment)
-					} else {
-						foldRange = new vscode.FoldingRange(
-						document.positionAt(capture.index).line,
-						document.positionAt(capture.index + capture[0].length).line
-					)}
-					ranges.push(foldRange)
-				}
-			}
+		for (let iDefine of await gatherDefinitions(document)){
+			if (iDefine){
+				let pos = document.positionAt(iDefine.Contents.Capture.Index)
+				ranges.push({start:pos.line,end:pos.translate({characterDelta:iDefine.Contents.Capture.Text.length}).line})
 		}
 	}
-		return ranges
+	if (ranges.length) return ranges
+	return;
 	}
 }
 
 export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
 	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
 		//update active file and wait for map to be updated
-		await addToMapsIfEntriesExist(document)
+		await addToFileToIDefineIfEntries(document)
 		//get newly updated ICompounds
 		 
 		//determie tokens

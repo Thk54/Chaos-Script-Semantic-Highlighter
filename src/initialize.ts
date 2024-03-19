@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { addToMapsIfEntriesExist, addToFileToNameToCompoundListMap } from './mapsManager';
+import { addToFileToIDefineIfEntries, } from './mapsManager';
 import { presentTextDocumentFromURIToReturnlessFunction, FoldingRangeProvider, DocumentSemanticTokensProvider } from './extension';
 import { IBuiltins, IArguments, typeToCompoundsMap, fileToCompoundsesMap, legend, generateMaps, compoundTypeMap } from './constants';
 import {buildRegexes} from './regexes'
@@ -18,7 +18,7 @@ export async function initialize/*Compounds*/(context: vscode.ExtensionContext) 
 	let promises = [];
 	promises.push(await /* todo test if this await is necessary */presentTextDocumentFromURIToReturnlessFunction(context.extensionUri.with({ path: context.extensionUri.path + '/ModdingInfo.txt.built-ins' }), parseModdinginfo));
 	for (let txt of await files) {
-		promises.push(presentTextDocumentFromURIToReturnlessFunction(txt, addToMapsIfEntriesExist));
+		promises.push(presentTextDocumentFromURIToReturnlessFunction(txt, addToFileToIDefineIfEntries));
 	}
 	await Promise.allSettled(promises);
 	console.log('initial map done');
