@@ -1,7 +1,10 @@
 ## Release Notes
 
+## [0.1.2]
+Fixed non-compound highlighting, enabled and reimplemented document symbol provider, and implemented workspace symbol provider (ctrl+t to search and jump to any defined and parsed thing) todo make that search treat underscores as spaces and not need all the characters contiguous - Not done yet because I shouldn't have even been working on this today.
+
 ## [0.1.1]
-Split extension over multiple files for better organization
+Split extension over multiple files for better organization, perk highlighting broke am very confused
 
 ## [0.0.8]
 Actualy gave stuff diffrent names so it stopped overwriteing each other and stopped just doing the same thing again if it didn't work the first time when figureing out if a word should be a token

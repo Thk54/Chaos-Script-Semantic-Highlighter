@@ -1,24 +1,20 @@
 import * as vscode from 'vscode';
 import { updateFilesMapsIfEntries } from './mapsManager';
 import { gatherDefinitions } from './parser';
-import { typesLegend, fileToDefines, IType, IDefined, fileToNameToCompoundDefine, fileToNameToDefine } from './constants';
+import { typesLegend, fileToDefines, IType, IDefined, fileToNameToCompoundDefine, fileToNameToDefine, defineTypeMap } from './constants';
 
-export function typeStringifyer(type:IType){
-	return type.Define === 'COMPOUND' ? (type.Define+type.Compound) : type.Define
-}
-
-export async function presentTextDocumentFromURIToReturnlessFunction(uri:vscode.Uri,fuc:Function){
-	await vscode.workspace.openTextDocument(uri).then((document)=>{fuc(document)})
-	return Promise
+export function typeStringifyer(type:IType):string {
+	return type.Define === 'COMPOUND' ? (type.Define+' '+type.Compound) : type.Define
 }
 
 export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
 	async provideFoldingRanges(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
 		let ranges: vscode.FoldingRange[] = []
-		for (let iDefine of await gatherDefinitions(document)){
+		for (let iDefine of (await gatherDefinitions(document)).Defines){
 			if (iDefine){
-				let pos = document.positionAt(iDefine.Contents.Capture.Index)
-				ranges.push({start:pos.line,end:pos.translate({characterDelta:iDefine.Contents.Capture.Text.length}).line})
+				let posStart = document.positionAt(iDefine.Contents.Capture.Index)
+				let posEnd = document.positionAt(iDefine.Contents.Capture.Index+iDefine.Contents.Capture.Text.length)
+				ranges.push({start:posStart.line,end:posEnd.line})
 		}
 	}
 	if (ranges.length) return ranges
@@ -63,7 +59,7 @@ async function builderTokens(builder:vscode.SemanticTokensBuilder,compound:IDefi
 		if (result) {
 			let tokenStart = document.positionAt(word.index+mainOffset)
 			if (!(typeof(typesLegend.get(typeStringifyer(result.Type)))==="number")){
-				console.log('Unhandled Type: '+result.Type+' defaulting to "UHANDLED"')
+				console.log('Unhandled Type: '+typeStringifyer(result.Type)+' defaulting to "UHANDLED"')
 				result.Type.Define = 'UHANDLED'
 				result.Type.Compound = 'UHANDLED'
 			}
@@ -87,47 +83,64 @@ async function builderTokens(builder:vscode.SemanticTokensBuilder,compound:IDefi
 	} */
 }
 
-/* class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
+export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 	async provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
-		return this._parseDefinitionsText(document);
-	}
-
-	private _parseDefinitionsText(document: vscode.TextDocument): vscode.DocumentSymbol[] { 
-		//const text = document.getText()
-		let docs:vscode.DocumentSymbol[] = []
-		//const lineLengths: number[] = text.split(/\r\n|\r|\n/).map(l => l.length+ 1 + Number(1 < text.split(/\r\n/).length));
-		///
-		//First try to capture comments
-		//(?:\s|^((/-)\s.*?\s-/)\s|$)|
-		//Try to capture all of any compounds
-		//(?:\b[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*)\s.*?(?:\bText:\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?\b[Ee][Nn][Dd]\b)|
-		//Try to capture most of other definition flags
-		//todo
-		///gsd
-		for (let list of fileToNameToDefinedListMap){
-			for (let defined of list[1]){
-				let iDefined = defined[1]
-				let defineStartPos
-				iDefined.Contents
-			}
+		let defines = fileToDefines?.get(document.uri) ?? []
+		let docs = []
+		for (let define of defines){
+			let defineRange = new vscode.Range(document.positionAt(define.Contents.Capture.Index),document.positionAt(define.Contents.Capture.Index+define.Contents.Capture.Text.length))
+			let symbolRange = new vscode.Range(document.positionAt(define.Name.Index),document.positionAt(define.Name.Index+define.Name.Name.length))
+			let symbolName = define.Name.Name
+			let symbolDetail = typeStringifyer(define.Type)
+			let symbolKind = defineTypeMap.get(typeStringifyer(define.Type))
+			docs.push(new vscode.DocumentSymbol(symbolName,symbolDetail,symbolKind,defineRange,symbolRange))
 		}
-		for (let list of fileToNameToCompoundListMap){
-			for (let compound of list[1]){
-				
-			}
-		}
-			let compoundStartPos = document.positionAt(match.index)
-			let compoundEndPos = document.positionAt(match.index+match.length)
-			let compoundRange = new vscode.Range(compoundStartPos,compoundEndPos)
-			let symbolStartPos = document.positionAt(match.indices.groups['NameOfCompound'][0])
-			let symbolEndPos = document.positionAt(match.indices.groups['NameOfCompound'][1])
-			let symbolRange = new vscode.Range(symbolStartPos,symbolEndPos)
-			let symbolName = match.groups['NameOfCompound']
-			let symbolDetail = match.groups['TypeOfCompound']
-			let symbolKind = 11// todo make this number dynamic
-			docs.push(new vscode.DocumentSymbol(symbolName,symbolDetail,symbolKind,compoundRange,symbolRange))
-		
-
 		return docs
 	}
-} */
+}
+
+export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
+	async provideWorkspaceSymbols(query: string, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[]> {
+		let defineds:{iDefined:IDefined,document:vscode.TextDocument}[] = []
+		let promise = this._findMatchingNames(fileToNameToCompoundDefine, query, defineds)
+		await this._findMatchingNames(fileToNameToDefine, query, defineds)
+		await promise
+/* 		for (let names of fileToNameToCompoundDefine.entries()){
+			let textDocumentCache:vscode.TextDocument
+			for (let name of names[1].keys()){
+				if (name.includes(query.toLowerCase())){
+					textDocumentCache = textDocumentCache ?? await vscode.workspace.openTextDocument(names[0])
+					defineds.push({iDefined:names[1].get(name),document:textDocumentCache})
+				}
+			}
+		}
+		for (let names of fileToNameToDefine.entries()){
+			let textDocumentCache:vscode.TextDocument
+			for (let name of names[1].keys()){
+				if (name.includes(query.toLowerCase())){
+					textDocumentCache = textDocumentCache ?? await vscode.workspace.openTextDocument(names[0])
+					defineds.push({iDefined:names[1].get(name),document:textDocumentCache})
+				}
+			}
+		} */
+		let symbols:vscode.SymbolInformation[] = []
+		for (let define of defineds){
+			if (define.iDefined.Name?.AsFound&&define.iDefined.Name?.Index) {
+				let location = new vscode.Location(define.document.uri, new vscode.Range(define.document.positionAt(define.iDefined.Name.Index),define.document.positionAt(define.iDefined.Name.Index+define.iDefined.Name.AsFound.length)))
+				symbols.push({name:define.iDefined.Name.AsFound, containerName:typeStringifyer(define.iDefined.Type), kind:defineTypeMap.get(typeStringifyer(define.iDefined.Type)), location:location})
+			}
+		}
+		return symbols
+	}
+	private async _findMatchingNames(map:Map<vscode.Uri, Map<string, IDefined>>, query:string, output:{iDefined:IDefined,document:vscode.TextDocument}[]):Promise<void>{
+		for (let names of map.entries()){
+			let textDocumentCache:vscode.TextDocument
+			for (let name of names[1].keys()){
+				if (name.includes(query.toLowerCase())){
+					textDocumentCache = textDocumentCache ?? await vscode.workspace.openTextDocument(names[0])
+					output.push({iDefined:names[1].get(name),document:textDocumentCache})
+				}
+			}
+		}
+	}
+}

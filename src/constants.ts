@@ -55,27 +55,27 @@ export const generateMaps = (function () {
 	defineTypeKeyArray.forEach((TypeOfDefine, index) => defineTypeMap.set(TypeOfDefine, index));
 	const chaosMappings = [
 		'COMMENT', //'comment',//green
-		'COMPOUNDABILITY', //'string',//salmon
-		'COMPOUNDCUBE', //'keyword',//pink
-		'COMPOUNDDOUBLE', //'number',//pale yellow
-		'COMPOUNDSTRING', //'regexp',//purple
-		'COMPOUNDPERK', //'operator',//offwhite
-		'COMPOUNDTRIGGER', //'namespace',//teal
+		'COMPOUND ABILITY', //'string',//salmon
+		'COMPOUND CUBE', //'keyword',//pink
+		'COMPOUND DOUBLE', //'number',//pale yellow
+		'COMPOUND STRING', //'regexp',//purple
+		'COMPOUND PERK', //'operator',//offwhite
+		'COMPOUND TRIGGER', //'namespace',//teal
 		'TEXTTOOLTIP', //'type',//teal
 		'g', //'struct',//teal
 		'h', //'class',//teal
 		'i', //'interface',//teal
-		'COMPOUNDBOOLEAN', //'enum',//teal
+		'COMPOUND BOOLEAN', //'enum',//teal
 		'k', //'typeParameter',//teal
 		'ARTOVERRIDE', //'function',//pale yellow
 		'SCENARIO', //'method',//pale yellow
-		'COMPOUNDPOSITION', //'decorator',//pale yellow
-		'COMPOUNDACTION', //'macro',//blue
+		'COMPOUND POSITION', //'decorator',//pale yellow
+		'COMPOUND ACTION', //'macro',//blue
 		'PERK', //'variable',//light sky blue
 		'CUBE', //'parameter',//light sky blue
-		'COMPOUNDDIRECTION', //'property',//light sky blue
-		'COMPOUNDTYPE', //'label'//text white 
-		'UHANDLEDUHANDLED'
+		'COMPOUND DIRECTION', //'property',//light sky blue
+		'COMPOUND TYPE', //'label'//text white 
+		'UHANDLED UHANDLED'
 	];
 	chaosMappings.forEach((TypeOfCompound, index) => typesLegend.set(TypeOfCompound, index));
 })();
@@ -87,6 +87,7 @@ export interface IBuiltins {
 }
 export interface IBuiltInName {
 	Name: string;
+	AsFound?: string;
 }
 export interface IDefined {
 	Type: IType;
@@ -117,6 +118,12 @@ export interface IArguments {
 	Type: string;
 	String?: string;
 	Index?: number;
+}
+export interface GatherResults {
+	Defines: IDefined[]
+	Document: vscode.TextDocument
+	Comments?: RegExpMatchArray[]
+	Scenarios?: RegExpMatchArray[]
 }
 interface Token {
 	line: number;

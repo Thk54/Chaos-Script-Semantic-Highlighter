@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { updateFilesMapsIfEntries, } from './mapsManager';
-import { presentTextDocumentFromURIToReturnlessFunction, FoldingRangeProvider, DocumentSemanticTokensProvider } from './extension';
-import { IBuiltins, IArguments, legend, generateMaps, fileToDefines, builtins, fileToNameToCompoundDefine } from './constants';
+import { FoldingRangeProvider, DocumentSemanticTokensProvider, DocumentSymbolProvider, WorkspaceSymbolProvider } from './extension';
+import { IBuiltins, IArguments, legend, generateMaps, builtins, fileToNameToCompoundDefine, IDefined } from './constants';
 import {buildRegexes} from './regexes'
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -9,22 +9,25 @@ export async function activate(context: vscode.ExtensionContext) {
 	//buildRegexes()
 	await initialize(context);
 	context.subscriptions.push(vscode.languages.registerFoldingRangeProvider({ language: 'cubechaos' }, new FoldingRangeProvider()));
-	//context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'cubechaos' }, new DocumentSymbolProvider()));
+	context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'cubechaos' }, new DocumentSymbolProvider()));
+	context.subscriptions.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider()));
 	context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'cubechaos' }, new DocumentSemanticTokensProvider(), legend));
 }
 
 export async function initialize/*Compounds*/(context: vscode.ExtensionContext) {
 	let files = vscode.workspace.findFiles('**/*.txt');
 	let promises = [];
-	promises.push(await /* todo test if this await is necessary */presentTextDocumentFromURIToReturnlessFunction(context.extensionUri.with({ path: context.extensionUri.path + '/ModdingInfo.txt.built-ins' }), parseModdinginfo));
+	promises.push(await parseModdinginfo(context.extensionUri.with({ path: context.extensionUri.path + '/ModdingInfo.txt.built-ins' })));
 	for (let txt of await files) {
-		promises.push(presentTextDocumentFromURIToReturnlessFunction(txt, updateFilesMapsIfEntries));
+		promises.push(updateFilesMapsIfEntries({uri:txt}))
+		//promises.push(presentTextDocumentFromURIToReturnlessFunction(txt, updateFilesMapsIfEntries));
 	}
 	await Promise.allSettled(promises);
 	console.log('initial map done');
 }
 
-export async function parseModdinginfo(document: vscode.TextDocument) {
+export async function parseModdinginfo(uri: vscode.Uri) {
+	const document = await vscode.workspace.openTextDocument(uri)
 	const pack: Function = async function (lines: string[]): Promise<IBuiltins[]> {
 		let compounds: IBuiltins[] = [];
 		let type = lines[0].toUpperCase().match(/(.*?)S?: /)[1]; //todo fix plural types
@@ -37,7 +40,7 @@ export async function parseModdinginfo(document: vscode.TextDocument) {
 				args.push({ Type: generic[0].toUpperCase() });
 			}
 			let builtin = {Type: {Define:'COMPOUND', Compound:type},
-				Name: { Name: name[0].toLowerCase() },
+				Name: { Name: name[0].toLowerCase(), AsFound:name[0] },
 				Arguments: args
 			}
 			nameToBuiltins.set(name[0].toLowerCase(),builtin)
@@ -51,16 +54,12 @@ export async function parseModdinginfo(document: vscode.TextDocument) {
 	for (let match of document.getText().matchAll(/^(Triggers?|Actions?|BOOLEAN|CUBE|DIRECTION|DOUBLE|PERK|POSITION|STRING): (?:$\s\s?^(?:.(?!\:))+$)+/gim)) {
 		promises.push(pack(match[0].split(/[\r\n]+/)))
 	}
-	for (let set of await Promise.allSettled(promises)){
-		await set.value
-		iBuiltins = [...iBuiltins,...set.value]
+	for (let set of await <any>Promise.allSettled(promises)){
+		//await set.value //much fuckery I don't really understand here
+		iBuiltins = [...iBuiltins,...await (set.value)]
 	}
 	builtins.set(document.uri, iBuiltins)
-	fileToNameToCompoundDefine.set(document.uri,nameToBuiltins)
-	
-	
-	//while (!(compounds.Actions&&compounds.Booleans&&compounds.Doubles&&compounds.Cubes&&compounds.Positions&&compounds.Triggers&&compounds.Strings&&compounds.Perks)) {let wait}
-	//await Promise.allSettled(await compounds['Abilities'])
+	fileToNameToCompoundDefine.set(document.uri,<Map<string,IDefined>>nameToBuiltins)
 	return Promise;
 }
 
