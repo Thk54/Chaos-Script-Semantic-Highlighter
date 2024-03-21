@@ -120,24 +120,6 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
 		let promise = this._findMatchingNames(fileToNameToCompoundDefine, query, defineds)
 		await this._findMatchingNames(fileToNameToDefine, query, defineds)
 		await promise
-/* 		for (let names of fileToNameToCompoundDefine.entries()){
-			let textDocumentCache:vscode.TextDocument
-			for (let name of names[1].keys()){
-				if (name.includes(query.toLowerCase())){
-					textDocumentCache = textDocumentCache ?? await vscode.workspace.openTextDocument(names[0])
-					defineds.push({iDefined:names[1].get(name),document:textDocumentCache})
-				}
-			}
-		}
-		for (let names of fileToNameToDefine.entries()){
-			let textDocumentCache:vscode.TextDocument
-			for (let name of names[1].keys()){
-				if (name.includes(query.toLowerCase())){
-					textDocumentCache = textDocumentCache ?? await vscode.workspace.openTextDocument(names[0])
-					defineds.push({iDefined:names[1].get(name),document:textDocumentCache})
-				}
-			}
-		} */
 		let symbols:vscode.SymbolInformation[] = []
 		for (let define of defineds){
 			if (define.iDefined.Name?.AsFound&&define.iDefined.Name?.Index) {
@@ -152,7 +134,7 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
 			let textDocumentCache:vscode.TextDocument
 			for (let name of names[1].keys()){
 				if (name.includes(query.toLowerCase())){
-					textDocumentCache = textDocumentCache ?? await vscode.workspace.openTextDocument(names[0])
+					textDocumentCache = textDocumentCache ?? await vscode.workspace.openTextDocument(vscode.Uri.parse(names[0],true))
 					output.push({iDefined:names[1].get(name),document:textDocumentCache})
 				}
 			}
