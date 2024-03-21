@@ -33,7 +33,7 @@ async function packIntoIDefined(capture: RegExpMatchArray): Promise<IDefined>{
 }
 function packIntoICompound(capture: RegExpMatchArray): ICompound {
 	let args: IArguments[] = [];
-	// ./regexes.genericCapture()
+	// ./regexes.buildRegexes[3]
 	for (let generic of capture.groups['ContentsOfCOMPOUND'].matchAll(/(?:\b(?:Text:|GainAbilityText)\s.*?\b[Ee][Nn][Dd]\b)|(?<CompoundGenerics>[Gg][Ee][Nn][Ee][Rr][Ii][Cc](?:[Pp][Ee][Rr][Kk]|[Pp][Oo][Ss][Ii][Tt][Ii][Oo][Nn]|[Ss][Tt][Rr][Ii][Nn][Gg]|[Ww][Oo][Rr][Dd]|[Nn][Aa][Mm][Ee]|[Aa][Cc][Tt][Ii][Oo][Nn]|[Bb][Oo][Oo][Ll][Ee][Aa][Nn]|[Dd][Ii][Rr][Ee][Cc][Tt][Ii][Oo][Nn]|[Dd][Oo][Uu][Bb][Ll][Ee]|[Cc][Oo][Nn][Ss][Tt][Aa][Nn][Tt]|[Cc][Uu][Bb][Ee]|[Ss][Tt][Aa][Cc][Kk][Ii][Nn][Gg]|[Tt][Ii][Mm][Ee])\b)/dg)) {
 		if (generic.groups['CompoundGenerics'])
 			args.push({
@@ -67,7 +67,12 @@ export async function gatherDefinitions(document: vscode.TextDocument): Promise<
 		for (let scenario of scenariosRegEx) {//todo actually handle |[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo] and DOACTION
 			delete(scenario.input)
 			text = text.replace(scenario[0], ''.padEnd(scenario[0].length)); // replace them with spaces to preserve character count
-			scenarios.push(scenario)
+			scenarios.push(scenario)//./regexes.buildRegexes[4]
+			for (let comment of scenario[0].matchAll(/(?<=[\s^])\/\/\s(?:.*?\s)?\/\/(?=[\s$])/sg)){
+				delete(comment.input)
+				comment.index = scenario.index+comment.index
+				comments.push(comment)
+			}
 		}
 	}
 	// ./regexes.buildRegexes()[2]
@@ -77,7 +82,7 @@ export async function gatherDefinitions(document: vscode.TextDocument): Promise<
 /* groups: 
 	TypeOfDefine 
 		TypeOfCompound NameOfCompound ContentsOfCompound 
-		NameOfCube ContentsOfCube 
+		NameOfCube ContentsOfCube
 		NameOfPerk ContentsOfPerk 
 		NameOfTextTooltip ContentOfTextTooltip 
 	ArtOverrideFolder ArtOverrideSubstring ArtOverridePerk ArtOverrideCube ArtOverrideName */

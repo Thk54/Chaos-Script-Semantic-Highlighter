@@ -32,6 +32,7 @@ export function buildRegexes():RegExp[]{
 	outputRegexes.push(scenarioCapture())
 	outputRegexes.push(primaryCapture())
 	outputRegexes.push(genericsCapture())
+	outputRegexes.push(scenarioCommentsCapture())
 	for (let regex of outputRegexes){
 		console.log(regex)
 	}
@@ -85,6 +86,9 @@ return (unnamedCapture(lookBehindify(caseInsensify('artoverride')+':\\s')+'\\s*'
 function genericsCapture():RegExp{
 	let genericTypes = ['Perk', 'Position', 'String', 'Word', 'Name', 'Action', 'Boolean', 'Direction', 'Double', 'Constant', 'Cube', 'Stacking', 'Time']
 	return RegExp('(?:\\b(?:Text:|GainAbilityText)\\s.*?\\b[Ee][Nn][Dd]\\b)|'+namedCapture('CompoundGenerics', caseInsensify('Generic')+unnamedCapture(caseInsensify(genericTypes).join('|'))+'\\b'),'gd')
+}
+function scenarioCommentsCapture():RegExp{
+	return RegExp(blankBehind+'//\\s(?:.*?\\s)?//'+blankAhead,'gs')
 }
 function unnamedCapture(input:string):string{
 	return ('(?:'+input+')')

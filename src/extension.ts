@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { updateFilesMapsIfEntries } from './mapsManager';
 import { gatherDefinitions } from './parser';
-import { typesLegend, fileToDefines, IType, IDefined, fileToNameToCompoundDefine, fileToNameToDefine, defineTypeMap } from './constants';
+import { typesLegend, fileToDefines, IType, IDefined, fileToNameToCompoundDefine, fileToNameToDefine, defineTypeMap, GatherResults } from './constants';
 
 export function typeStringifyer(type:IType):string {
 	return type.Define === 'COMPOUND' ? (type.Define+' '+type.Compound) : type.Define
@@ -9,12 +9,27 @@ export function typeStringifyer(type:IType):string {
 
 export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
 	async provideFoldingRanges(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
-		let ranges: vscode.FoldingRange[] = []
-		for (let iDefine of (await gatherDefinitions(document)).Defines){
-			if (iDefine){
-				let posStart = document.positionAt(iDefine.Contents.Capture.Index)
-				let posEnd = document.positionAt(iDefine.Contents.Capture.Index+iDefine.Contents.Capture.Text.length)
-				ranges.push({start:posStart.line,end:posEnd.line})
+	let gatherResults:GatherResults = (await gatherDefinitions(document))
+	let ranges: vscode.FoldingRange[] = []
+	for (let iDefine of gatherResults.Defines ?? []){
+		if (iDefine){
+			let posStart = document.positionAt(iDefine.Contents.Capture.Index)
+			let posEnd = document.positionAt(iDefine.Contents.Capture.Index+iDefine.Contents.Capture.Text.length)
+			ranges.push({start:posStart.line,end:posEnd.line})
+		}
+	}
+	for (let comment of gatherResults?.Comments ?? []){
+		if (comment){
+			let posStart = document.positionAt(comment.index)
+			let posEnd = document.positionAt(comment.index+comment[0].length)
+			ranges.push({start:posStart.line,end:posEnd.line,kind:1})
+		}
+	}
+	for (let scenario of gatherResults?.Scenarios ?? []){
+		if (scenario){
+			let posStart = document.positionAt(scenario.index)
+			let posEnd = document.positionAt(scenario.index+scenario[0].length)
+			ranges.push({start:posStart.line,end:posEnd.line})
 		}
 	}
 	if (ranges.length) return ranges
