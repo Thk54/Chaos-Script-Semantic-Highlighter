@@ -6,10 +6,10 @@ import {buildRegexes} from './regexes'
 
 export async function activate(context: vscode.ExtensionContext) {
 	generateMaps;
-	buildRegexes()
+	//buildRegexes()
 	await initialize(context);
 	context.subscriptions.push(vscode.languages.registerFoldingRangeProvider({ language: 'cubechaos' }, new FoldingRangeProvider()));
-	//context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'cubechaos' }, new DocumentSymbolProvider()));
+	context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'cubechaos' }, new DocumentSymbolProvider()));
 	context.subscriptions.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider()));
 	context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'cubechaos' }, new DocumentSemanticTokensProvider(), legend));
 }
@@ -58,8 +58,8 @@ export async function parseModdinginfo(uri: vscode.Uri) {
 		//await set.value //much fuckery I don't really understand here
 		iBuiltins = [...iBuiltins,...await (set.value)]
 	}
-	builtins.set(document.uri, iBuiltins)
-	fileToNameToCompoundDefine.set(document.uri,<Map<string,IDefined>>nameToBuiltins)
+	builtins.set(document.uri.toString(), iBuiltins)
+	fileToNameToCompoundDefine.set(document.uri.toString(),<Map<string,IDefined>>nameToBuiltins)
 	return Promise;
 }
 

@@ -47,8 +47,8 @@ export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTo
 		const builder:vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder()
 		//fileToCompoundsMap.set(document.uri, update)
 		let promises = []
-		if (fileToDefines.get(document.uri)?.values())
-		for (let defines of fileToDefines.get(document.uri)?.values()){
+		if (fileToDefines.get(document.uri.toString())?.values())
+		for (let defines of fileToDefines.get(document.uri.toString())?.values()){
 				promises.push(builderTokens(builder,defines,document))
 		}
 		await Promise.allSettled(promises)
@@ -100,7 +100,7 @@ async function builderTokens(builder:vscode.SemanticTokensBuilder,compound:IDefi
 
 export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 	async provideDocumentSymbols(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[] | vscode.DocumentSymbol[]> {
-		let defines = fileToDefines?.get(document.uri) ?? []
+		let defines = fileToDefines?.get(document.uri.toString()) ?? []
 		let docs = []
 		for (let define of defines){
 			let defineRange = new vscode.Range(document.positionAt(define.Contents.Capture.Index),document.positionAt(define.Contents.Capture.Index+define.Contents.Capture.Text.length))
@@ -147,7 +147,7 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
 		}
 		return symbols
 	}
-	private async _findMatchingNames(map:Map<vscode.Uri, Map<string, IDefined>>, query:string, output:{iDefined:IDefined,document:vscode.TextDocument}[]):Promise<void>{
+	private async _findMatchingNames(map:Map<string, Map<string, IDefined>>, query:string, output:{iDefined:IDefined,document:vscode.TextDocument}[]):Promise<void>{
 		for (let names of map.entries()){
 			let textDocumentCache:vscode.TextDocument
 			for (let name of names[1].keys()){

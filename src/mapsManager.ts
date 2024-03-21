@@ -6,7 +6,7 @@ export async function updateFilesMapsIfEntries(document:{doc?:vscode.TextDocumen
 	const gatherResults:GatherResults = (await gatherDefinitions(document?.doc ?? (await vscode.workspace.openTextDocument(document.uri))));
 	const iDefineds: IDefined[] = gatherResults.Defines
 	if (iDefineds.length) {
-		fileToDefines.set(document.uri, iDefineds)
+		fileToDefines.set(document.uri.toString(), iDefineds)
 		let nameToCompound = new Map<string,ICompound>();
 		let nameToDefine = new Map<string,IDefined>();
 		for (let defined of iDefineds){
@@ -16,7 +16,7 @@ export async function updateFilesMapsIfEntries(document:{doc?:vscode.TextDocumen
 				nameToDefine.set(defined.Name.Name, defined)
 			}
 		}
-		if (nameToCompound.size) fileToNameToCompoundDefine.set(document.uri, nameToCompound)
-		if (nameToDefine.size) fileToNameToDefine.set(document.uri, nameToDefine)
+		if (nameToCompound.size) fileToNameToCompoundDefine.set(document.uri.toString(), nameToCompound)
+		if (nameToDefine.size) fileToNameToDefine.set(document.uri.toString(), nameToDefine)
 	}
 }
