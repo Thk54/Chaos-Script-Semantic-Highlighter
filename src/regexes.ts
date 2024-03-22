@@ -1,30 +1,5 @@
-const blankBehind = /(?<=[\s^])/.source
-const blankAhead = /(?=[\s$])/.source
-
-/* const compoundTypeKeyArray = [
-	'TRIGGER',
-	'ABILITY',
-	'ACTION',
-	'BOOLEAN',
-	'CUBE',
-	'DIRECTION',
-	'POSITION',
-	'DOUBLE',
-	'PERK',
-	'STRING'
-];
-compoundTypeMap.set(TypeOfCompound, index)
-
-const defineTypeKeyArray = [
-	'COMPOUND', //important that this maps to zero for else fallthough
-	'CUBE',
-	'PERK',
-	'SCENARIO',
-	'ARTOVERRIDE',
-	'TEXTTOOLTIP',
-	'COMMENT'
-];
-defineTypeMap.set(TypeOfDefine, index) */
+const blankBehind = /(?<=\s|^)/.source
+const blankAhead = /(?=\s|$)/.source
 
 export function buildRegexes():RegExp[]{
 	let outputRegexes:RegExp[] = []
@@ -38,7 +13,6 @@ export function buildRegexes():RegExp[]{
 	}
 	return outputRegexes
 }
-
 
 function commentCapture():RegExp{
 	return RegExp(blankBehind+/\/-(?=\s).*?\s-\//.source+blankAhead,'gs')

@@ -53,7 +53,7 @@ export async function gatherDefinitions(document: vscode.TextDocument): Promise<
 	let iDefineds:IDefined[] = []
 	let text: string = document.getText();
 	let comments = []
-	let commentsRegEx = text.matchAll(/(?<=[\s^])\/-(?=\s).*?\s-\/(?=[\s$])/gs); // Find all the comments
+	let commentsRegEx = text.matchAll(/(?<=\s|^)\/-(?=\s).*?\s-\/(?=\s|$)/gs); // Find all the comments // ./regexes.buildRegexes()[0]
 	if (commentsRegEx) {
 		for (let comment of commentsRegEx) {
 			delete(comment.input)
@@ -62,13 +62,13 @@ export async function gatherDefinitions(document: vscode.TextDocument): Promise<
 		}
 	}
 	let scenarios = []
-	let scenariosRegEx = text.matchAll(/\b[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo]:\s[\s\S]*?\b[Ss][Ee][Nn][Dd]\b/gs);
+	let scenariosRegEx = text.matchAll(/\b[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo]:\s[\s\S]*?\b[Ss][Ee][Nn][Dd]\b/gs); // Match scenarios // ./regexes.buildRegexes()[1]
 	if (scenariosRegEx) {
 		for (let scenario of scenariosRegEx) {//todo actually handle |[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo] and DOACTION
 			delete(scenario.input)
 			text = text.replace(scenario[0], ''.padEnd(scenario[0].length)); // replace them with spaces to preserve character count
-			scenarios.push(scenario)//./regexes.buildRegexes[4]
-			for (let comment of scenario[0].matchAll(/(?<=[\s^])\/\/\s(?:.*?\s)?\/\/(?=[\s$])/sg)){
+			scenarios.push(scenario)
+			for (let comment of scenario[0].matchAll(/(?<=\s|^)\/\/\s(?:.*?\s)?\/\/(?=\s|$)/gs)){ //./regexes.buildRegexes()[4]
 				delete(comment.input)
 				comment.index = scenario.index+comment.index
 				comments.push(comment)

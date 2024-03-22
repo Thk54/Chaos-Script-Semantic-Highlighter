@@ -6,7 +6,7 @@ import {buildRegexes} from './regexes'
 
 export async function activate(context: vscode.ExtensionContext) {
 	generateMaps;
-	//buildRegexes()
+	buildRegexes()
 	await initialize(context);
 	context.subscriptions.push(vscode.languages.registerFoldingRangeProvider({ language: 'cubechaos' }, new FoldingRangeProvider()));
 	context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'cubechaos' }, new DocumentSymbolProvider()));
