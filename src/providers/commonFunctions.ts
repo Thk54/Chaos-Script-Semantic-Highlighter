@@ -1,6 +1,23 @@
-import { IType } from "../constants";
+import { IDefined, IDefinedWithURI, IType, fileToNameToCompoundDefine, fileToNameToDefine } from "../constants";
 
 export function typeStringifyer(type: IType): string {
 	return type.Define === 'COMPOUND' ? (type.Define + ' ' + type.Compound) : type.Define;
 }
 
+export function getDefineFromWord(word:string):IDefined{
+	let result:[string,IDefined]
+	result = getATopMapKeyAndSubMapValueFromSubMapKey(fileToNameToCompoundDefine,word)
+
+	if (!result) {
+		result = getATopMapKeyAndSubMapValueFromSubMapKey(fileToNameToDefine,word)
+	}
+	if (result) return result[1]
+	return
+}
+export function getATopMapKeyAndSubMapValueFromSubMapKey<topMap extends Map<topKey,subMap>, subMap extends Map<subMapKey,subMapValue>, topKey, subMapKey, subMapValue>(map:topMap,key:subMapKey):[topKey,subMapValue]{
+	for (let topEntries of map.entries()) {
+		let result = topEntries[1].get(key);
+		if (result) return [topEntries[0],result]
+	}
+	return
+}

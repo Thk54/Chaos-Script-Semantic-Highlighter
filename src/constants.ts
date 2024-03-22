@@ -94,6 +94,9 @@ export interface IDefined {
 	Contents: IContents;
 	Name: IName;
 }
+export interface IDefinedWithURI {
+	Uri:string
+}
 export interface ICompound extends IDefined, IBuiltins {
 	Name: IName;
 }

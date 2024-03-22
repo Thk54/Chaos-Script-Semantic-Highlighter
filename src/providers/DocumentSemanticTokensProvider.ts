@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { updateFilesMapsIfEntries } from '../mapsManager';
 import { typesLegend, fileToDefines, IDefined, fileToNameToCompoundDefine, fileToNameToDefine } from '../constants';
-import { typeStringifyer } from "./commonFunctions";
+import { getDefineFromWord, typeStringifyer } from "./commonFunctions";
 
 
 export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
@@ -26,17 +26,7 @@ export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTo
 async function builderTokens(builder: vscode.SemanticTokensBuilder, compound: IDefined, document: vscode.TextDocument) {
 	const mainOffset = compound.Contents.Index; // ./regexes.stringExcluderCapture() // Mostly verbose could be more function-ized
 	for (let word of compound.Contents.Content.matchAll(/(?<=\s|^)\b(?:(?:(?:Ability|Flavour)?Text|Description|TODO):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b|\S+?(?=\s|$)/gis)) {
-		let result;
-		for (let file of fileToNameToCompoundDefine.keys()) {
-			result = fileToNameToCompoundDefine.get(file).get(word[0].toLowerCase());
-			if (result) break;
-		}
-		if (!result) {
-			for (let file of fileToNameToDefine.keys()) {
-				result = fileToNameToDefine.get(file).get(word[0].toLowerCase());
-				if (result) break;
-			}
-		}
+		let result = getDefineFromWord(word[0].toLowerCase())
 		if (result) {
 			let tokenStart = document.positionAt(word.index + mainOffset);
 			if (!(typeof (typesLegend.get(typeStringifyer(result.Type))) === "number")) {
