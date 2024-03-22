@@ -1,6 +1,9 @@
 import * as vscode from 'vscode';
 import { updateFilesMapsIfEntries, } from './mapsManager';
-import { FoldingRangeProvider, DocumentSemanticTokensProvider, DocumentSymbolProvider, WorkspaceSymbolProvider } from './extension';
+import { FoldingRangeProvider } from './providers/FoldingRangeProvider';
+import { DocumentSemanticTokensProvider } from './providers/DocumentSemanticTokensProvider';
+import { DocumentSymbolProvider } from './providers/DocumentSymbolProvider';
+import { WorkspaceSymbolProvider } from './providers/WorkspaceSymbolProvider';
 import { IBuiltins, IArguments, legend, generateMaps, builtins, fileToNameToCompoundDefine, IDefined } from './constants';
 import { regexes } from './regexes'
 

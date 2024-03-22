@@ -9,6 +9,6 @@
 		"strict": true,
 		"strictNullChecks": false
 	},
-	"include": ["src/*.ts"],
+	"include": ["src/**/*.ts"],
 	"exclude": ["node_modules", ".vscode-test",".vscode"],
 }
