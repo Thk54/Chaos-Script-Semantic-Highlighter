@@ -1,5 +1,8 @@
 ## Release Notes
 
+## [0.1.4]
+Initial rename, may be renamed again pending results of poll. Implemented Go to Definition, and proof of concept hover text
+
 ## [0.1.3]
 Mostly bugfixes. Comments now get correctly detected even at the start and end of files, document symbol provider works consistently now. Highlights can occur in Artoverrides now.
 
