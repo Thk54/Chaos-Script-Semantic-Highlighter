@@ -1,13 +1,13 @@
 {
-	"name": "cube-chaos-semantic-highlighter",
-	"displayName": "Cube Chaos Semantic Highlighter",
+	"name": "chaos-script-semantic-highlighter",
+	"displayName": "Chaos Script Semantic Highlighter",
 	"description": "Semantic highlighter for Cube Chaos mod files.",
 	"version": "0.1.4",
 	"publisher": "Thk",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/Thk54/Cube-Chaos-Semantic-Highlighter.git"
+		"url": "https://github.com/Thk54/Chaos-Script-Semantic-Highlighter.git"
 	},
 	"engines": {
 		"vscode": "^1.74.0"
