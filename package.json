@@ -19,10 +19,10 @@
 	"contributes": {
 		"languages": [
 			{
-				"id": "cubechaos",
+				"id": "chaos-script",
 				"aliases": [
-					"Cube Chaos",
-					"cubechaos"
+					"Chaos Script",
+					"chaos"
 				],
 				"extensions": [
 					".chaos",
@@ -36,9 +36,9 @@
 		],
 		"grammars": [
 			{
-				"language": "cubechaos",
-				"scopeName": "text.cubechaos",
-				"path": "./syntaxes/cubechaos.tmLanguage.json"
+				"language": "chaos-script",
+				"scopeName": "source.chaos",
+				"path": "./syntaxes/chaos-script.tmLanguage.json"
 			}
 		]
 	},
