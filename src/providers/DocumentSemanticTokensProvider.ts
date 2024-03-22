@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { updateFilesMapsIfEntries } from '../mapsManager';
 import { typesLegend, fileToDefines, IDefined, fileToNameToCompoundDefine, fileToNameToDefine } from '../constants';
-import { typeStringifyer } from '../constants';
+import { typeStringifyer } from "./commonFunctions";
 
 
 export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {

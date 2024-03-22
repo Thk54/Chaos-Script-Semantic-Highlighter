@@ -1,3 +1,4 @@
+import * as vscode from "vscode";
 export module regexes {
 
 	const blankBehind = /(?<=\s|^)/.source
@@ -70,6 +71,9 @@ export module regexes {
 		let normalEndUser = ['(?:Ability|Flavour)?Text','Description','TODO']
 		let gainAbilityText = ['GainAbilityText']
 		return RegExp(blankBehind+/\b(?:(?:(?:Ability|Flavour)?Text|Description|TODO):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b|\S+?/.source+blankAhead,'gis')
+	}
+	export function captureWordInLineFromPosition(pos:vscode.Position):RegExp {
+		return new RegExp(blankBehind+'\\S*?'+lookBehindify('^.{'+pos.character+'}')+'\\S*?'+blankAhead)
 	}
 	function unnamedCapture(input:string):string{
 		return ('(?:'+input+')')

@@ -11,9 +11,6 @@ export const fileToNameToDefine = new Map<string,Map<string,IDefined>>();
 export const compoundTypeMap = new Map<string, number>();
 export const defineTypeMap = new Map<string, number>();
 
-export function typeStringifyer(type: IType): string {
-	return type.Define === 'COMPOUND' ? (type.Define + ' ' + type.Compound) : type.Define;
-}
 export const legend = (function () {
 	const tokenTypesLegend = [
 		'comment', 'string', 'keyword', 'number', 'regexp', 'operator', 'namespace',
@@ -136,5 +133,3 @@ interface Token {
 	type: number;
 	modifiers?: number;
 }
-
-

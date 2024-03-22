@@ -1,9 +1,11 @@
 import * as vscode from 'vscode';
 import { updateFilesMapsIfEntries, } from './mapsManager';
-import { FoldingRangeProvider } from './providers/FoldingRangeProvider';
-import { DocumentSemanticTokensProvider } from './providers/DocumentSemanticTokensProvider';
-import { DocumentSymbolProvider } from './providers/DocumentSymbolProvider';
-import { WorkspaceSymbolProvider } from './providers/WorkspaceSymbolProvider';
+import { DeclarationProvider } from './providers/declarationProvider';
+import { FoldingRangeProvider } from './providers/foldingRangeProvider';
+import { DocumentSemanticTokensProvider } from './providers/documentSemanticTokensProvider';
+import { DocumentSymbolProvider } from './providers/documentSymbolProvider';
+import { WorkspaceSymbolProvider } from './providers/workspaceSymbolProvider';
+import { HoverProvider } from './providers/hoverProvider';
 import { IBuiltins, IArguments, legend, generateMaps, builtins, fileToNameToCompoundDefine, IDefined } from './constants';
 import { regexes } from './regexes'
 
@@ -11,10 +13,12 @@ export async function activate(context: vscode.ExtensionContext) {
 	generateMaps;
 	//regexes.buildRegexes()
 	await initialize(context);
+	context.subscriptions.push(vscode.languages.registerDeclarationProvider({ language: 'chaos-script' }, new DeclarationProvider));
 	context.subscriptions.push(vscode.languages.registerFoldingRangeProvider({ language: 'chaos-script' }, new FoldingRangeProvider()));
+	context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'chaos-script' }, new DocumentSemanticTokensProvider(), legend));
 	context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'chaos-script' }, new DocumentSymbolProvider()));
 	context.subscriptions.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider()));
-	context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'chaos-script' }, new DocumentSemanticTokensProvider(), legend));
+	//context.subscriptions.push(vscode.languages.registerHoverProvider({ language: 'chaos-script' }, new HoverProvider))
 }
 
 export async function initialize/*Compounds*/(context: vscode.ExtensionContext) {

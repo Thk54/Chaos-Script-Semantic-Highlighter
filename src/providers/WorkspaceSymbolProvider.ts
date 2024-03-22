@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { IDefined, fileToNameToCompoundDefine, fileToNameToDefine, defineTypeMap } from '../constants';
-import { typeStringifyer } from '../constants';
+import { typeStringifyer } from "./commonFunctions";
 
 
 export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {

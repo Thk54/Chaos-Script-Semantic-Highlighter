@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { fileToDefines, defineTypeMap } from '../constants';
-import { typeStringifyer } from '../constants';
+import { typeStringifyer } from "./commonFunctions";
 
 
 export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
