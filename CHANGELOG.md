@@ -1,5 +1,8 @@
 ## Release Notes
 
+## [0.1.3]
+Mostly bugfixes. Comments now get correctly detected even at the start and end of files, document symbol provider works consistently now. Highlights can occur in Artoverrides now.
+
 ## [0.1.2]
 Fixed non-compound highlighting, enabled and reimplemented document symbol provider, and implemented workspace symbol provider (ctrl+t to search and jump to any defined and parsed thing) todo make that search treat underscores as spaces and not need all the characters contiguous - Not done yet because I shouldn't have even been working on this today.
 
