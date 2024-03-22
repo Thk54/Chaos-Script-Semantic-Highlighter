@@ -1,4 +1,4 @@
-import { IDefined, IDefinedWithURI, IType, fileToNameToCompoundDefine, fileToNameToDefine } from "../constants";
+import { IDefined, IType, fileToNameToCompoundDefine, fileToNameToDefine } from "../constants";
 
 export function typeStringifyer(type: IType): string {
 	return type.Define === 'COMPOUND' ? (type.Define + ' ' + type.Compound) : type.Define;
@@ -11,7 +11,10 @@ export function getDefineFromWord(word:string):IDefined{
 	if (!result) {
 		result = getATopMapKeyAndSubMapValueFromSubMapKey(fileToNameToDefine,word)
 	}
-	if (result) return result[1]
+	if (result) {
+		result[1].Uri = result[0]
+		return	result[1]
+	}
 	return
 }
 export function getATopMapKeyAndSubMapValueFromSubMapKey<topMap extends Map<topKey,subMap>, subMap extends Map<subMapKey,subMapValue>, topKey, subMapKey, subMapValue>(map:topMap,key:subMapKey):[topKey,subMapValue]{
