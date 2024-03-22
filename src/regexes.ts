@@ -10,6 +10,7 @@ export module regexes {
 		outputRegexes.push(primaryCapture())
 		outputRegexes.push(genericsCapture())
 		outputRegexes.push(scenarioCommentsCapture())
+		outputRegexes.push(stringExcluderCapture())
 		for (let regex of outputRegexes){
 			console.log(regex)
 		}
@@ -25,13 +26,12 @@ export module regexes {
 	}
 
 	export function primaryCapture():RegExp{
-		return RegExp(definesDeclarationCapture()+unnamedCapture(/*End termintated defines*/unnamedCapture(compoundSubCapture()+'|'+cubeSubCapture()+'|'+perkSubCapture()+'|'+textTooltipSubCapture())+'\\b'+caseInsensify('End')+'\\b')+'|'+artoverrideSubCapture(),"gsd")
+		return RegExp(definesDeclarationCapture()+unnamedCapture(unnamedCapture(/*End termintated defines*/unnamedCapture(compoundSubCapture()+'|'+cubeSubCapture()+'|'+perkSubCapture()+'|'+textTooltipSubCapture())+'\\b'+caseInsensify('End')+'\\b')+'|'+artoverrideSubCapture()),"gsd")
 	}
 	function definesDeclarationCapture():string{
 		let possibleDefines:string[] = ['compound', 'cube', 'perk', /* 'scenario', */ 'artoverride', 'texttooltip']
 		return (/\b/.source+namedCapture('TypeOfDEFINE',caseInsensify(possibleDefines).join('|'))+/:\s/.source)
 	}
-	///(?:\s*(?<TypeOfCompound>ABILITY|ACTION|BOOLEAN|DIRECTION|DOUBLE|CUBE|POSITION)\s*(?<NameOfCompound>[\S]*?)\s(?<ContentsOfCompound>.*?(?:\b(?:Text:|GainAbilityText)\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?)\b[Ee][Nn][Dd]\b)/
 	function compoundSubCapture():string{
 		let normalEndUser = ['Text']
 		let gainAbilityText = ['GainAbilityText']
@@ -51,7 +51,7 @@ export module regexes {
 	function textTooltipSubCapture():string{
 		return unnamedCapture(lookBehindify(caseInsensify('TextTooltip')+':\\s')+'\\s*'+namedCapture('NameOfTEXTTOOLTIP', '\\S+')+'\\s+'+namedCapture('ContentsOfTEXTTOOLTIP', '.*?'))
 	}
-	function artoverrideSubCapture():string{//wildly misbehaiving
+	function artoverrideSubCapture():string{
 		//Possible first args: [name], CUBE, PERK, ALL
 	return (unnamedCapture(lookBehindify(caseInsensify('artoverride')+':\\s')+'\\s*'+unnamedCapture(
 		[unnamedCapture('ALL\\s+'+namedCapture('ARTOVERRIDEFolder', '\\S+')+'\\s+'+namedCapture('ARTOVERRIDESubstring', '\\S+')), 
@@ -65,6 +65,11 @@ export module regexes {
 	}
 	export function scenarioCommentsCapture():RegExp{
 		return RegExp(blankBehind+'//\\s(?:.*?\\s)?//'+blankAhead,'gs')
+	}
+	export function stringExcluderCapture():RegExp{
+		let normalEndUser = ['(?:Ability|Flavour)?Text','Description','TODO']
+		let gainAbilityText = ['GainAbilityText']
+		return RegExp(blankBehind+/\b(?:(?:(?:Ability|Flavour)?Text|Description|TODO):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b|\S+?/.source+blankAhead,'gis')
 	}
 	function unnamedCapture(input:string):string{
 		return ('(?:'+input+')')

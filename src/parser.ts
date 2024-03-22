@@ -3,7 +3,7 @@ import { IDefined, ICompound, IArguments, GatherResults } from './constants';
 import { regexes } from "./regexes";
 
 async function packIntoIDefined(capture: RegExpMatchArray): Promise<IDefined>{
-	let defineType:string = capture?.groups['TypeOfDEFINE'].toUpperCase() ?? "ABORT"
+	let defineType:string = capture?.groups['TypeOfDEFINE']?.toUpperCase() ?? "ABORT"
 	switch (defineType) {
 	case 'COMPOUND':
 		return (packIntoICompound(capture))
@@ -54,29 +54,25 @@ export async function gatherDefinitions(document: vscode.TextDocument): Promise<
 	let text: string = document.getText();
 	let comments = []
 	let commentsRegEx = text.matchAll(/(?<=\s|^)\/-(?=\s).*?\s-\/(?=\s|$)/gs); // Find all the comments // ./regexes.commentCapture()
-	if (commentsRegEx) {
-		for (let comment of commentsRegEx) {
-			delete(comment.input)
-			text = text.replace(comment[0], ''.padEnd(comment[0].length)); // replace them with spaces to preserve character count
-			comments.push(comment)
-		}
+	for (let comment of commentsRegEx) {
+		delete(comment.input)
+		text = text.replace(comment[0], ''.padEnd(comment[0].length)); // replace them with spaces to preserve character count
+		comments.push(comment)
 	}
 	let scenarios = []
 	let scenariosRegEx = text.matchAll(/\b[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo]:\s[\s\S]*?\b[Ss][Ee][Nn][Dd]\b/gs); // Match scenarios // ./regexes.scenarioCapture()
-	if (scenariosRegEx) {
-		for (let scenario of scenariosRegEx) {//todo actually handle |[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo] and DOACTION
-			delete(scenario.input)
-			text = text.replace(scenario[0], ''.padEnd(scenario[0].length)); // replace them with spaces to preserve character count
-			scenarios.push(scenario)
-			for (let comment of scenario[0].matchAll(/(?<=\s|^)\/\/\s(?:.*?\s)?\/\/(?=\s|$)/gs)){ //./regexes.scenarioCommentsCapture()
-				delete(comment.input)
-				comment.index = scenario.index+comment.index
-				comments.push(comment)
-			}
+	for (let scenario of scenariosRegEx) {//todo actually handle |[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo] and DOACTION
+		delete(scenario.input)
+		text = text.replace(scenario[0], ''.padEnd(scenario[0].length)); // replace them with spaces to preserve character count
+		scenarios.push(scenario)
+		for (let comment of scenario[0].matchAll(/(?<=\s|^)\/\/\s(?:.*?\s)?\/\/(?=\s|$)/gs)){ //./regexes.scenarioCommentsCapture()
+			delete(comment.input)
+			comment.index = scenario.index+comment.index
+			comments.push(comment)
 		}
 	}
 	// ./regexes.primaryCapture()
-	for (let match of text.matchAll(/\b(?<TypeOfDEFINE>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Aa][Rr][Tt][Oo][Vv][Ee][Rr][Rr][Ii][Dd][Ee]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s(?:(?:(?:(?<=[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<TypeOfCOMPOUND>TRIGGER|ABILITY|ACTION|BOOLEAN|CUBE|DIRECTION|POSITION|DOUBLE|PERK|STRING)\s*(?<NameOfCOMPOUND>\S*)\s(?<ContentsOfCOMPOUND>.*?(?:\b(?:(?:Text):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:(?<=[Cc][Uu][Bb][Ee]:\s)\s*(?<NameOfCUBE>\S+)\s+(?<ContentsOfCUBE>.*?(?:\b(?:(?:(?:Flavour)?Text):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:(?<=[Pp][Ee][Rr][Kk]:\s)\s*(?<NameOfPERK>\S+)\s+(?<ContentsOfPERK>.*?(?:\b(?:(?:AbilityText|Description|TODO):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:(?<=[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]:\s)\s*(?<NameOfTEXTTOOLTIP>\S+)\s+(?<ContentsOfTEXTTOOLTIP>.*?)))\b[Ee][Nn][Dd]\b)|(?:(?<=[Aa][Rr][Tt][Oo][Vv][Ee][Rr][Rr][Ii][Dd][Ee]:\s)\s*(?:(?:ALL\s+(?<ARTOVERRIDEFolder>\S+)\s+(?<ARTOVERRIDESubstring>\S+))|(?:PERK\s+(?<ARTOVERRIDEPerk>\S+))|(?:CUBE\s+(?<ARTOVERRIDECube>\S+))|(?<ARTOVERRIDEName>\S+))(?=\s|$))/dgs)) {
+	for (let match of text.matchAll(/\b(?<TypeOfDEFINE>[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]|[Cc][Uu][Bb][Ee]|[Pp][Ee][Rr][Kk]|[Aa][Rr][Tt][Oo][Vv][Ee][Rr][Rr][Ii][Dd][Ee]|[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]):\s(?:(?:(?:(?:(?<=[Cc][Oo][Mm][Pp][Oo][Uu][Nn][Dd]:\s)\s*(?<TypeOfCOMPOUND>TRIGGER|ABILITY|ACTION|BOOLEAN|CUBE|DIRECTION|POSITION|DOUBLE|PERK|STRING)\s*(?<NameOfCOMPOUND>\S*)\s(?<ContentsOfCOMPOUND>.*?(?:\b(?:(?:Text):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:(?<=[Cc][Uu][Bb][Ee]:\s)\s*(?<NameOfCUBE>\S+)\s+(?<ContentsOfCUBE>.*?(?:\b(?:(?:(?:Flavour)?Text):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:(?<=[Pp][Ee][Rr][Kk]:\s)\s*(?<NameOfPERK>\S+)\s+(?<ContentsOfPERK>.*?(?:\b(?:(?:AbilityText|Description|TODO):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b.*?)*(?:.(?!\b[Ee][Nn][Dd]\b))*?))|(?:(?<=[Tt][Ee][Xx][Tt][Tt][Oo][Oo][Ll][Tt][Ii][Pp]:\s)\s*(?<NameOfTEXTTOOLTIP>\S+)\s+(?<ContentsOfTEXTTOOLTIP>.*?)))\b[Ee][Nn][Dd]\b)|(?:(?<=[Aa][Rr][Tt][Oo][Vv][Ee][Rr][Rr][Ii][Dd][Ee]:\s)\s*(?:(?:ALL\s+(?<ARTOVERRIDEFolder>\S+)\s+(?<ARTOVERRIDESubstring>\S+))|(?:PERK\s+(?<ARTOVERRIDEPerk>\S+))|(?:CUBE\s+(?<ARTOVERRIDECube>\S+))|(?<ARTOVERRIDEName>\S+))(?=\s|$)))/dgs)) {
 		iDefineds.push(await packIntoIDefined(match))
 	} return {Defines:iDefineds, Document:document, Comments:comments.length ? comments : undefined, Scenarios:scenarios.length ? scenarios : undefined}
 /* groups: 
