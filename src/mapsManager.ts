@@ -12,7 +12,7 @@ export async function updateFilesMapsIfEntries(document:{doc?:vscode.TextDocumen
 		for (let defined of iDefineds){
 			if (defined.Type.Define === 'COMPOUND') {
 				nameToCompound.set(defined.Name.Name, defined)
-			} else {
+			} else if (!(defined.Type.Define === 'ARTOVERRIDE')) {//probably need better override handling
 				nameToDefine.set(defined.Name.Name, defined)
 			}
 		}

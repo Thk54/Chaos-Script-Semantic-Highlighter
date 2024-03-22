@@ -2,11 +2,11 @@ import * as vscode from 'vscode';
 import { updateFilesMapsIfEntries, } from './mapsManager';
 import { FoldingRangeProvider, DocumentSemanticTokensProvider, DocumentSymbolProvider, WorkspaceSymbolProvider } from './extension';
 import { IBuiltins, IArguments, legend, generateMaps, builtins, fileToNameToCompoundDefine, IDefined } from './constants';
-import {buildRegexes} from './regexes'
+import { regexes } from './regexes'
 
 export async function activate(context: vscode.ExtensionContext) {
 	generateMaps;
-	buildRegexes()
+	regexes.buildRegexes()
 	await initialize(context);
 	context.subscriptions.push(vscode.languages.registerFoldingRangeProvider({ language: 'cubechaos' }, new FoldingRangeProvider()));
 	context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'cubechaos' }, new DocumentSymbolProvider()));
@@ -20,7 +20,6 @@ export async function initialize/*Compounds*/(context: vscode.ExtensionContext) 
 	promises.push(await parseModdinginfo(context.extensionUri.with({ path: context.extensionUri.path + '/ModdingInfo.txt.built-ins' })));
 	for (let txt of await files) {
 		promises.push(updateFilesMapsIfEntries({uri:txt}))
-		//promises.push(presentTextDocumentFromURIToReturnlessFunction(txt, updateFilesMapsIfEntries));
 	}
 	await Promise.allSettled(promises);
 	console.log('initial map done');
@@ -54,9 +53,8 @@ export async function parseModdinginfo(uri: vscode.Uri) {
 	for (let match of document.getText().matchAll(/^(Triggers?|Actions?|BOOLEAN|CUBE|DIRECTION|DOUBLE|PERK|POSITION|STRING): (?:$\s\s?^(?:.(?!\:))+$)+/gim)) {
 		promises.push(pack(match[0].split(/[\r\n]+/)))
 	}
-	for (let set of await <any>Promise.allSettled(promises)){
-		//await set.value //much fuckery I don't really understand here
-		iBuiltins = [...iBuiltins,...await (set.value)]
+	for (let set of await <any>Promise.allSettled(promises)){//Much fuckery I don't
+		iBuiltins = [...iBuiltins,...await (set.value)]//really understand here
 	}
 	builtins.set(document.uri.toString(), iBuiltins)
 	fileToNameToCompoundDefine.set(document.uri.toString(),<Map<string,IDefined>>nameToBuiltins)
