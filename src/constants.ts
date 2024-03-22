@@ -100,6 +100,7 @@ export interface ICompound extends IDefined, IBuiltins {
 export interface IType {
 	Define:string
 	Compound?:string
+	Override?:boolean
 }
 interface IName extends IBuiltInName{
 	Name: string;

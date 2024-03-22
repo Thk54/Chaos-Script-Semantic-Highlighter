@@ -11,14 +11,10 @@ async function packIntoIDefined(capture: RegExpMatchArray): Promise<IDefined>{
 		//ArtOverrideFolder ArtOverrideSubstring ArtOverridePerk ArtOverrideCube ArtOverrideName
 		let name = capture.groups['ARTOVERRIDEName'] ? 'ARTOVERRIDEName' : capture.groups['ARTOVERRIDECube'] ? 'ARTOVERRIDECube' : capture.groups['ARTOVERRIDEPerk'] ? 'ARTOVERRIDEPerk' : capture.groups['ARTOVERRIDEFolder']&&capture.groups['ARTOVERRIDESubstring'] ? ('Files in folder: "'+capture.groups['ARTOVERRIDEFolder']+'" containing "'+capture.groups['ARTOVERRIDESubstring']+'"') : '< Malformed >';
 		if (name === '< Malformed >') console.log("This shouldn't be possible (Pack ArtOverride) returning: \"< Malformed >\"")
-		/* if (capture.groups['ArtOverrideName']) {name = 'ArtOverrideName'}
-		else if (capture.groups['ArtOverrideCube']){name = 'ArtOverrideCube'}
-		else if (capture.groups['ArtOverridePerk']){name = 'ArtOverridePerk'}
-		else if (capture.groups['ArtOverrideFolder']&&capture.groups['ArtOverrideSubstring']){name = ('Files in folder: "'+capture.groups['ArtOverrideFolder']+'" containing "'+capture.groups['ArtOverrideSubstring']+'"')} else {console.log("This shouldn't be possible (Pack ArtOverride) returning: \"< Malformed >\"");name = '< Malformed >'} */
 		return ( {
-			Type: {Define:defineType}, // "[Boolean] ? [thing] : [thing2]" is an if else statement
+			Type: {Define:defineType, Override:true}, // "[Boolean] ? [thing] : [thing2]" is an if else statement
 			Contents: {Capture:{Text:capture[0],Index:capture.index}, Content: capture[0].slice(12).trimStart(), Index: capture.index+(capture[0].length-capture[0].slice(12).trimStart().length)},
-			Name: {Name: capture?.groups[name] ? name : capture.groups[name].toLowerCase(), Index: capture?.groups[name] ? capture[0].match(/\S*\s*\S*$/).index+capture.index : capture.indices.groups[name][0]}
+			Name: {Name: 'ARTOVERRIDE'/* capture?.groups[name] ? name : capture.groups[name].toLowerCase() */, Index: capture.index/* capture.indices.groups[name][0] ?? capture[0].match(/\S*\s*\S*$/).index+capture.index */}
 		})
 	case 'ABORT':
 		console.log('IDefined ABORT on capture: '+capture[0])
