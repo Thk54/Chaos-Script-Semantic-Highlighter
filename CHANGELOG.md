@@ -1,5 +1,8 @@
 ## Release Notes
 
+## [0.1.5]
+Hover text now tells type of compound and its arguments if it has any
+
 ## [0.1.4]
 Initial rename, may be renamed again pending results of poll. Implemented Go to Definition, and proof of concept hover text
 

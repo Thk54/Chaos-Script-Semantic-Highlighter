@@ -22,6 +22,7 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 export async function initialize/*Compounds*/(context: vscode.ExtensionContext) {
+	console.log('initial map start');
 	let files = vscode.workspace.findFiles('**/*.txt');
 	let promises = [];
 	promises.push(await parseModdinginfo(context.extensionUri.with({ path: context.extensionUri.path + '/ModdingInfo.txt.built-ins' })));
@@ -42,8 +43,10 @@ export async function parseModdinginfo(uri: vscode.Uri) {
 			let args: IArguments[] = [];
 			let name = line.match(/^\S+/);
 			line.slice(name.length);
+			let first:boolean = true
 			for (let generic of line.matchAll(/\S+/ig)) {
-				args.push({ Type: generic[0].toUpperCase() });
+				if (first) {first=false}
+				else { args.push({ Type: generic[0].toUpperCase() });}
 			}
 			let builtin = {Type: {Define:'COMPOUND', Compound:type},
 				Name: { Name: name[0].toLowerCase(), AsFound:name[0] },

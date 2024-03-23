@@ -1,4 +1,4 @@
-import { IDefined, IType, fileToNameToCompoundDefine, fileToNameToDefine } from "../constants";
+import { IArguments, ICompound, IDefined, IType, fileToNameToCompoundDefine, fileToNameToDefine } from "../constants";
 
 export function typeStringifyer(type: IType): string {
 	return type.Define === 'COMPOUND' ? (type.Define + ' ' + type.Compound) : type.Define;
@@ -23,4 +23,12 @@ export function getATopMapKeyAndSubMapValueFromSubMapKey<topMap extends Map<topK
 		if (result) return [topEntries[0],result]
 	}
 	return
+}
+export function doesIDefineHaveArguments(tested:ICompound|IDefined):boolean{
+	let interum:any = tested
+	return interum?.Arguments.length ? true : false
+}
+export function returnArgumentsAsString(defined:ICompound):string{
+	let temp:IArguments
+	return defined.Arguments.map((temp)=>(temp.Type)).join(' ')
 }
