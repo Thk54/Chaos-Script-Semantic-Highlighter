@@ -1,48 +1,429 @@
-{"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json", "name": "Chaos Script", "patterns": [ { "include": "#keywords" } ], "repository": { "keywords": { "patterns": [
-    {
-        "name": "storage.type.simplecompare.chaos",
-        "match": "[^\\s\\S]\\b((?i)Not|StringContainsString|XOr|Or|IsSamePosition|IsPositionEmpty|IsSameDirection|IsSameString|IsEqual|IsSmaller|IsLarger|IsSameCube|And|PerkHasNameOfPerk|HasNameOfCube)\\b"
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Chaos Script",
+  "patterns": [
+    { "include": "#cube.definition" },
+    { "include": "#perk.definition" },
+    { "include": "#compound.definition" },
+    { "include": "#singleton" }
+  ],
+  "repository": {
+    "comment": {
+      "name": "comment.chaos",
+      "begin": "(\\s|^)/-(?=\\s|$)",
+      "end": "(\\s|^)-/(?=\\s|$)"
     },
-    {
-        "name": "entity.name.class.triggers.chaos",
-        "match": "[^\\s\\S]\\b((?i)Addon|Advanced_Hovering|AfterACubeCollides|AfterACubeCreationIsBlocked|AfterACubeDies|AfterACubeHeals|AfterACubeIsCreated|AfterACubeLosesAnAbility|AfterACubeMoves|AfterACubeTakesDamage|AfterACubeTeleports|AfterAMapIsGenerated|AfterAnotherAllyIsCreated|AfterBlockedTeleport|AfterCampaignSomething|AfterEndOfTheBattle|AfterThisCreates|AfterThisDealsDamage|AfterThisDies|AfterThisIsClicked|AfterThisIsCreated|AfterThisKills|AfterThisMoves|AfterThisMovesACube|AfterThisTakesDamage|AfterWorldSomething|AfterYouClickAPerk|AfterYouGainAPerk|AfterYouGainOrLoseCurrency|AfterYouLose|AfterYouLoseAPerk|AfterYouReroll|AfterYouUpgradeAPerk|AfterYouWin|AiAggressiveBurrowing|AiPlacement|AiPlacementAdd|AiPlacementRule|AiWarrior|AlwaysNeutral|Arcing|AreaBlast|ArmorX|Ascension|AtTheStartOfTheBattle|BaseManaGen|BeesInsideX|BeforeACubeDies|BeforeACubeGainsAnAbility|BeforeACubeHeals|BeforeACubeIsAddedToAHand|BeforeACubeIsAddedToInventory|BeforeACubeIsAddedToYourHand|BeforeACubeMoves|BeforeACubeMovesNegation|BeforeACubeTakesDamage|BeforeACubeVariableChanges|BeforeCollision|BeforeEndOfTheBattle|BeforeManaIsGenerated|BeforePercentChance|BeforeThisDealsDamage|BeforeThisDies|BeforeThisHealsACube|BeforeThisIsDrawn|BeforeThisIsHealed|BeforeThisIsPlaced|BeforeThisMoves|BeforeThisMovesNegation|BeforeThisTakesDamage|BeforeTime|BeforeYouLose|BeforeYouTakeAStep|BeforeYouWin|BetrayalX|BubbleX|Buoyant|Burning|Burrowed|Burrowing|CascadeX|ChargeEveryX|CheaperX|Climbing|Counter|Crippling|DamagePassing|DarkReturn|DeadlyX|Debt|DevouringX|DiagonalFalling|DieAfterX|DiveEnemiesX|Dragon_Egg|Eldritch|Enchantment|EnergyGenerationX|EnergyX|Eternal|Every10Minutes|Every10Seconds|Every10Ticks|Every20Seconds|Every2Seconds|Every30Seconds|Every30Ticks|Every3Seconds|Every5Seconds|Every5Ticks|EveryMinute|EverySecond|EveryTick|EveryXAcidicY|EveryXCreateCubeAbove|EveryXCreateCubeInfront|EveryXMeleeY|EveryXMinutes|EveryXSeconds|EveryXTicks|EvolveMoil|ExplodesX|ExtraLife|EyeXY|Flying|FoodX|Fragile|FreePlacement|FreeUpgrade|FrozenX|GhostDeath|GiveWay|Golden|Gravity|GrowingUp|GrowthX|Hat|HolyX|HomingX|HorizontalHomingX|Hovering|InfestedX|Inheritable|Inspatial|KeepAltitudeX|Knockback|LaserXY|LEADER|LifeDebtX|LifeSteal|LiquidX|ManaCharged|ManaStorageX|Manifold|MapGenerationTPEB|MiseryX|Neutral|NormalWinLoss|Nothing|OnDeathCreateCube|Phasing|PoisonousX|PoisonX|Projectile|ProjectileX|Quantum|RandomBonus|RandomMovementX|RegenerationX|ResetManaCostOnce|RetaliateX|Returning|ReturningZap|RoamingX|ScalingX|Shadow|ShowCERTAINTY|SilentDieAfterX|Slowed|SplinterX|Starcurse|StrengthX|Summoning_Circle_Combine|Swarm|TemporaryDoubleTime|TemporaryStrength|TemporaryUnmovable|TimeShift|Undead|UnfoldingX|Unique|Unmovable|Upgrade|UpToXEfficiency|VengeanceX|WaterX|WorthXMore|Zap)\\b"
+    "cube.definition": {
+      "patterns": [
+        {
+          "comment": "Cube definition",
+          "begin": "(CUBE:)\\s+(\\w+)?(?:\\s+(\\d+)(?:\\s+(\\d+)(?:\\s+(\\d+))?)?)?",
+          "end": "^\\s*(End)",
+          "beginCaptures": {
+            "1": { "name": "storage.type.class.cube.chaos" },
+            "2": { "name": "entity.name.class.cube.chaos" },
+            "3": { "name": "constant.numeric.stat.mana.chaos" },
+            "4": { "name": "constant.numeric.stat.health.chaos" },
+            "5": { "name": "constant.numeric.stat.health.max.chaos" }
+          },
+          "endCaptures": {
+            "1": { "name": "keyword.control.end.chaos" }
+          },
+          "patterns": [
+            {
+              "comment": "Tag line",
+              "name": "entity.name.tag.chaos",
+              "match": "\\s*(TOKEN|OVERRIDE)"
+            },
+            {
+              "comment": "Action line",
+              "begin": "\\s*(Ability:)",
+              "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq|Ability))",
+              "beginCaptures": { "1": { "name": "entity.name.method.chaos" } },
+              "contentName": "unknown.chaos",
+              "patterns": [{ "include": "#compound" }]
+            },
+            {
+              "comment": "Extra action line",
+              "begin": "\\s*(ExtraTrigger:)",
+              "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq|Ability))",
+              "beginCaptures": { "1": { "name": "entity.name.method.chaos" } },
+              "contentName": "unknown.chaos",
+              "patterns": [{ "include": "#compound" }]
+            },
+            {
+              "comment": "Text line",
+              "name": "constant.language.text.chaos",
+              "begin": "^\\s*Text:",
+              "end": "\\bEnd\\b",
+              "contentName": "string.quoted.triple.chaos",
+              "patterns": [{ "include": "#text" }]
+            },
+            {
+              "comment": "Flavour text line",
+              "name": "constant.language.text.chaos",
+              "begin": "\\s*FlavourText:",
+              "end": "End",
+              "contentName": "string.quoted.triple.chaos markup.italic",
+              "patterns": [{ "include": "#text" }]
+            },
+            {
+              "comment": "Ai Placement Rule",
+              "name": "entity.name.tag.placement.chaos",
+              "begin": "\\s*AiPlacementRule",
+              "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq))",
+              "patterns": [{ "include": "#compound" }]
+            },
+            {
+              "comment": "LevelReq Level Requirement line",
+              "name": "entity.name.tag.chaos",
+              "match": "\\s*(LevelReq)( \\d*)?",
+              "captures": {
+                "2": { "name": "constant.numeric.level.chaos" }
+              }
+            },
+            {
+              "comment": "IDENT Ai Identification Values",
+              "name": "entity.name.tag.ident.chaos",
+              "match": "\\s*(IDENT)(\\s+[1-4])?(\\s+\\d+)?(\\s+\\d+)?(\\s+\\d+)?(\\s+\\d+)?",
+              "captures": {
+                "2": { "name": "constant.numeric.rarity.chaos" },
+                "3": { "name": "constant.numeric.worth.offense.chaos" },
+                "4": { "name": "constant.numeric.worth.defense.chaos" },
+                "5": { "name": "constant.numeric.worth.long-term.chaos" },
+                "6": { "name": "constant.numeric.worth.range.chaos" }
+              }
+            },
+            {
+              "comment": "TYPE tag",
+              "name": "entity.name.tag.type.chaos",
+              "match": "\\s*(TYPE)\\s+(Special|Spell|Wall|Factory|Attacker|Healer|Modifier|Shooter|Mana|Movement)?",
+              "captures": { "2": { "name": "string" } }
+            },
+            {
+              "comment": "Animation line",
+              "name": "entity.name.tag.animation.chaos",
+              "begin": "\\s*(Animation:)(\\D+)(TRIGGER|BOOLEAN|DOUBLE|HP|CLOCK|TIME)\\s+(?:(0)\\s+(EQUAL\\s+)?(\\d+))?((?:\\s+\\d+)*)((?:\\s+\\w+)*)\\s*?$",
+              "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq))",
+              "beginCaptures": {
+                "2": { "name": "string" },
+                "3": { "name": "entity.name.type.animation.chaos" },
+                "4": { "name": "constant.numeric.zero.chaos" },
+                "5": { "name": "constant.language.equal.chaos" },
+                "6": { "name": "constant.numeric.frame-count.chaos" },
+                "7": { "name": "constant.numeric.interval.chaos" },
+                "8": { "patterns": [{ "include": "#compound" }] }
+              },
+              "patterns": [{ "include": "#compound" }]
+            },
+            {
+              "comment": "Visual line",
+              "name": "entity.name.tag.visual.chaos",
+              "match": "\\s*(Visual:)(\\s+Area \\d+)?(?:\\s+(Arrow|Mist|Square|Sword|Target|Plus))?(?:\\s+(-?\\d+))?(?:\\s+(-?\\d+))?(\\s+\\d+)?(\\s+\\d+)?(\\s+\\d+)?(\\s+[1-4])?",
+              "captures": {
+                "2": { "name": "constant.language.area.chaos" },
+                "3": { "name": "entity.name.type.visual.chaos" },
+                "4": { "name": "constant.numeric.coordinate.x.chaos" },
+                "5": { "name": "constant.numeric.coordinate.y.chaos" },
+                "6": { "name": "constant.numeric.color.red.chaos" },
+                "7": { "name": "constant.numeric.color.green.chaos" },
+                "8": { "name": "constant.numeric.color.blue.chaos" },
+                "9": { "name": "constant.numeric.rotation.chaos" }
+              }
+            },
+            {
+              "comment": "Add invalid scope to all unmatched",
+              "name": "unknown.chaos",
+              "match": ".+"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "name": "entity.name.function.actions.chaos",
-        "match": "[^\\s\\S]\\b((?i)EveryXTimes|Both|If|TargetCube|EveryCubeWhich|EveryCubeInHandOfFactionWhich|XShots|XTimes|SecretXTimes|IfElse|XDelay|Randomly|Silent|Secret|Until|SetCaster|SetStorage|EveryCubeTouchingPosition|TargetPerk|EveryPerkInInventoryWhich|EveryCubeInInventoryWhich|Cooldown|EveryXTimesSteady|SeperateEffect|EveryXAmount|XFeedY|EveryMapNodeWhich|TakeXDamage|TakeXDamageEffect|ChangeMaxHp|ChangeHp|HealXDamage|GainAbility|FactionXGainsYMana|GenericAction|SetFaction|MoveInDirection|NegateX|CreateCubeOnPosition|AddCubeToHandOfFaction|AddCubeToHandOfFactionInfinitly|ChangeMaxManaOfFaction|CreateParticlesWithColourOnPosition|CreateAoEParticlesColourRadiusPosition|Die|ChangeManaCost|TeleportToPosition|SwapWithPosition|RemoveThisAbility|Nothing|Exile|SetVariable|ChangeVariable|RemoveAbilityWithName|AccelerateX|SetPositionPlacability|GainAbilityText|RemoveCubeFromHandOfFaction|GainAllAbilitiesOfCube|GainRandomAbilityOfCube|GainNthAbilityOfCube|ChangeIncomingAdjacency|NewAdjacency|ResetAdjacency|RemoveColumn|RemoveRow|AddRow|AddColumn|FactionPlacesCubeOnPosition|ChangeWorldTime|ChangeAbilityStacking|RemoveRandomAbility|GainAbilityStacking|GainAffectedAbility|GainThisAbility|GainAllAbilitiesOfPerk|GainObtainAction|AddPerkAbility|AddCubeToInventory|RemoveCubeFromInventory|AddCubeToDeck|Win|WinCampaign|Lose|ReadAScenario|ReadARandomEvent|GrantXP|EndCampaign|LoseALife|GainALife|ChangeCampaignVariable|SetCampaignVariable|ObtainPerk|LosePerk|ChangeDeckSize|FlipSprite|SystemTime|GainRandomGeneratedAbility|SetScore|SetName|SetScoringScenario|Banish|RemoveAllAbilities|PlaySound|TriggerCampaignSomething|TeleportToMapNode|LoadMapNode|AddPathAB|RemoveCubeFromDeck|SetMapNodeScenario|SetMapNodeDifficulty|CreateGhost|SetSpriteToCube|SetSpriteToPerk|DisablePerkAutoSort|ReadAPartialScenario|TriggerWorldSomething|1Shot|Then|UntilSuccess|GenerateXMana|AddCubeToHandOfThis|SetHp|EveryCube|GainXExtraHp|ChangeCurrency|ChangeRerollCost|ChangeStartingMana|ChangeStartingMaxMana|ChangeDifficulty|ChangeStartingHandSize|EveryLeaderOfFaction|EveryAlliedLeader|EveryAlly|RefundX|NoManaCost|EveryCubeInRadiusXAroundTarget|ResetManaCost|AddDepthRow|LoseThisPerk|EnergyNegation|ResetAdjacencyAtTarget|GainARandomBonus|GainInspatial|SufferXWounds)\\b"
+    "perk.definition": {
+      "patterns": [
+        {
+          "comment": "Perk definition",
+          "begin": "((?:PERK|Perk):)(\\s+[\\w-]+)?",
+          "end": "^\\s*(End)",
+          "name": "definition.perk.chaos",
+          "beginCaptures": {
+            "1": { "name": "storage.type.class.perk.chaos" },
+            "2": { "name": "entity.name.class.perk.chaos" }
+          },
+          "endCaptures": {
+            "1": { "name": "keyword.control.end.chaos" }
+          },
+          "patterns": [
+            {
+              "include": "#comment"
+            },
+            {
+              "comment": "Action line",
+              "name": "entity.name.method",
+              "begin": "\\s*Ability:",
+              "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq|Ability))",
+              "patterns": [{ "include": "#compound" }]
+            },
+            {
+              "comment": "Description line",
+              "name": "constant.language.text.chaos",
+              "begin": "^\\s*Description:",
+              "end": "\\bEnd\\b",
+              "contentName": "string.quoted.triple.chaos",
+              "patterns": [{ "include": "#text" }]
+            },
+            {
+              "name": "entity.name.tag.owner.chaos",
+              "match": "\\s*BelongsTo:\\s+(CLASSSPECIES|SPECIES|CLASS|NULL|Everyone|Consumable|Active|Neutral|Terrain)?(\\w+)?",
+              "captures": {
+                "1": { "name": "entity.name.type.owner.chaos" },
+                "2": { "name": "entity.name.class.perk.chaos" }
+              }
+            },
+            {
+              "comment": "Tag line",
+              "name": "entity.name.tag.chaos",
+              "match": "^\\s*(Unique|OVERRIDE)"
+            },
+            {
+              "comment": "Value line",
+              "name": "entity.name.tag.value.chaos",
+              "match": "^\\s*(Value:)(\\s+-?\\d+)?",
+              "captures": {
+                "2": { "name": "constant.numeric.value.chaos" }
+              }
+            },
+            {
+              "comment": "IsUpgradeFrom line",
+              "name": "entity.name.tag.upgrade",
+              "match": "\\s*(IsUpgradeFrom:)(?:\\s+([\\w-]+)?)?(?:\\s+(-?\\d+)?)?",
+              "captures": {
+                "2": { "name": "entity.name.class.perk.chaos" },
+                "3": { "name": "constant.numeric.value.offset.chaos" }
+              }
+            },
+            {
+              "name": "unknown.chaos",
+              "match": ".+"
+            }
+          ]
+        }
+      ]
     },
-    {
-        "name": "support.constant.boolean.chaos",
-        "match": "[^\\s\\S]\\b((?i)IsEnemyToCaster|IsAllyToCaster|And|HasAbilityWithName|IsToken|CubeExists|HasLimitedUses|IsSameCube|IsLarger|IsSmaller|IsEqual|IsSameString|IsSameDirection|IsPositionEmpty|IsSamePosition|Not|Or|True|HadAnEffect|X%Chance|GenericBoolean|IsAlreadyInInventory|IsAlreadyInHandOfFaction|PositionExists|HasCategory|HasPerk|PerkIsType|PerkIsUnique|PerkExists|HasPerkOrUpgrade|SeededX%Chance|IsType|MapNodeIsType|XOr|WorldExists|StringContainsString|False|IsPlaced|IsCubeInfront|IsEmptyAbove|AboveExists|NoCubeAbove|IsNotAllyInfront|HaveMoreThanXMana|IsALeader|BattleOngoing|FirstMap|MapLeft|IsNotInHandOfThis|IsInShieldArea|IsInAoEAroundTarget|IsSurroundedByAllies|IsDamaged|IsEnemy|IsAlly|IsNeutral|HasNameOfCube|PerkHasNameOfPerk|CubeHasName|ExcludeLastXNodes|AiBackline|AiDefense|AiFrontline|AiEmptyInfront|AiAllyInfront|AiEnemyInfront|AiEmptyBehind|AiAllyBehind|AiEmptyNorth|AiCubeBelow|AiEmptySouth|AiCubeSouth|AiAllySouth|AiAllyNorth|AiEnemySouth|AiNeutralSouth|AiLeaderSouth|AiLeaderBehind|AiVoidSouth|AiLiquidSouth|AiDangerSouth|AiStacking|AiBurrowing|AiFlying|AiMissile|AiDelay|AiLimit|IsCubeOnLeftSide|IsTestPerkCubable)\\b"
+    "compound.definition": {
+      "patterns": [
+        {
+          "comment": "Compound definition",
+          "begin": "(COMPOUND:)(?:\\s+(ABILITY|DOUBLE|BOOLEAN|ACTION|CUBE|PERK|STRING|POSITION|DIRECTION))?",
+          "end": "^\\s*(End)",
+          "beginCaptures": {
+            "1": { "name": "storage.type.class.compound.chaos" },
+            "2": { "name": "entity.name.class.compound.chaos" }
+          },
+          "endCaptures": {
+            "1": { "name": "keyword.control.end.chaos" }
+          },
+          "patterns": [
+            {
+              "include": "#comment"
+            },
+            {
+              "comment": "Name line",
+              "name": "entity.name.class.compound.chaos",
+              "match": "^\\s*[a-zA-Z]+\\s*$"
+            },
+            {
+              "comment": "Tag line",
+              "name": "entity.name.tag.chaos",
+              "match": "^\\b(NO_DUPLICATES|OVERRIDE)\\b"
+            },
+            {
+              "comment": "Compound line",
+              "name": "entity.name.function.compound.chaos",
+              "patterns": [{ "include": "#compound" }]
+            },
+            {
+              "comment": "Text line",
+              "name": "constant.language.text.chaos",
+              "begin": "\\s*Text:",
+              "end": "End",
+              "contentName": "string.quoted.triple.chaos",
+              "patterns": [{ "include": "#text" }]
+            },
+            {
+              "name": "entity.name.tag.chaos",
+              "match": "\\s*CubeColourShift:\\s+([0]?\\.[0-9]+|[1]\\.0|[0])?(?:\\s+(\\d+)(?:\\s+(\\d+)(?:\\s+(\\d+))?)?)?",
+              "captures": {
+                "1": { "name": "constant.numeric.color.delta.chaos" },
+                "2": { "name": "constant.numeric.color.red.chaos" },
+                "3": { "name": "constant.numeric.color.green.chaos" },
+                "4": { "name": "constant.numeric.color.blue.chaos" }
+              }
+            }
+          ]
+        }
+      ]
     },
-    {
-        "name": "entity.other.inherited-class.cube.chaos",
-        "match": "[^\\s\\S]\\b((?i)Caster|ARandomCubeWhich|Target|Victim|Culprit|Test|GenericCube|CubeConstant|CopyOfCube|ARandomCubeInLibraryWhich|ARandomCubeInHandOfFactionWhich|CubeInDirectionFromCube|CombinationOf2Cubes|CubeOfPosition|ARandomRarityBasedCubeInLibraryWhich|TheFirstCubeInHandOfFactionWhich|TheFirstCubeInDirectionFromPositionWhich|WorldCube|Storage|APRandomCubeInLibraryWhich|ARandomCubeInInventoryWhich|TheXSlotInHandOfFaction|CopyWithAction|ARandomEnemy|ARandomAlly|ARandomDamagedAlly|ARandomNotLeaderEnemy|ARandomLeaderOfFaction|ARandomAlliedLeader|ARandomCube|FreeCopy|NeutralCopy)\\b"
+    "singleton": {
+      "patterns": [
+        {
+          "comment": "Function definition line",
+          "match": "^(\\w+)((?:\\s+\\w+)*)$",
+          "captures": {
+            "1": { "patterns": [{ "include": "#compound" }] },
+            "2": { "name": "entity.name.type.chaos" }
+          }
+        },
+        {
+          "comment": "tooltip",
+          "begin": "^\\s*(TEXTTOOLTIP:)(?:\\s+([^ \\\\]+)?)?",
+          "beginCaptures": {
+            "1": { "name": "storage.type.tooltip.chaos" },
+            "2": { "name": "string.chaos" }
+          },
+          "end": "\\b(End)\\b",
+          "endCaptures": {
+            "1": { "name": "keyword.control.end.chaos" }
+          },
+          "contentName": "string.quoted.triple",
+          "patterns": [{ "include": "#text" }]
+        },
+        {
+          "match": "^\\s*(DOACTION:)\\s+(CUBE|PERK)\\s+(\\w+)\\s+([ \\w]+)$",
+          "captures": {
+            "1": { "name": "entity.name.function.chaos" },
+            "2": { "name": "entity.name.class.chaos" },
+            "3": { "name": "storage.type.class.chaos" },
+            "4": { "patterns": [{ "include": "#compound" }] }
+          }
+        },
+        {
+          "match": "^\\s*(ARTOVERRIDE:)\\s+(\\w+)$",
+          "captures": {
+            "1": { "name": "storage.type.art-override.chaos" },
+            "2": { "name": "storage.type.class.chaos" }
+          }
+        }
+      ]
     },
-    {
-        "name": "constant.numeric.direction.chaos",
-        "match": "[^\\s\\S]\\b((?i)Forwards|DirectionConstant|ReverseDirection|EventDirection|GenericDirection|DirectionFromDouble|RotateClock|RotateCounterClock|DirectionFromPosToPos|North|East|South|West|Backwards|RandomDirection|GravityDirection)\\b"
+    "compound": {
+      "patterns": [
+        {
+          "include": "#comment"
+        },
+        {
+          "comment": "compare",
+          "name": "keyword.operator.compare.chaos",
+          "match": "\\b((?i)Not|StringContainsString|XOr|Or|IsSamePosition|IsPositionEmpty|IsSameDirection|IsSameString|IsEqual|IsSmaller|IsLarger|IsSameCube|And|PerkHasNameOfPerk|HasNameOfCube)\\b"
+        },
+        {
+          "comment": "trigger",
+          "name": "entity.name.class.triggers.chaos",
+          "match": "\\b((?i)Addon|Advanced_Hovering|AfterACubeCollides|AfterACubeCreationIsBlocked|AfterACubeDies|AfterACubeHeals|AfterACubeIsCreated|AfterACubeLosesAnAbility|AfterACubeMoves|AfterACubeTakesDamage|AfterACubeTeleports|AfterAMapIsGenerated|AfterAnotherAllyIsCreated|AfterBlockedTeleport|AfterCampaignSomething|AfterEndOfTheBattle|AfterThisCreates|AfterThisDealsDamage|AfterThisDies|AfterThisIsClicked|AfterThisIsCreated|AfterThisKills|AfterThisMoves|AfterThisMovesACube|AfterThisTakesDamage|AfterWorldSomething|AfterYouClickAPerk|AfterYouGainAPerk|AfterYouGainOrLoseCurrency|AfterYouLose|AfterYouLoseAPerk|AfterYouReroll|AfterYouUpgradeAPerk|AfterYouWin|AiAggressiveBurrowing|AiPlacement|AiPlacementAdd|AiPlacementRule|AiWarrior|AlwaysNeutral|Arcing|AreaBlast|ArmorX|Ascension|AtTheStartOfTheBattle|BaseManaGen|BeesInsideX|BeforeACubeDies|BeforeACubeGainsAnAbility|BeforeACubeHeals|BeforeACubeIsAddedToAHand|BeforeACubeIsAddedToInventory|BeforeACubeIsAddedToYourHand|BeforeACubeMoves|BeforeACubeMovesNegation|BeforeACubeTakesDamage|BeforeACubeVariableChanges|BeforeCollision|BeforeEndOfTheBattle|BeforeManaIsGenerated|BeforePercentChance|BeforeThisDealsDamage|BeforeThisDies|BeforeThisHealsACube|BeforeThisIsDrawn|BeforeThisIsHealed|BeforeThisIsPlaced|BeforeThisMoves|BeforeThisMovesNegation|BeforeThisTakesDamage|BeforeTime|BeforeYouLose|BeforeYouTakeAStep|BeforeYouWin|BetrayalX|BubbleX|Buoyant|Burning|Burrowed|Burrowing|CascadeX|ChargeEveryX|CheaperX|Climbing|Counter|Crippling|DamagePassing|DarkReturn|DeadlyX|Debt|DevouringX|DiagonalFalling|DieAfterX|DiveEnemiesX|Dragon_Egg|Eldritch|Enchantment|EnergyGenerationX|EnergyX|Eternal|Every10Minutes|Every10Seconds|Every10Ticks|Every20Seconds|Every2Seconds|Every30Seconds|Every30Ticks|Every3Seconds|Every5Seconds|Every5Ticks|EveryMinute|EverySecond|EveryTick|EveryXAcidicY|EveryXCreateCubeAbove|EveryXCreateCubeInfront|EveryXMeleeY|EveryXMinutes|EveryXSeconds|EveryXTicks|EvolveMoil|ExplodesX|ExtraLife|EyeXY|Flying|FoodX|Fragile|FreePlacement|FreeUpgrade|FrozenX|GhostDeath|GiveWay|Golden|Gravity|GrowingUp|GrowthX|Hat|HolyX|HomingX|HorizontalHomingX|Hovering|InfestedX|Inheritable|Inspatial|KeepAltitudeX|Knockback|LaserXY|LEADER|LifeDebtX|LifeSteal|LiquidX|ManaCharged|ManaStorageX|Manifold|MapGenerationTPEB|MiseryX|Neutral|NormalWinLoss|Nothing|OnDeathCreateCube|Phasing|PoisonousX|PoisonX|Projectile|ProjectileX|Quantum|RandomBonus|RandomMovementX|RegenerationX|ResetManaCostOnce|RetaliateX|Returning|ReturningZap|RoamingX|ScalingX|Shadow|ShowCERTAINTY|SilentDieAfterX|Slowed|SplinterX|Starcurse|StrengthX|Summoning_Circle_Combine|Swarm|TemporaryDoubleTime|TemporaryStrength|TemporaryUnmovable|TimeShift|Undead|UnfoldingX|Unique|Unmovable|Upgrade|UpToXEfficiency|VengeanceX|WaterX|WorthXMore|Zap)\\b"
+        },
+        {
+          "comment": "action",
+          "name": "entity.name.function.actions.chaos",
+          "match": "\\b((?i)EveryXTimes|Both|If|TargetCube|EveryCubeWhich|EveryCubeInHandOfFactionWhich|XShots|XTimes|SecretXTimes|IfElse|XDelay|Randomly|Silent|Secret|Until|SetCaster|SetStorage|EveryCubeTouchingPosition|TargetPerk|EveryPerkInInventoryWhich|EveryCubeInInventoryWhich|Cooldown|EveryXTimesSteady|SeperateEffect|EveryXAmount|XFeedY|EveryMapNodeWhich|TakeXDamage|TakeXDamageEffect|ChangeMaxHp|ChangeHp|HealXDamage|GainAbility|FactionXGainsYMana|GenericAction|SetFaction|MoveInDirection|NegateX|CreateCubeOnPosition|AddCubeToHandOfFaction|AddCubeToHandOfFactionInfinitly|ChangeMaxManaOfFaction|CreateParticlesWithColourOnPosition|CreateAoEParticlesColourRadiusPosition|Die|ChangeManaCost|TeleportToPosition|SwapWithPosition|RemoveThisAbility|Nothing|Exile|SetVariable|ChangeVariable|RemoveAbilityWithName|AccelerateX|SetPositionPlacability|RemoveCubeFromHandOfFaction|GainAllAbilitiesOfCube|GainRandomAbilityOfCube|GainNthAbilityOfCube|ChangeIncomingAdjacency|NewAdjacency|ResetAdjacency|RemoveColumn|RemoveRow|AddRow|AddColumn|FactionPlacesCubeOnPosition|ChangeWorldTime|ChangeAbilityStacking|RemoveRandomAbility|GainAbilityStacking|GainAffectedAbility|GainThisAbility|GainAllAbilitiesOfPerk|GainObtainAction|AddPerkAbility|AddCubeToInventory|RemoveCubeFromInventory|AddCubeToDeck|Win|WinCampaign|Lose|ReadAScenario|ReadARandomEvent|GrantXP|EndCampaign|LoseALife|GainALife|ChangeCampaignVariable|SetCampaignVariable|ObtainPerk|LosePerk|ChangeDeckSize|FlipSprite|SystemTime|GainRandomGeneratedAbility|SetScore|SetName|SetScoringScenario|Banish|RemoveAllAbilities|PlaySound|TriggerCampaignSomething|TeleportToMapNode|LoadMapNode|AddPathAB|RemoveCubeFromDeck|SetMapNodeScenario|SetMapNodeDifficulty|CreateGhost|SetSpriteToCube|SetSpriteToPerk|DisablePerkAutoSort|ReadAPartialScenario|TriggerWorldSomething|1Shot|Then|UntilSuccess|GenerateXMana|AddCubeToHandOfThis|SetHp|EveryCube|GainXExtraHp|ChangeCurrency|ChangeRerollCost|ChangeStartingMana|ChangeStartingMaxMana|ChangeDifficulty|ChangeStartingHandSize|EveryLeaderOfFaction|EveryAlliedLeader|EveryAlly|RefundX|NoManaCost|EveryCubeInRadiusXAroundTarget|ResetManaCost|AddDepthRow|LoseThisPerk|EnergyNegation|ResetAdjacencyAtTarget|GainARandomBonus|GainInspatial|SufferXWounds)\\b"
+        },
+        {
+          "comment": "GainAbilityText matching",
+          "begin": "\\b(GainAbilityText)\\b",
+          "end": "\\b(End)\\b",
+          "captures": { "1": { "name": "entity.name.method.chaos" } },
+          "patterns": [
+            { "include": "#compound" },
+            {
+              "match": "^(.+)(?=End)",
+
+              "captures": {
+                "1": {
+                  "name": "string.quoted.triple.chaos",
+                  "patterns": [{ "include": "#text" }]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "comment": "boolean",
+          "name": "support.boolean.chaos",
+          "match": "\\b((?i)IsEnemyToCaster|IsAllyToCaster|And|HasAbilityWithName|IsToken|CubeExists|HasLimitedUses|IsSameCube|IsLarger|IsSmaller|IsEqual|IsSameString|IsSameDirection|IsPositionEmpty|IsSamePosition|Not|Or|True|HadAnEffect|X%Chance|GenericBoolean|IsAlreadyInInventory|IsAlreadyInHandOfFaction|PositionExists|HasCategory|HasPerk|PerkIsType|PerkIsUnique|PerkExists|HasPerkOrUpgrade|SeededX%Chance|IsType|MapNodeIsType|XOr|WorldExists|StringContainsString|False|IsPlaced|IsCubeInfront|IsEmptyAbove|AboveExists|NoCubeAbove|IsNotAllyInfront|HaveMoreThanXMana|IsALeader|BattleOngoing|FirstMap|MapLeft|IsNotInHandOfThis|IsInShieldArea|IsInAoEAroundTarget|IsSurroundedByAllies|IsDamaged|IsEnemy|IsAlly|IsNeutral|HasNameOfCube|PerkHasNameOfPerk|CubeHasName|ExcludeLastXNodes|AiBackline|AiDefense|AiFrontline|AiEmptyInfront|AiAllyInfront|AiEnemyInfront|AiEmptyBehind|AiAllyBehind|AiEmptyNorth|AiCubeBelow|AiEmptySouth|AiCubeSouth|AiAllySouth|AiAllyNorth|AiEnemySouth|AiNeutralSouth|AiLeaderSouth|AiLeaderBehind|AiVoidSouth|AiLiquidSouth|AiDangerSouth|AiStacking|AiBurrowing|AiFlying|AiMissile|AiDelay|AiLimit|IsCubeOnLeftSide|IsTestPerkCubable)\\b"
+        },
+        {
+          "comment": "cube",
+          "name": "support.class.cube.chaos",
+          "match": "\\b((?i)ARandomCubeWhich|GenericCube|CubeConstant|CopyOfCube|ARandomCubeInLibraryWhich|ARandomCubeInHandOfFactionWhich|CubeInDirectionFromCube|CombinationOf2Cubes|CubeOfPosition|ARandomRarityBasedCubeInLibraryWhich|TheFirstCubeInHandOfFactionWhich|TheFirstCubeInDirectionFromPositionWhich|WorldCube|Storage|APRandomCubeInLibraryWhich|ARandomCubeInInventoryWhich|TheXSlotInHandOfFaction|CopyWithAction|ARandomEnemy|ARandomAlly|ARandomDamagedAlly|ARandomNotLeaderEnemy|ARandomLeaderOfFaction|ARandomAlliedLeader|ARandomCube|FreeCopy|NeutralCopy)\\b"
+        },
+        {
+          "comment": "target cubes",
+          "name": "keyword.control.cube",
+          "match": "\\b((?i)Caster|Target|Victim|Culprit|Test)\\b"
+        },
+        {
+          "comment": "direction",
+          "name": "constant.numeric.direction.chaos",
+          "match": "\\b((?i)Forwards|DirectionConstant|ReverseDirection|EventDirection|GenericDirection|DirectionFromDouble|RotateClock|RotateCounterClock|DirectionFromPosToPos|North|East|South|West|Backwards|RandomDirection|GravityDirection)\\b"
+        },
+        {
+          "comment": "double",
+          "name": "keyword.double.chaos",
+          "match": "\\b((?i)DoubleConstant|TimeConstant|EventAmount|EventFaction|MaxHpOfCube|HpOfCube|RarityOfCube|ManaCostOfCube|FactionOfCube|GetVariableOnCube|RemainingLives|MaxManaOfFaction|ManaOfFaction|XOfPosition|YOfPosition|GenericDouble|GenericConstant|GenericTime|GenericStacking|HandSizeOfFaction|AmountOfCubesWhich|WorldTime|MaxWorldX|StartingMaxWorldX|MaxWorldY|StartingMaxWorldY|GetCampaignVariable|DistanceOfPositions|PlacabilityOfPosition|GetBestScore|ValueOfPerk|AmountOfPerksInInventoryWhich|AmountOfCubesInInventoryWhich|LetterCount|VowelCount|KonsonantCount|StackingDouble|GetStackingOfAbilityOnCube|AmountOfAbilitiesOfCube|DescriptionValue|TimeSpeed|ScalingOfCube|PressureOfCube|Test|ARandomMapNodeWhich|DoubleFromDirection|CopiableAbilitiesOfPerk|AmountOfCubesInHandOfFactionWhich|Addition|Subtraction|Division|Lowest|Highest|Multiplication|AbsoluteAmount|RandomRoundBetweenXtoY|RoundedDown|Minus|InvertedFaction|%|1/2|FactionOfThis|EnemyFaction|Currency|Difficulty|CurrentMapNode|MapNodeAmount|Nightmares|GetEnergy)\\b"
+        },
+        {
+          "comment": "perk",
+          "name": "support.class.perk.chaos",
+          "match": "\\b((?i)Target|Test|PerkConstant|ARandomPerkInInventoryWhich|ARandomPerkInLibraryWhich|UpgradeOfPerk|GenericPerk)\\b"
+        },
+        {
+          "comment": "position",
+          "name": "entity.other.attribute-name.position.chaos",
+          "match": "\\b((?i)PositionInDirectionFromPosition|PositionOfCube|OriginalPosition|PositionXInfrontYBelowPosition|PositionFromXAndY|GenericPosition|PositionOfThis|PositionInDirectionFromThis|TopPositionAboveCube|ARandomPosition|ARandomLeftPosition|ARandomTopPosition|ARandomRightPosition)\\b"
+        },
+        {
+          "comment": "string",
+          "name": "string.chaos support.string.chaos",
+          "match": "\\b((?i)ScenarioOfMapNode|NameOfCube|NameOfPerk|StringMissingLetterX|StringConstant|GenericString|RandomName|StringAddition|GenericWord|GenericName|IfElse|StringNull)\\b"
+        },
+        {
+          "comment": "literal number",
+          "name": "constant.numeric.compound.chaos",
+          "match": "\\b(\\d+)\\b"
+        },
+        {
+          "comment": "all caps variable name",
+          "name": "variable.parameter.compound.chaos",
+          "match": "\\b([A-Z_][A-Z_0-9]*)\\b"
+        }
+      ]
     },
-    {
-        "name": "keyword.double.chaos",
-        "match": "[^\\s\\S]\\b((?i)DoubleConstant|TimeConstant|EventAmount|EventFaction|MaxHpOfCube|HpOfCube|RarityOfCube|ManaCostOfCube|FactionOfCube|GetVariableOnCube|RemainingLives|MaxManaOfFaction|ManaOfFaction|XOfPosition|YOfPosition|GenericDouble|GenericConstant|GenericTime|GenericStacking|HandSizeOfFaction|AmountOfCubesWhich|WorldTime|MaxWorldX|StartingMaxWorldX|MaxWorldY|StartingMaxWorldY|GetCampaignVariable|DistanceOfPositions|PlacabilityOfPosition|GetBestScore|ValueOfPerk|AmountOfPerksInInventoryWhich|AmountOfCubesInInventoryWhich|LetterCount|VowelCount|KonsonantCount|StackingDouble|GetStackingOfAbilityOnCube|AmountOfAbilitiesOfCube|DescriptionValue|TimeSpeed|ScalingOfCube|PressureOfCube|Test|ARandomMapNodeWhich|DoubleFromDirection|CopiableAbilitiesOfPerk|AmountOfCubesInHandOfFactionWhich|Addition|Subtraction|Division|Lowest|Highest|Multiplication|AbsoluteAmount|RandomRoundBetweenXtoY|RoundedDown|Minus|InvertedFaction|%|1/2|FactionOfThis|EnemyFaction|Currency|Difficulty|CurrentMapNode|MapNodeAmount|Nightmares|GetEnergy)\\b"
-    },
-    {
-        "name": "meta.diff.perk.chaos",
-        "match": "[^\\s\\S]\\b((?i)Target|Test|PerkConstant|ARandomPerkInInventoryWhich|ARandomPerkInLibraryWhich|UpgradeOfPerk|GenericPerk)\\b"
-    },
-    {
-        "name": "entity.other.attribute-name.position.chaos",
-        "match": "[^\\s\\S]\\b((?i)PositionInDirectionFromPosition|PositionOfCube|OriginalPosition|PositionXInfrontYBelowPosition|PositionFromXAndY|GenericPosition|PositionOfThis|PositionInDirectionFromThis|TopPositionAboveCube|ARandomPosition|ARandomLeftPosition|ARandomTopPosition|ARandomRightPosition)\\b"
-    },
-    {
-        "name": "string.type.string.chaos",
-        "match": "[^\\s\\S]\\b((?i)ScenarioOfMapNode|NameOfCube|NameOfPerk|StringMissingLetterX|StringConstant|GenericString|RandomName|StringAddition|GenericWord|GenericName|IfElse|StringNull)\\b"
-    },
-    {
-        "name": "comment.chaos",
-        "begin": "(\\s|^)/-(?=\\s|$)",
-        "end": "(\\s|^)-/(?=\\s|$)"
+    "text": {
+      "patterns": [
+        {
+          "comment": "Valid/invalid escape sequences",
+          "match": "(?<= )(?:(\\\\(?:A\\s+(\\w+)|B|CMANA|CN|C(?:(\\d+)(?:\\s+(\\d+)(?:\\s+(\\d+))?)?)?|N|\\\\| ))|(\\\\\\w+))\\b",
+          "captures": {
+            "1": { "name": "constant.character.escape" },
+            "2": { "name": "entity.name.class.triggers.chaos" },
+            "3": { "name": "constant.numeric.color.red.chaos" },
+            "4": { "name": "constant.numeric.color.green.chaos" },
+            "5": { "name": "constant.numeric.color.blue.chaos" },
+            "6": { "name": "unknown.chaos" }
+          }
+        },
+        {
+          "comment": "STACKING and CODE highlighting",
+          "name": "variable.parameter",
+          "match": "\\b(?:STACKING|CODE)\\b\\s+\\d+"
+        },
+        {
+          "comment": "VARIABLE + varName highlighting",
+          "name": "variable.parameter",
+          "match": "\\bVARIABLE\\b\\s+\\b[A-Z_][A-Z_0-9]*\\b"
+        }
+      ]
     }
-    ]}},"scopeName": "source.chaos"}
-    
+  },
+  "scopeName": "source.chaos"
+}
