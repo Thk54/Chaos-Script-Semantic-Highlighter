@@ -70,7 +70,7 @@ export module regexes {
 	export function stringExcluderCapture():RegExp{ // a little over verbose
 		let normalEndUser = ['(?:Ability|Flavour)?Text','Description','TODO']
 		let gainAbilityText = ['GainAbilityText']
-		return RegExp(blankBehind+/\b(?:(?:(?:Ability|Flavour)?Text|Description|TODO):|(?:GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b|\S+?/.source+blankAhead,'gis')
+		return RegExp(blankBehind+unnamedCapture(/\b(?:(?:(?:Ability|Flavour)?Text|Description|TODO):|(?<GainAbilityText>GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b|\S+?/.source)+blankAhead,'gis')
 	}
 	export function captureWordInLineFromPosition(pos:vscode.Position):RegExp {
 		return new RegExp(blankBehind+'\\S*?'+lookBehindify('^.{'+pos.character+'}')+'\\S*?'+blankAhead)

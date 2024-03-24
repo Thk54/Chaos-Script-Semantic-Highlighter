@@ -32,3 +32,5 @@ export function returnArgumentsAsString(defined:ICompound):string{
 	let temp:IArguments
 	return defined.Arguments.map((temp)=>(temp.Type)).join(' ')
 }
+
+//store 'to be filled arguments' in array and unshift stuff into the front of the array
