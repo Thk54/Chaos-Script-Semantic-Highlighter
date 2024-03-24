@@ -25,6 +25,7 @@
 					"chaos"
 				],
 				"extensions": [
+					".ch",
 					".chaos",
 					".txt",
 					".cc.txt",
