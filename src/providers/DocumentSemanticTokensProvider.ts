@@ -26,6 +26,7 @@ export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTo
 async function builderTokens(builder: vscode.SemanticTokensBuilder, compound: IDefined, document: vscode.TextDocument) {
 	const mainOffset = compound.Contents.Index; // ./regexes.stringExcluderCapture() // Mostly verbose could be more function-ized
 	for (let word of compound.Contents.Content.matchAll(/(?<=\s|^)(?:\b(?:(?:(?:Ability|Flavour)?Text|Description|TODO):|(?<GainAbilityText>GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b|\S+?)(?=\s|$)/gis)) {
+		if ((compound.Type.Define === 'TEXTTOOLTIP')) break //abort if tooltiptext but still highlight name
 		let result = getDefineFromWord(word[0].toLowerCase())
 		if (result) {
 			let tokenStart = document.positionAt(word.index + mainOffset);
