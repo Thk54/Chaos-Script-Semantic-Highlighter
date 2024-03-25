@@ -216,23 +216,30 @@
       "patterns": [
         {
           "comment": "Compound definition",
-          "begin": "(COMPOUND:)(?:\\s+(ABILITY|DOUBLE|BOOLEAN|ACTION|CUBE|PERK|STRING|POSITION|DIRECTION))?",
+          "begin": "(COMPOUND:)",
           "end": "^\\s*(End)",
           "beginCaptures": {
-            "1": { "name": "storage.type.class.compound.chaos" },
-            "2": { "name": "entity.name.class.compound.chaos" }
+            "1": { "name": "storage.type.class.compound.chaos" }
           },
           "endCaptures": {
             "1": { "name": "keyword.control.end.chaos" }
           },
           "patterns": [
             {
-              "include": "#comment"
+              "comment": "First line is name",
+              "name" : "entity.name.class.compound.chaos",
+              "begin": "\\s+(ABILITY|DOUBLE|BOOLEAN|ACTION|CUBE|PERK|STRING|POSITION|DIRECTION)",
+              "end": "^(\\w+)(.*)$",
+              "beginCaptures": {
+                "1": { "name": "entity.name.class.compound.chaos" }
+              },
+              "endCaptures": {
+                "1": { "name": "entity.name.class.compound.chaos"},
+                "2": {"name": "invalid"}
+              }
             },
             {
-              "comment": "Name line",
-              "name": "entity.name.class.compound.chaos",
-              "match": "^\\s*[a-zA-Z]+\\s*$"
+              "include": "#comment"
             },
             {
               "comment": "Tag line",
