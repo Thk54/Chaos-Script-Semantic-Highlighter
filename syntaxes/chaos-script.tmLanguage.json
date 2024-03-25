@@ -2,6 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
   "name": "Chaos Script",
   "patterns": [
+    { "include": "#comment"},
     { "include": "#cube.definition" },
     { "include": "#perk.definition" },
     { "include": "#compound.definition" },
