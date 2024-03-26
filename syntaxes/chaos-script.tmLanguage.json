@@ -20,7 +20,7 @@
       "end": "^\\s*(End)",
       "beginCaptures": {
         "1": { "name": "keyword.control.cube.chaos" },
-        "2": { "name": "entity.name.class.cube.chaos entity.name.type.class.cube.chaos" },
+        "2": { "name": "entity.name.class.cube.chaos" },
         "3": { "name": "constant.numeric.stat.mana.chaos" },
         "4": { "name": "constant.numeric.stat.health.chaos" },
         "5": { "name": "constant.numeric.stat.health.max.chaos" }
@@ -68,14 +68,14 @@
         },
         {
           "comment": "Ai Placement Rule",
-          "name": "entity.name.tag.placement.chaos entity.name.type.tag.placement.chaos",
+          "name": "entity.name.tag.placement.chaos",
           "begin": "\\s*AiPlacementRule",
           "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq))",
           "patterns": [{ "include": "#compound" }]
         },
         {
           "comment": "LevelReq Level Requirement line",
-          "name": "entity.name.tag.chaos entity.name.type.tag.chaos",
+          "name": "entity.name.tag.chaos",
           "match": "\\s*(LevelReq)( \\d*)?",
           "captures": {
             "2": { "name": "constant.numeric.level.chaos" }
@@ -83,7 +83,7 @@
         },
         {
           "comment": "IDENT Ai Identification Values",
-          "name": "entity.name.tag.ident.chaos entity.name.type.tag.ident.chaos",
+          "name": "entity.name.tag.ident.chaos",
           "match": "\\s*(IDENT)(\\s+[1-4])?(\\s+\\d+)?(\\s+\\d+)?(\\s+\\d+)?(\\s+\\d+)?",
           "captures": {
             "2": { "name": "constant.numeric.rarity.chaos" },
@@ -95,13 +95,13 @@
         },
         {
           "comment": "TYPE tag",
-          "name": "entity.name.tag.type.chaos entity.name.type.tag.type.chaos",
+          "name": "entity.name.tag.type.chaos",
           "match": "\\s*(TYPE)\\s+(Special|Spell|Wall|Factory|Attacker|Healer|Modifier|Shooter|Mana|Movement)?",
           "captures": { "2": { "name": "string" } }
         },
         {
           "comment": "Animation line",
-          "name": "entity.name.tag.animation.chaos entity.name.type.tag.animation.chaos",
+          "name": "entity.name.tag.animation.chaos",
           "begin": "\\s*(Animation:)(\\D+)(TRIGGER|BOOLEAN|DOUBLE|HP|CLOCK|TIME)\\s+(?:(0)\\s+(EQUAL\\s+)?(\\d+))?((?:\\s+\\d+)*)((?:\\s+\\w+)*)\\s*?$",
           "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq))",
           "beginCaptures": {
@@ -117,7 +117,7 @@
         },
         {
           "comment": "Visual line",
-          "name": "entity.name.tag.visual.chaos entity.name.type.tag.visual.chaos",
+          "name": "entity.name.tag.visual.chaos",
           "match": "\\s*(Visual:)(\\s+Area \\d+)?(?:\\s+(Arrow|Mist|Square|Sword|Target|Plus))?(?:\\s+(-?\\d+))?(?:\\s+(-?\\d+))?(\\s+\\d+)?(\\s+\\d+)?(\\s+\\d+)?(\\s+[1-4])?",
           "captures": {
             "2": { "name": "constant.language.area.chaos" },
@@ -144,7 +144,7 @@
       "name": "definition.perk.chaos",
       "beginCaptures": {
         "1": { "name": "keyword.control.perk.chaos" },
-        "2": { "name": "entity.name.class.perk.chaos entity.name.type.class.perk.chaos" }
+        "2": { "name": "entity.name.class.perk.chaos" }
       },
       "endCaptures": {
         "1": { "name": "keyword.control.end.chaos" }
@@ -169,21 +169,21 @@
           "patterns": [{ "include": "#text" }]
         },
         {
-          "name": "entity.name.tag.owner.chaos entity.name.type.tag.owner.chaos",
+          "name": "entity.name.tag.owner.chaos",
           "match": "\\s*BelongsTo:\\s+(CLASSSPECIES|SPECIES|CLASS|NULL|Everyone|Consumable|Active|Neutral|Terrain)?(\\w+)?",
           "captures": {
             "1": { "name": "entity.name.type.owner.chaos" },
-            "2": { "name": "entity.name.class.perk.chaos entity.name.type.class.perk.chaos" }
+            "2": { "name": "entity.name.class.perk.chaos" }
           }
         },
         {
           "comment": "Tag line",
-          "name": "entity.name.tag.chaos entity.name.type.tag.chaos",
+          "name": "entity.name.tag.chaos",
           "match": "^\\s*(Unique|OVERRIDE)"
         },
         {
           "comment": "Value line",
-          "name": "entity.name.tag.value.chaos entity.name.type.tag.value.chaos",
+          "name": "entity.name.tag.value.chaos",
           "match": "^\\s*(Value:)(\\s+-?\\d+)?",
           "captures": {
             "2": { "name": "constant.numeric.value.chaos" }
@@ -191,10 +191,10 @@
         },
         {
           "comment": "IsUpgradeFrom line",
-          "name": "entity.name.tag.upgrade entity.name.type.tag.upgrade",
+          "name": "entity.name.tag.upgrade",
           "match": "\\s*(IsUpgradeFrom:)(?:\\s+([\\w-]+)?)?(?:\\s+(-?\\d+)?)?",
           "captures": {
-            "2": { "name": "entity.name.class.perk.chaos entity.name.type.class.perk.chaos" },
+            "2": { "name": "entity.name.class.perk.chaos" },
             "3": { "name": "constant.numeric.value.offset.chaos" }
           }
         },
@@ -217,14 +217,14 @@
       "patterns": [
         {
           "comment": "First line is name",
-          "name": "entity.name.class.compound.chaos entity.name.type.class.compound.chaos",
+          "name": "entity.name.class.compound.chaos",
           "begin": "\\s+(ABILITY|DOUBLE|BOOLEAN|ACTION|CUBE|PERK|STRING|POSITION|DIRECTION)",
           "end": "^(\\w+)(.*)$",
           "beginCaptures": {
-            "1": { "name": "entity.name.class.compound.chaos entity.name.type.class.compound.chaos" }
+            "1": { "name": "entity.name.class.compound.chaos" }
           },
           "endCaptures": {
-            "1": { "name": "entity.name.class.compound.chaos entity.name.class.compound.chaos" },
+            "1": { "name": "entity.name.class.compound.chaos" },
             "2": { "name": "invalid" }
           }
         },
@@ -233,7 +233,7 @@
         },
         {
           "comment": "Tag line",
-          "name": "entity.name.tag.chaos entity.name.type.tag.chaos",
+          "name": "entity.name.tag.chaos",
           "match": "^\\b(NO_DUPLICATES|OVERRIDE)\\b"
         },
         {
@@ -250,7 +250,7 @@
           "patterns": [{ "include": "#text" }]
         },
         {
-          "name": "entity.name.tag.chaos entity.name.type.tag.chaos",
+          "name": "entity.name.tag.chaos",
           "match": "\\s*CubeColourShift:\\s+([0]?\\.[0-9]+|[1]\\.0|[0])?(?:\\s+(\\d+)(?:\\s+(\\d+)(?:\\s+(\\d+))?)?)?",
           "captures": {
             "1": { "name": "constant.numeric.color.delta.chaos" },
@@ -289,7 +289,7 @@
           "match": "^\\s*(DOACTION:)\\s+(CUBE|PERK)\\s+(\\w+)\\s+([ \\w]+)$",
           "captures": {
             "1": { "name": "entity.name.function.chaos" },
-            "2": { "name": "entity.name.class.chaos entity.name.type.class.chaos" },
+            "2": { "name": "entity.name.class.chaos" },
             "3": { "name": "storage.type.class.chaos" },
             "4": { "patterns": [{ "include": "#compound" }] }
           }
@@ -315,7 +315,7 @@
         },
         {
           "comment": "trigger",
-          "name": "entity.name.class.triggers.chaos entity.name.type.class.triggers.chaos",
+          "name": "entity.name.class.triggers.chaos",
           "match": "\\b((?i)Addon|Advanced_Hovering|AfterACubeCollides|AfterACubeCreationIsBlocked|AfterACubeDies|AfterACubeHeals|AfterACubeIsCreated|AfterACubeLosesAnAbility|AfterACubeMoves|AfterACubeTakesDamage|AfterACubeTeleports|AfterAMapIsGenerated|AfterAnotherAllyIsCreated|AfterBlockedTeleport|AfterCampaignSomething|AfterEndOfTheBattle|AfterThisCreates|AfterThisDealsDamage|AfterThisDies|AfterThisIsClicked|AfterThisIsCreated|AfterThisKills|AfterThisMoves|AfterThisMovesACube|AfterThisTakesDamage|AfterWorldSomething|AfterYouClickAPerk|AfterYouGainAPerk|AfterYouGainOrLoseCurrency|AfterYouLose|AfterYouLoseAPerk|AfterYouReroll|AfterYouUpgradeAPerk|AfterYouWin|AiAggressiveBurrowing|AiPlacement|AiPlacementAdd|AiPlacementRule|AiWarrior|AlwaysNeutral|Arcing|AreaBlast|ArmorX|Ascension|AtTheStartOfTheBattle|BaseManaGen|BeesInsideX|BeforeACubeDies|BeforeACubeGainsAnAbility|BeforeACubeHeals|BeforeACubeIsAddedToAHand|BeforeACubeIsAddedToInventory|BeforeACubeIsAddedToYourHand|BeforeACubeMoves|BeforeACubeMovesNegation|BeforeACubeTakesDamage|BeforeACubeVariableChanges|BeforeCollision|BeforeEndOfTheBattle|BeforeManaIsGenerated|BeforePercentChance|BeforeThisDealsDamage|BeforeThisDies|BeforeThisHealsACube|BeforeThisIsDrawn|BeforeThisIsHealed|BeforeThisIsPlaced|BeforeThisMoves|BeforeThisMovesNegation|BeforeThisTakesDamage|BeforeTime|BeforeYouLose|BeforeYouTakeAStep|BeforeYouWin|BetrayalX|BubbleX|Buoyant|Burning|Burrowed|Burrowing|CascadeX|ChargeEveryX|CheaperX|Climbing|Counter|Crippling|DamagePassing|DarkReturn|DeadlyX|Debt|DevouringX|DiagonalFalling|DieAfterX|DiveEnemiesX|Dragon_Egg|Eldritch|Enchantment|EnergyGenerationX|EnergyX|Eternal|Every10Minutes|Every10Seconds|Every10Ticks|Every20Seconds|Every2Seconds|Every30Seconds|Every30Ticks|Every3Seconds|Every5Seconds|Every5Ticks|EveryMinute|EverySecond|EveryTick|EveryXAcidicY|EveryXCreateCubeAbove|EveryXCreateCubeInfront|EveryXMeleeY|EveryXMinutes|EveryXSeconds|EveryXTicks|EvolveMoil|ExplodesX|ExtraLife|EyeXY|Flying|FoodX|Fragile|FreePlacement|FreeUpgrade|FrozenX|GhostDeath|GiveWay|Golden|Gravity|GrowingUp|GrowthX|Hat|HolyX|HomingX|HorizontalHomingX|Hovering|InfestedX|Inheritable|Inspatial|KeepAltitudeX|Knockback|LaserXY|LEADER|LifeDebtX|LifeSteal|LiquidX|ManaCharged|ManaStorageX|Manifold|MapGenerationTPEB|MiseryX|Neutral|NormalWinLoss|Nothing|OnDeathCreateCube|Phasing|PoisonousX|PoisonX|Projectile|ProjectileX|Quantum|RandomBonus|RandomMovementX|RegenerationX|ResetManaCostOnce|RetaliateX|Returning|ReturningZap|RoamingX|ScalingX|Shadow|ShowCERTAINTY|SilentDieAfterX|Slowed|SplinterX|Starcurse|StrengthX|Summoning_Circle_Combine|Swarm|TemporaryDoubleTime|TemporaryStrength|TemporaryUnmovable|TimeShift|Undead|UnfoldingX|Unique|Unmovable|Upgrade|UpToXEfficiency|VengeanceX|WaterX|WorthXMore|Zap)\\b"
         },
         {
@@ -327,7 +327,7 @@
           "comment": "GainAbilityText matching",
           "begin": "\\b(GainAbilityText)\\b",
           "end": "\\b(End)\\b",
-          "captures": { "1": { "name": "entity.name.method.chaos entity.name.type.function.member.chaos" } },
+          "captures": { "1": { "name": "entity.name.method.chaos" } },
           "patterns": [
             { "include": "#compound" },
             {
@@ -401,7 +401,7 @@
           "match": "(?<= )(?:(\\\\(?:A\\s+(\\w+)|B|CMANA|CN|C(?:(\\d+)(?:\\s+(\\d+)(?:\\s+(\\d+))?)?)?|N|\\\\| ))|(\\\\\\w+))\\b",
           "captures": {
             "1": { "name": "constant.character.escape" },
-            "2": { "name": "entity.name.class.triggers.chaos entity.name.type.class.triggers.chaos" },
+            "2": { "name": "entity.name.class.triggers.chaos" },
             "3": { "name": "constant.numeric.color.red.chaos" },
             "4": { "name": "constant.numeric.color.green.chaos" },
             "5": { "name": "constant.numeric.color.blue.chaos" },

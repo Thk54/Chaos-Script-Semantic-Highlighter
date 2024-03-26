@@ -29,22 +29,6 @@
 			}
 		},
 		{
-			"scope": [
-				"meta.embedded",
-				"source.groovy.embedded",
-				"string meta.image.inline.markdown",
-				"variable.legacy.builtin.python",
-				"meta.template.expression",
-				"keyword.operator",
-				"storage.modifier.import.java",
-				"variable.language.wildcard.java",
-				"storage.modifier.package.java"
-			],
-			"settings": {
-				"foreground": "#D4D4D4"
-			}
-		},
-		{
 			"scope": "header",
 			"settings": {
 				"foreground": "#000080"
@@ -52,7 +36,7 @@
 		},
 		{
 			"scope": [
-				"comment",
+				"comment", //magic string comment maps to this
 				"punctuation.definition.quote.begin.markdown"
 			],
 			"settings": {
@@ -61,22 +45,37 @@
 		},
 		{
 			"scope": [
-				"constant.language",
-				"entity.name.tag",
+				"source.groovy.embedded",
+				"variable.legacy.builtin.python",
+				"variable.language.wildcard.java",
+				"keyword.operator", //magic string operator maps to this
+				"storage.modifier.import.java",
+				"storage.modifier.package.java",
+				"string meta.image.inline.markdown",
+				"meta.template.expression",
+				"meta.embedded"
+			],
+			"settings": {
+				"foreground": "#D4D4D4"
+			}
+		},
+		{
+			"scope": [
+				"entity.name.function.preprocessor", //magic string macro maps to this
 				"markup.heading",
 				"markup.changed",
 				"meta.preprocessor",
-				"entity.name.function.preprocessor",
 				"meta.diff.header",
 				"storage",
 				"storage.modifier",
-				"keyword.operator.noexcept",
 				"storage.type",
 				"punctuation.definition.template-expression.begin",
 				"punctuation.definition.template-expression.end",
+				"punctuation.section.embedded.begin.php",
+				"punctuation.section.embedded.end.php",
 				"punctuation.section.embedded",
-				"keyword.control",
 				"keyword",
+				"keyword.control", // from dark_vs overwritten by dark_plus
 				"keyword.operator.new",
 				"keyword.operator.expression",
 				"keyword.operator.cast",
@@ -87,11 +86,12 @@
 				"keyword.operator.instanceof",
 				"keyword.operator.logical.python",
 				"keyword.operator.wordlike",
-				"punctuation.section.embedded.begin.php",
-				"punctuation.section.embedded.end.php",
+				"keyword.operator.noexcept",
 				"constant.character",
 				"constant.other.option",
-				"variable.language"
+				"constant.language",
+				"variable.language",
+				"entity.name.tag"
 			],
 			"settings": {
 				"foreground": "#569cd6"
@@ -99,8 +99,8 @@
 		},
 		{
 			"scope": [
-				"constant.numeric",
-				"variable.other.enummember",
+				"constant.numeric", //magic string number maps to this
+				"variable.other.enummember", // from dark_vs overwritten by dark_plus
 				"keyword.operator.plus.exponent",
 				"keyword.operator.minus.exponent",
 				"markup.inserted",
@@ -113,7 +113,7 @@
 			}
 		},
 		{
-			"scope": "constant.regexp",
+			"scope": "constant.regexp", //magic string regexp maps to this
 			"settings": {
 				"foreground": "#646695"
 			}
@@ -147,7 +147,7 @@
 				"support.function.git-rebase",
 				"meta.structure.dictionary.key.python",
 				"meta.object-literal.key",
-                "variable",
+                "variable", //magic strings variable, parameter, and property map to this //all of them are over-defined too
                 "meta.definition.variable.name",
                 "support.variable",
                 "entity.name.variable",
@@ -165,7 +165,7 @@
 		},
 		{
 			"scope": [
-				"string",
+				"string", //magic string string maps to this
 				"meta.embedded.assembly",
 				"meta.preprocessor.string",
 				"markup.inline.raw",
@@ -217,7 +217,7 @@
 		},
 		{
             "scope": [
-                "entity.name.function",
+                "entity.name.function", //magic string function, decorator, and method map to this
                 "support.function",
                 "support.constant.handlebars",
                 "source.powershell variable.other.member",
@@ -233,8 +233,8 @@
             "scope": [
                 "support.class",
                 "support.type",
-                "entity.name.type",
-                "entity.name.namespace",
+                "entity.name.type", //magic strings type, struct, class, interface, enum, and typeParameter map to this
+                "entity.name.namespace", //magic string namespace maps to this
                 "entity.other.attribute",
                 "entity.name.scope-resolution",
                 "entity.name.class",
@@ -276,8 +276,8 @@
         },
         {
             "scope": [
-                "keyword.control",
                 "source.cpp keyword.operator.new",
+                "keyword.control", //magic string keyword maps to this  //from dark_plus, overwrites dark_vs
                 "keyword.operator.delete",
                 "keyword.other.using",
                 "keyword.other.directive.using",
@@ -291,7 +291,7 @@
         {
             "scope": [
                 "variable.other.constant",
-                "variable.other.enummember"
+                "variable.other.enummember" //from dark_plus, overwrites dark_vs
             ],
             "settings": {
                 "foreground": "#4FC1FF"
