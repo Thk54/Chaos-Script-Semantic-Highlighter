@@ -7,6 +7,7 @@ export const fileToDefines = new Map<string,IDefined[]>();
 export const builtins = new Map<string,IBuiltins[]>();
 export const fileToNameToCompoundDefine = new Map<string,Map<string,ICompound>>();
 export const fileToNameToDefine = new Map<string,Map<string,IDefined>>();
+export const nameToDefines = new Map<string,IDefined[]>();
 
 export const compoundTypeMap = new Map<string, number>();
 export const defineTypeMap = new Map<string, number>();
@@ -79,22 +80,18 @@ export const generateMaps = (function () {
 	];
 	chaosMappings.forEach((TypeOfCompound, index) => typesLegend.set(TypeOfCompound, index));
 })();
-
-export interface IBuiltins {
+interface IProtoDefine{
 	Type: IType;
 	Name: IName;
+	Uri: string;
+}
+export interface IBuiltins extends IProtoDefine{
 	Arguments?: IArguments[];
-	Uri?:string
 }
-export interface IDefined {
-	Type: IType;
+export interface IDefined extends IProtoDefine{
 	Contents: IContents;
-	Name: IName;
-	Uri?:string
 }
-export interface ICompound extends IDefined, IBuiltins {
-	Name: IName;
-}
+export interface ICompound extends IDefined, IBuiltins {}
 export interface IType {
 	Define:string
 	Compound?:string
@@ -123,6 +120,8 @@ export interface GatherResults {
 	Document: vscode.TextDocument
 	Comments?: RegExpMatchArray[]
 	Scenarios?: RegExpMatchArray[]
+	ArtOverrides?: IDefined[]//to make specilized type for
+	DoActions?: IDefined[]//to make specilized type for
 }
 interface Token {
 	line: number;

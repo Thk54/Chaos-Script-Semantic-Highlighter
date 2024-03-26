@@ -20,10 +20,10 @@ export module regexes {
 	}
 
 	export function generatePrimaryCapture():RegExp{
-		return RegExp(definesDeclarationCapture()+unnamedCapture(unnamedCapture(/*End termintated defines*/unnamedCapture(compoundSubCapture()+'|'+cubeSubCapture()+'|'+perkSubCapture()+'|'+textTooltipSubCapture())+'\\b'+caseInsensify('End')+'\\b')/* +'|'+artoverrideSubCapture() */),"gsd")
+		return RegExp(definesDeclarationCapture()+unnamedCapture(unnamedCapture(/*End termintated defines*/unnamedCapture(compoundSubCapture()+'|'+cubeSubCapture()+'|'+perkSubCapture()+'|'+textTooltipSubCapture())+'\\b'+caseInsensify('End')+'\\b')+'|'+artoverrideSubCapture()),"gsd")
 	}
 	function definesDeclarationCapture():string{
-		let possibleDefines:string[] = ['compound', 'cube', 'perk', /* 'doaction', 'scenario', 'artoverride',*/ 'texttooltip']
+		let possibleDefines:string[] = ['compound', 'cube', 'perk', /* 'doaction', 'scenario',*/ 'artoverride', 'texttooltip']
 		return (/\b/.source+namedCapture('TypeOfDEFINE',caseInsensify(possibleDefines).join('|'))+/:\s/.source)
 	}
 	function compoundSubCapture():string{

@@ -2,11 +2,11 @@ import * as vscode from "vscode";
 import { IDefined, ICompound, IArguments, GatherResults } from './constants';
 import { regexes } from "./regexes";
 
-async function packIntoIDefined(capture: RegExpMatchArray): Promise<IDefined>{
+async function packIntoIDefined(capture: RegExpMatchArray,uri:string): Promise<IDefined>{
 	let defineType:string = capture?.groups['TypeOfDEFINE']?.toUpperCase() ?? "ABORT"
 	switch (defineType) {
 	case 'COMPOUND':
-		return (packIntoICompound(capture))
+		return (packIntoICompound(capture,uri))
 	case 'ARTOVERRIDE':
 		//ArtOverrideFolder ArtOverrideSubstring ArtOverridePerk ArtOverrideCube ArtOverrideName
 		let name = capture.groups['ARTOVERRIDEName'] ? 'ARTOVERRIDEName' : capture.groups['ARTOVERRIDECube'] ? 'ARTOVERRIDECube' : capture.groups['ARTOVERRIDEPerk'] ? 'ARTOVERRIDEPerk' : capture.groups['ARTOVERRIDEFolder']&&capture.groups['ARTOVERRIDESubstring'] ? ('Files in folder: "'+capture.groups['ARTOVERRIDEFolder']+'" containing "'+capture.groups['ARTOVERRIDESubstring']+'"') : '< Malformed >';
@@ -14,7 +14,8 @@ async function packIntoIDefined(capture: RegExpMatchArray): Promise<IDefined>{
 		return ( {
 			Type: {Define:defineType}, // "[Boolean] ? [thing] : [thing2]" is an if else statement
 			Contents: {Capture:{Text:capture[0],Index:capture.index}, Content: capture[0].slice(12).trimStart(), Index: capture.index+(capture[0].length-capture[0].slice(12).trimStart().length)},
-			Name: {Name: 'ARTOVERRIDE'/* capture?.groups[name] ? name : capture.groups[name].toLowerCase() */, Index: capture.index/* capture.indices.groups[name][0] ?? capture[0].match(/\S*\s*\S*$/).index+capture.index */}
+			Name: {Name: 'ARTOVERRIDE'/* capture?.groups[name] ? name : capture.groups[name].toLowerCase() */, Index: capture.index/* capture.indices.groups[name][0] ?? capture[0].match(/\S*\s*\S*$/).index+capture.index */},
+			Uri:uri
 		})
 	case 'ABORT':
 		console.log('IDefined ABORT on capture: '+capture[0])
@@ -23,13 +24,13 @@ async function packIntoIDefined(capture: RegExpMatchArray): Promise<IDefined>{
 		return ({
 			Type: {Define:defineType},
 			Contents: {Capture:{Text:capture[0],Index:capture.index}, Content: capture.groups['ContentsOf'+defineType], Index: capture.indices.groups['ContentsOf'+defineType][0]},
-			Name: {Name: capture.groups['NameOf'+defineType].toLowerCase(), AsFound:capture.groups['NameOf'+defineType], Index: capture.indices.groups['NameOf'+defineType][0]}
+			Name: {Name: capture.groups['NameOf'+defineType].toLowerCase(), AsFound:capture.groups['NameOf'+defineType], Index: capture.indices.groups['NameOf'+defineType][0]},
+			Uri:uri
 		})
 	}
 }
-function packIntoICompound(capture: RegExpMatchArray): ICompound {
+function packIntoICompound(capture: RegExpMatchArray,uri:string): ICompound {
 	let args: IArguments[] = [];
-	// ./regexes.genericsCapture()
 	for (let generic of capture.groups['ContentsOfCOMPOUND'].matchAll(regexes.genericsCapture)) {
 		if (generic.groups['CompoundGenerics'])
 			args.push({
@@ -42,35 +43,45 @@ function packIntoICompound(capture: RegExpMatchArray): ICompound {
 		Type: {Define:'COMPOUND', Compound:capture.groups['TypeOfCOMPOUND'].toUpperCase()},
 		Contents: {Capture:{Text:capture[0],Index:capture.index}, Content: capture.groups['ContentsOfCOMPOUND'], Index: capture.indices.groups['ContentsOfCOMPOUND'][0] },
 		Name: { Name: capture.groups['NameOfCOMPOUND'].toLowerCase(), AsFound:capture.groups['NameOfCOMPOUND'], Index: capture.indices.groups['NameOfCOMPOUND'][0] },
+		Uri:uri,
 		Arguments: args
 	};
 }
-export async function gatherDefinitions(document: vscode.TextDocument): Promise<GatherResults> {
-	let iDefineds:IDefined[] = []
-	let text: string = document.getText();
+export async function gatherDefinitions(document:{ doc?: vscode.TextDocument; uri?: vscode.Uri; }): Promise<GatherResults> {
+	let iDefineds:IDefined[] = [] 
+	document = <vscode.TextDocument>(document?.doc ?? (await vscode.workspace.openTextDocument(document.uri)));
+	let text: string = (<vscode.TextDocument>document).getText()
 	let comments = []
-	let commentsRegEx = text.matchAll(regexes.commentCapture); // Find all the comments // ./regexes.commentCapture()
+	let commentsRegEx = text.matchAll(regexes.commentCapture); // Find all the comments
 	for (let comment of commentsRegEx) {
 		delete(comment.input)
 		text = text.replace(comment[0], ''.padEnd(comment[0].length)); // replace them with spaces to preserve character count
 		comments.push(comment)
 	}
 	let scenarios = []
-	let scenariosRegEx = text.matchAll(regexes.scenarioCapture); // Match scenarios // ./regexes.scenarioCapture()
+	let scenariosRegEx = text.matchAll(regexes.scenarioCapture); // Match scenarios
 	for (let scenario of scenariosRegEx) {//todo actually handle |[Ss][Cc][Ee][Nn][Aa][Rr][Ii][Oo] and DOACTION
 		delete(scenario.input)
 		text = text.replace(scenario[0], ''.padEnd(scenario[0].length)); // replace them with spaces to preserve character count
 		scenarios.push(scenario)
-		for (let comment of scenario[0].matchAll(regexes.scenarioCommentsCapture/* /(?<=\s|^)\/\/\s(?:.*?\s)?\/\/(?=\s|$)/gs */)){ //./regexes.scenarioCommentsCapture()
+		for (let comment of scenario[0].matchAll(regexes.scenarioCommentsCapture)){
 			delete(comment.input)
 			comment.index = scenario.index+comment.index
 			comments.push(comment)
 		}
 	}
-	// ./regexes.primaryCapture()
+	let promises = []
 	for (let match of text.matchAll(regexes.primaryCapture)) {
-		iDefineds.push(await packIntoIDefined(match))
-	} return {Defines:iDefineds, Document:document, Comments:comments.length ? comments : null, Scenarios:scenarios.length ? scenarios : null}
+		promises.push(packIntoIDefined(match,document.uri.toString()))
+		text = text.replace(match[0], ''.padEnd(match[0].length)); // replace them with spaces to preserve character count
+	}
+	let artoverrides = <any>[]
+	for (let define of promises){
+		(await define).Type.Define !== 'ARTOVERRIDE' ? iDefineds.push(await define) : artoverrides.push(await define)
+	}
+	let doactions = <any>[]
+	return {Defines:iDefineds, Document:<vscode.TextDocument>document, ArtOverrides:artoverrides.length ? artoverrides : null,
+		DoActions:doactions.length ? doactions : null, Comments:comments.length ? comments : null, Scenarios:scenarios.length ? scenarios : null}
 /* groups: 
 	TypeOfDefine 
 		TypeOfCompound NameOfCompound ContentsOfCompound 
