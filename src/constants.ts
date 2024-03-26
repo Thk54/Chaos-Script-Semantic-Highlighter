@@ -82,12 +82,8 @@ export const generateMaps = (function () {
 
 export interface IBuiltins {
 	Type: IType;
-	Name: IBuiltInName;
+	Name: IName;
 	Arguments?: IArguments[];
-}
-export interface IBuiltInName {
-	Name: string;
-	AsFound?: string;
 }
 export interface IDefined {
 	Type: IType;
@@ -103,9 +99,10 @@ export interface IType {
 	Compound?:string
 	Override?:boolean
 }
-interface IName extends IBuiltInName{
+interface IName{
 	Name: string;
-	Index?: number;
+	AsFound?: string;
+	Index: number;
 }
 interface IContents {
 	Capture: ICapture;

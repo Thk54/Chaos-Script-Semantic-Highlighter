@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { updateFilesMapsIfEntries } from '../mapsManager';
+import { updateFilesMapsIfEntries } from './commonFunctions';
 import { typesLegend, fileToDefines, IDefined, fileToNameToCompoundDefine, fileToNameToDefine } from '../constants';
 import { getDefineFromWord, typeStringifyer } from "./commonFunctions";
 
