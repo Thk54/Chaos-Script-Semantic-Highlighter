@@ -1,36 +1,43 @@
 import * as vscode from "vscode";
 export module regexes {
 
-	const blankBehind = /(?<=\s|^)/.source
+	const blankBehind = /(?<=\s|^)/.source //need to say above the exported generated constants so the generators don't try to use these constants before they are initialized
 	const blankAhead = /(?=\s|$)/.source
-
+	
+	export const commentCapture = generateCommentCapture()
+	export const scenarioCapture = generateScenarioCapture()
+	export const primaryCapture = generatePrimaryCapture()
+	export const genericsCapture = generateGenericsCapture()
+	export const scenarioCommentsCapture = generateScenarioCommentsCapture()
+	export const stringExcluderCapture = generateStringExcluderCapture()
+	
 	export function buildRegexes():RegExp[]{
 		let outputRegexes:RegExp[] = []
-		outputRegexes.push(commentCapture())
-		outputRegexes.push(scenarioCapture())
-		outputRegexes.push(primaryCapture())
-		outputRegexes.push(genericsCapture())
-		outputRegexes.push(scenarioCommentsCapture())
-		outputRegexes.push(stringExcluderCapture())
+		outputRegexes.push(generateCommentCapture())
+		outputRegexes.push(generateScenarioCapture())
+		outputRegexes.push(generatePrimaryCapture())
+		outputRegexes.push(generateGenericsCapture())
+		outputRegexes.push(generateScenarioCommentsCapture())
+		outputRegexes.push(generateStringExcluderCapture())
 		for (let regex of outputRegexes){
 			console.log(regex)
 		}
 		return outputRegexes
 	}
-
-	export function commentCapture():RegExp{
+	
+	export function generateCommentCapture():RegExp{
 		return RegExp(blankBehind+/\/-(?=\s).*?\s-\//.source+blankAhead,'gs')
 	}
-
-	export function scenarioCapture():RegExp{
+	
+	export function generateScenarioCapture():RegExp{
 		return RegExp(/\b/.source+caseInsensify('Scenario')+/\:\s[\s\S]*?\b[Ss][Ee][Nn][Dd]\b/.source,'gs')
 	}
 
-	export function primaryCapture():RegExp{
-		return RegExp(definesDeclarationCapture()+unnamedCapture(unnamedCapture(/*End termintated defines*/unnamedCapture(compoundSubCapture()+'|'+cubeSubCapture()+'|'+perkSubCapture()+'|'+textTooltipSubCapture())+'\\b'+caseInsensify('End')+'\\b')+'|'+artoverrideSubCapture()),"gsd")
+	export function generatePrimaryCapture():RegExp{
+		return RegExp(definesDeclarationCapture()+unnamedCapture(unnamedCapture(/*End termintated defines*/unnamedCapture(compoundSubCapture()+'|'+cubeSubCapture()+'|'+perkSubCapture()+'|'+textTooltipSubCapture())+'\\b'+caseInsensify('End')+'\\b')/* +'|'+artoverrideSubCapture() */),"gsd")
 	}
 	function definesDeclarationCapture():string{
-		let possibleDefines:string[] = ['compound', 'cube', 'perk', /* 'scenario', */ 'artoverride', 'texttooltip']
+		let possibleDefines:string[] = ['compound', 'cube', 'perk', /* 'doaction', 'scenario', 'artoverride',*/ 'texttooltip']
 		return (/\b/.source+namedCapture('TypeOfDEFINE',caseInsensify(possibleDefines).join('|'))+/:\s/.source)
 	}
 	function compoundSubCapture():string{
@@ -60,19 +67,19 @@ export module regexes {
 		unnamedCapture('CUBE\\s+'+namedCapture('ARTOVERRIDECube', '\\S+')), 
 		namedCapture('ARTOVERRIDEName','\\S+')].join('|'))+blankAhead))
 	}
-	export function genericsCapture():RegExp{
+	export function generateGenericsCapture():RegExp{
 		let genericTypes = ['Perk', 'Position', 'String', 'Word', 'Name', 'Action', 'Boolean', 'Direction', 'Double', 'Constant', 'Cube', 'Stacking', 'Time']
 		return RegExp('(?:\\b(?:Text:|GainAbilityText)\\s.*?\\b[Ee][Nn][Dd]\\b)|'+namedCapture('CompoundGenerics', caseInsensify('Generic')+unnamedCapture(caseInsensify(genericTypes).join('|'))+'\\b'),'gd')
 	}
-	export function scenarioCommentsCapture():RegExp{
+	export function generateScenarioCommentsCapture():RegExp{
 		return RegExp(blankBehind+'//\\s(?:.*?\\s)?//'+blankAhead,'gs')
 	}
-	export function stringExcluderCapture():RegExp{ // a little over verbose
+	export function generateStringExcluderCapture():RegExp{ // a little over verbose
 		let normalEndUser = ['(?:Ability|Flavour)?Text','Description','TODO']
 		let gainAbilityText = ['GainAbilityText']
 		return RegExp(blankBehind+unnamedCapture(/\b(?:(?:(?:Ability|Flavour)?Text|Description|TODO):|(?<GainAbilityText>GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b|\S+?/.source)+blankAhead,'gis')
 	}
-	export function captureWordInLineFromPosition(pos:vscode.Position):RegExp {
+	export function generateCaptureWordInLineFromPositionRegEx(pos:vscode.Position):RegExp {
 		return new RegExp(blankBehind+'\\S*?'+lookBehindify('^.{'+pos.character+'}')+'\\S*?'+blankAhead)
 	}
 	function unnamedCapture(input:string):string{
