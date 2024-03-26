@@ -84,6 +84,7 @@ export interface IBuiltins {
 	Type: IType;
 	Name: IName;
 	Arguments?: IArguments[];
+	Uri?:string
 }
 export interface IDefined {
 	Type: IType;
@@ -97,7 +98,6 @@ export interface ICompound extends IDefined, IBuiltins {
 export interface IType {
 	Define:string
 	Compound?:string
-	Override?:boolean
 }
 interface IName{
 	Name: string;

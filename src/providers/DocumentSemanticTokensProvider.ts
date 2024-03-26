@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import { updateFilesMapsIfEntries } from './commonFunctions';
+import { updateFilesMapsIfEntries, getDefineFromWord, typeStringifyer } from "./commonFunctions";
 import { typesLegend, fileToDefines, IDefined, fileToNameToCompoundDefine, fileToNameToDefine } from '../constants';
-import { getDefineFromWord, typeStringifyer } from "./commonFunctions";
+import { regexes } from '../regexes';
 
 
 export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
@@ -25,7 +25,7 @@ export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTo
 }
 async function builderTokens(builder: vscode.SemanticTokensBuilder, compound: IDefined, document: vscode.TextDocument) {
 	const mainOffset = compound.Contents.Index; // ./regexes.stringExcluderCapture() // Mostly verbose could be more function-ized
-	for (let word of compound.Contents.Content.matchAll(/(?<=\s|^)(?:\b(?:(?:(?:Ability|Flavour)?Text|Description|TODO):|(?<GainAbilityText>GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b|\S+?)(?=\s|$)/gis)) {
+	for (let word of compound.Contents.Content.matchAll(regexes.stringExcluderCapture /*/(?<=\s|^)(?:\b(?:(?:(?:Ability|Flavour)?Text|Description|TODO):|(?<GainAbilityText>GainAbilityText))\s(?:.(?!\b[Ee][Nn][Dd]\b))*?.\b[Ee][Nn][Dd]\b|\S+?)(?=\s|$)/gis*/)) {
 		if ((compound.Type.Define === 'TEXTTOOLTIP')) break //abort if tooltiptext but still highlight name
 		let result = getDefineFromWord(word[0].toLowerCase())
 		if (result) {
