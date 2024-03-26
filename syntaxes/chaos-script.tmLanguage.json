@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
   "name": "Chaos Script",
   "patterns": [
-    { "include": "#comment"},
+    { "include": "#comment" },
     { "include": "#cube.definition" },
     { "include": "#perk.definition" },
     { "include": "#compound.definition" },
@@ -10,266 +10,254 @@
   ],
   "repository": {
     "comment": {
-      "name": "comment.chaos",
+      "name": "comment.block.chaos",
       "begin": "(\\s|^)/-(?=\\s|$)",
       "end": "(\\s|^)-/(?=\\s|$)"
     },
     "cube.definition": {
+      "comment": "Cube definition",
+      "begin": "(CUBE:)\\s+(\\w+)?(?:\\s+(\\d+)(?:\\s+(\\d+)(?:\\s+(\\d+))?)?)?",
+      "end": "^\\s*(End)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.cube.chaos" },
+        "2": { "name": "entity.name.class.cube.chaos" },
+        "3": { "name": "constant.numeric.stat.mana.chaos" },
+        "4": { "name": "constant.numeric.stat.health.chaos" },
+        "5": { "name": "constant.numeric.stat.health.max.chaos" }
+      },
+      "endCaptures": {
+        "1": { "name": "keyword.control.end.chaos" }
+      },
       "patterns": [
         {
-          "comment": "Cube definition",
-          "begin": "(CUBE:)\\s+(\\w+)?(?:\\s+(\\d+)(?:\\s+(\\d+)(?:\\s+(\\d+))?)?)?",
-          "end": "^\\s*(End)",
+          "comment": "Tag line",
+          "name": "storage.type.chaos",
+          "match": "\\s*(TOKEN|OVERRIDE)"
+        },
+        {
+          "comment": "Action line",
+          "begin": "\\s*(Ability:)",
+          "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq|Ability))",
+          "beginCaptures": { "1": { "name": "storage.type.function.chaos" } },
+          "contentName": "unknown.chaos",
+          "patterns": [{ "include": "#compound" }]
+        },
+        {
+          "comment": "Extra action line",
+          "begin": "\\s*(ExtraTrigger:)",
+          "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq|Ability))",
+          "beginCaptures": { "1": { "name": "storage.type.function" } },
+          "contentName": "unknown.chaos",
+          "patterns": [{ "include": "#compound" }]
+        },
+        {
+          "comment": "Text line",
+          "begin": "^\\s*(Text:)",
+          "end": "\\b(End)\\b",
+          "captures": { "1": { "name": "storage.type.string.chaos" } },
+          "contentName": "string.quoted.triple.chaos",
+          "patterns": [{ "include": "#text" }]
+        },
+        {
+          "comment": "Flavour text line",
+          "name": "storage.type.string.text.chaos",
+          "begin": "\\s*FlavourText:",
+          "end": "End",
+          "contentName": "string.quoted.triple.chaos markup.italic",
+          "patterns": [{ "include": "#text" }]
+        },
+        {
+          "comment": "Ai Placement Rule",
+          "name": "entity.name.tag.placement.chaos",
+          "begin": "\\s*AiPlacementRule",
+          "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq))",
+          "patterns": [{ "include": "#compound" }]
+        },
+        {
+          "comment": "LevelReq Level Requirement line",
+          "name": "entity.name.tag.chaos",
+          "match": "\\s*(LevelReq)( \\d*)?",
+          "captures": {
+            "2": { "name": "constant.numeric.level.chaos" }
+          }
+        },
+        {
+          "comment": "IDENT Ai Identification Values",
+          "name": "entity.name.tag.ident.chaos",
+          "match": "\\s*(IDENT)(\\s+[1-4])?(\\s+\\d+)?(\\s+\\d+)?(\\s+\\d+)?(\\s+\\d+)?",
+          "captures": {
+            "2": { "name": "constant.numeric.rarity.chaos" },
+            "3": { "name": "constant.numeric.worth.offense.chaos" },
+            "4": { "name": "constant.numeric.worth.defense.chaos" },
+            "5": { "name": "constant.numeric.worth.long-term.chaos" },
+            "6": { "name": "constant.numeric.worth.range.chaos" }
+          }
+        },
+        {
+          "comment": "TYPE tag",
+          "name": "entity.name.tag.type.chaos",
+          "match": "\\s*(TYPE)\\s+(Special|Spell|Wall|Factory|Attacker|Healer|Modifier|Shooter|Mana|Movement)?",
+          "captures": { "2": { "name": "string" } }
+        },
+        {
+          "comment": "Animation line",
+          "name": "entity.name.tag.animation.chaos",
+          "begin": "\\s*(Animation:)(\\D+)(TRIGGER|BOOLEAN|DOUBLE|HP|CLOCK|TIME)\\s+(?:(0)\\s+(EQUAL\\s+)?(\\d+))?((?:\\s+\\d+)*)((?:\\s+\\w+)*)\\s*?$",
+          "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq))",
           "beginCaptures": {
-            "1": { "name": "storage.type.class.cube.chaos" },
-            "2": { "name": "entity.name.class.cube.chaos" },
-            "3": { "name": "constant.numeric.stat.mana.chaos" },
-            "4": { "name": "constant.numeric.stat.health.chaos" },
-            "5": { "name": "constant.numeric.stat.health.max.chaos" }
+            "2": { "name": "string" },
+            "3": { "name": "entity.name.type.animation.chaos" },
+            "4": { "name": "constant.numeric.zero.chaos" },
+            "5": { "name": "constant.language.equal.chaos" },
+            "6": { "name": "constant.numeric.frame-count.chaos" },
+            "7": { "name": "constant.numeric.interval.chaos" },
+            "8": { "patterns": [{ "include": "#compound" }] }
           },
-          "endCaptures": {
-            "1": { "name": "keyword.control.end.chaos" }
-          },
-          "patterns": [
-            {
-              "comment": "Tag line",
-              "name": "entity.name.tag.chaos",
-              "match": "\\s*(TOKEN|OVERRIDE)"
-            },
-            {
-              "comment": "Action line",
-              "begin": "\\s*(Ability:)",
-              "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq|Ability))",
-              "beginCaptures": { "1": { "name": "entity.name.method.chaos" } },
-              "contentName": "unknown.chaos",
-              "patterns": [{ "include": "#compound" }]
-            },
-            {
-              "comment": "Extra action line",
-              "begin": "\\s*(ExtraTrigger:)",
-              "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq|Ability))",
-              "beginCaptures": { "1": { "name": "entity.name.method.chaos" } },
-              "contentName": "unknown.chaos",
-              "patterns": [{ "include": "#compound" }]
-            },
-            {
-              "comment": "Text line",
-              "name": "constant.language.text.chaos",
-              "begin": "^\\s*Text:",
-              "end": "\\bEnd\\b",
-              "contentName": "string.quoted.triple.chaos",
-              "patterns": [{ "include": "#text" }]
-            },
-            {
-              "comment": "Flavour text line",
-              "name": "constant.language.text.chaos",
-              "begin": "\\s*FlavourText:",
-              "end": "End",
-              "contentName": "string.quoted.triple.chaos markup.italic",
-              "patterns": [{ "include": "#text" }]
-            },
-            {
-              "comment": "Ai Placement Rule",
-              "name": "entity.name.tag.placement.chaos",
-              "begin": "\\s*AiPlacementRule",
-              "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq))",
-              "patterns": [{ "include": "#compound" }]
-            },
-            {
-              "comment": "LevelReq Level Requirement line",
-              "name": "entity.name.tag.chaos",
-              "match": "\\s*(LevelReq)( \\d*)?",
-              "captures": {
-                "2": { "name": "constant.numeric.level.chaos" }
-              }
-            },
-            {
-              "comment": "IDENT Ai Identification Values",
-              "name": "entity.name.tag.ident.chaos",
-              "match": "\\s*(IDENT)(\\s+[1-4])?(\\s+\\d+)?(\\s+\\d+)?(\\s+\\d+)?(\\s+\\d+)?",
-              "captures": {
-                "2": { "name": "constant.numeric.rarity.chaos" },
-                "3": { "name": "constant.numeric.worth.offense.chaos" },
-                "4": { "name": "constant.numeric.worth.defense.chaos" },
-                "5": { "name": "constant.numeric.worth.long-term.chaos" },
-                "6": { "name": "constant.numeric.worth.range.chaos" }
-              }
-            },
-            {
-              "comment": "TYPE tag",
-              "name": "entity.name.tag.type.chaos",
-              "match": "\\s*(TYPE)\\s+(Special|Spell|Wall|Factory|Attacker|Healer|Modifier|Shooter|Mana|Movement)?",
-              "captures": { "2": { "name": "string" } }
-            },
-            {
-              "comment": "Animation line",
-              "name": "entity.name.tag.animation.chaos",
-              "begin": "\\s*(Animation:)(\\D+)(TRIGGER|BOOLEAN|DOUBLE|HP|CLOCK|TIME)\\s+(?:(0)\\s+(EQUAL\\s+)?(\\d+))?((?:\\s+\\d+)*)((?:\\s+\\w+)*)\\s*?$",
-              "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq))",
-              "beginCaptures": {
-                "2": { "name": "string" },
-                "3": { "name": "entity.name.type.animation.chaos" },
-                "4": { "name": "constant.numeric.zero.chaos" },
-                "5": { "name": "constant.language.equal.chaos" },
-                "6": { "name": "constant.numeric.frame-count.chaos" },
-                "7": { "name": "constant.numeric.interval.chaos" },
-                "8": { "patterns": [{ "include": "#compound" }] }
-              },
-              "patterns": [{ "include": "#compound" }]
-            },
-            {
-              "comment": "Visual line",
-              "name": "entity.name.tag.visual.chaos",
-              "match": "\\s*(Visual:)(\\s+Area \\d+)?(?:\\s+(Arrow|Mist|Square|Sword|Target|Plus))?(?:\\s+(-?\\d+))?(?:\\s+(-?\\d+))?(\\s+\\d+)?(\\s+\\d+)?(\\s+\\d+)?(\\s+[1-4])?",
-              "captures": {
-                "2": { "name": "constant.language.area.chaos" },
-                "3": { "name": "entity.name.type.visual.chaos" },
-                "4": { "name": "constant.numeric.coordinate.x.chaos" },
-                "5": { "name": "constant.numeric.coordinate.y.chaos" },
-                "6": { "name": "constant.numeric.color.red.chaos" },
-                "7": { "name": "constant.numeric.color.green.chaos" },
-                "8": { "name": "constant.numeric.color.blue.chaos" },
-                "9": { "name": "constant.numeric.rotation.chaos" }
-              }
-            },
-            {
-              "comment": "Add invalid scope to all unmatched",
-              "name": "unknown.chaos",
-              "match": ".+"
-            }
-          ]
+          "patterns": [{ "include": "#compound" }]
+        },
+        {
+          "comment": "Visual line",
+          "name": "entity.name.tag.visual.chaos",
+          "match": "\\s*(Visual:)(\\s+Area \\d+)?(?:\\s+(Arrow|Mist|Square|Sword|Target|Plus))?(?:\\s+(-?\\d+))?(?:\\s+(-?\\d+))?(\\s+\\d+)?(\\s+\\d+)?(\\s+\\d+)?(\\s+[1-4])?",
+          "captures": {
+            "2": { "name": "constant.language.area.chaos" },
+            "3": { "name": "entity.name.type.visual.chaos" },
+            "4": { "name": "constant.numeric.coordinate.x.chaos" },
+            "5": { "name": "constant.numeric.coordinate.y.chaos" },
+            "6": { "name": "constant.numeric.color.red.chaos" },
+            "7": { "name": "constant.numeric.color.green.chaos" },
+            "8": { "name": "constant.numeric.color.blue.chaos" },
+            "9": { "name": "constant.numeric.rotation.chaos" }
+          }
+        },
+        {
+          "comment": "Add invalid scope to all unmatched",
+          "name": "unknown.chaos",
+          "match": ".+"
         }
       ]
     },
     "perk.definition": {
+      "comment": "Perk definition",
+      "begin": "((?:PERK|Perk):)(?:\\s+([\\w-]+))?",
+      "end": "^\\s*(End)",
+      "name": "definition.perk.chaos",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.perk.chaos" },
+        "2": { "name": "entity.name.class.perk.chaos" }
+      },
+      "endCaptures": {
+        "1": { "name": "keyword.control.end.chaos" }
+      },
       "patterns": [
         {
-          "comment": "Perk definition",
-          "begin": "((?:PERK|Perk):)(\\s+[\\w-]+)?",
-          "end": "^\\s*(End)",
-          "name": "definition.perk.chaos",
-          "beginCaptures": {
-            "1": { "name": "storage.type.class.perk.chaos" },
+          "include": "#comment"
+        },
+        {
+          "comment": "Action line",
+          "name": "entity.name.function.member.chaos",
+          "begin": "\\s*Ability:",
+          "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq|Ability))",
+          "patterns": [{ "include": "#compound" }]
+        },
+        {
+          "comment": "Description line",
+          "name": "constant.language.text.chaos",
+          "begin": "^\\s*Description:",
+          "end": "\\bEnd\\b",
+          "contentName": "string.quoted.triple.chaos",
+          "patterns": [{ "include": "#text" }]
+        },
+        {
+          "name": "entity.name.tag.owner.chaos",
+          "match": "\\s*BelongsTo:\\s+(CLASSSPECIES|SPECIES|CLASS|NULL|Everyone|Consumable|Active|Neutral|Terrain)?(\\w+)?",
+          "captures": {
+            "1": { "name": "entity.name.type.owner.chaos" },
             "2": { "name": "entity.name.class.perk.chaos" }
-          },
-          "endCaptures": {
-            "1": { "name": "keyword.control.end.chaos" }
-          },
-          "patterns": [
-            {
-              "include": "#comment"
-            },
-            {
-              "comment": "Action line",
-              "name": "entity.name.method",
-              "begin": "\\s*Ability:",
-              "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq|Ability))",
-              "patterns": [{ "include": "#compound" }]
-            },
-            {
-              "comment": "Description line",
-              "name": "constant.language.text.chaos",
-              "begin": "^\\s*Description:",
-              "end": "\\bEnd\\b",
-              "contentName": "string.quoted.triple.chaos",
-              "patterns": [{ "include": "#text" }]
-            },
-            {
-              "name": "entity.name.tag.owner.chaos",
-              "match": "\\s*BelongsTo:\\s+(CLASSSPECIES|SPECIES|CLASS|NULL|Everyone|Consumable|Active|Neutral|Terrain)?(\\w+)?",
-              "captures": {
-                "1": { "name": "entity.name.type.owner.chaos" },
-                "2": { "name": "entity.name.class.perk.chaos" }
-              }
-            },
-            {
-              "comment": "Tag line",
-              "name": "entity.name.tag.chaos",
-              "match": "^\\s*(Unique|OVERRIDE)"
-            },
-            {
-              "comment": "Value line",
-              "name": "entity.name.tag.value.chaos",
-              "match": "^\\s*(Value:)(\\s+-?\\d+)?",
-              "captures": {
-                "2": { "name": "constant.numeric.value.chaos" }
-              }
-            },
-            {
-              "comment": "IsUpgradeFrom line",
-              "name": "entity.name.tag.upgrade",
-              "match": "\\s*(IsUpgradeFrom:)(?:\\s+([\\w-]+)?)?(?:\\s+(-?\\d+)?)?",
-              "captures": {
-                "2": { "name": "entity.name.class.perk.chaos" },
-                "3": { "name": "constant.numeric.value.offset.chaos" }
-              }
-            },
-            {
-              "name": "unknown.chaos",
-              "match": ".+"
-            }
-          ]
+          }
+        },
+        {
+          "comment": "Tag line",
+          "name": "entity.name.tag.chaos",
+          "match": "^\\s*(Unique|OVERRIDE)"
+        },
+        {
+          "comment": "Value line",
+          "name": "entity.name.tag.value.chaos",
+          "match": "^\\s*(Value:)(\\s+-?\\d+)?",
+          "captures": {
+            "2": { "name": "constant.numeric.value.chaos" }
+          }
+        },
+        {
+          "comment": "IsUpgradeFrom line",
+          "name": "entity.name.tag.upgrade",
+          "match": "\\s*(IsUpgradeFrom:)(?:\\s+([\\w-]+)?)?(?:\\s+(-?\\d+)?)?",
+          "captures": {
+            "2": { "name": "entity.name.class.perk.chaos" },
+            "3": { "name": "constant.numeric.value.offset.chaos" }
+          }
+        },
+        {
+          "name": "unknown.chaos",
+          "match": ".+"
         }
       ]
     },
     "compound.definition": {
+      "comment": "Compound definition",
+      "begin": "(COMPOUND:)",
+      "end": "^\\s*(End)",
+      "beginCaptures": {
+        "1": { "name": "keyword.control.compound.chaos" }
+      },
+      "endCaptures": {
+        "1": { "name": "keyword.control.end.chaos" }
+      },
       "patterns": [
         {
-          "comment": "Compound definition",
-          "begin": "(COMPOUND:)",
-          "end": "^\\s*(End)",
+          "comment": "First line is name",
+          "name": "entity.name.class.compound.chaos",
+          "begin": "\\s+(ABILITY|DOUBLE|BOOLEAN|ACTION|CUBE|PERK|STRING|POSITION|DIRECTION)",
+          "end": "^(\\w+)(.*)$",
           "beginCaptures": {
-            "1": { "name": "storage.type.class.compound.chaos" }
+            "1": { "name": "entity.name.class.compound.chaos" }
           },
           "endCaptures": {
-            "1": { "name": "keyword.control.end.chaos" }
-          },
-          "patterns": [
-            {
-              "comment": "First line is name",
-              "name" : "entity.name.class.compound.chaos",
-              "begin": "\\s+(ABILITY|DOUBLE|BOOLEAN|ACTION|CUBE|PERK|STRING|POSITION|DIRECTION)",
-              "end": "^(\\w+)(.*)$",
-              "beginCaptures": {
-                "1": { "name": "entity.name.class.compound.chaos" }
-              },
-              "endCaptures": {
-                "1": { "name": "entity.name.class.compound.chaos"},
-                "2": {"name": "invalid"}
-              }
-            },
-            {
-              "include": "#comment"
-            },
-            {
-              "comment": "Tag line",
-              "name": "entity.name.tag.chaos",
-              "match": "^\\b(NO_DUPLICATES|OVERRIDE)\\b"
-            },
-            {
-              "comment": "Compound line",
-              "name": "entity.name.function.compound.chaos",
-              "patterns": [{ "include": "#compound" }]
-            },
-            {
-              "comment": "Text line",
-              "name": "constant.language.text.chaos",
-              "begin": "\\s*Text:",
-              "end": "End",
-              "contentName": "string.quoted.triple.chaos",
-              "patterns": [{ "include": "#text" }]
-            },
-            {
-              "name": "entity.name.tag.chaos",
-              "match": "\\s*CubeColourShift:\\s+([0]?\\.[0-9]+|[1]\\.0|[0])?(?:\\s+(\\d+)(?:\\s+(\\d+)(?:\\s+(\\d+))?)?)?",
-              "captures": {
-                "1": { "name": "constant.numeric.color.delta.chaos" },
-                "2": { "name": "constant.numeric.color.red.chaos" },
-                "3": { "name": "constant.numeric.color.green.chaos" },
-                "4": { "name": "constant.numeric.color.blue.chaos" }
-              }
-            }
-          ]
+            "1": { "name": "entity.name.class.compound.chaos" },
+            "2": { "name": "invalid" }
+          }
+        },
+        {
+          "include": "#comment"
+        },
+        {
+          "comment": "Tag line",
+          "name": "entity.name.tag.chaos",
+          "match": "^\\b(NO_DUPLICATES|OVERRIDE)\\b"
+        },
+        {
+          "comment": "Compound line",
+          "name": "entity.name.function.compound.chaos",
+          "patterns": [{ "include": "#compound" }]
+        },
+        {
+          "comment": "Text line",
+          "name": "constant.language.text.chaos",
+          "begin": "\\s*Text:",
+          "end": "End",
+          "contentName": "string.quoted.triple.chaos",
+          "patterns": [{ "include": "#text" }]
+        },
+        {
+          "name": "entity.name.tag.chaos",
+          "match": "\\s*CubeColourShift:\\s+([0]?\\.[0-9]+|[1]\\.0|[0])?(?:\\s+(\\d+)(?:\\s+(\\d+)(?:\\s+(\\d+))?)?)?",
+          "captures": {
+            "1": { "name": "constant.numeric.color.delta.chaos" },
+            "2": { "name": "constant.numeric.color.red.chaos" },
+            "3": { "name": "constant.numeric.color.green.chaos" },
+            "4": { "name": "constant.numeric.color.blue.chaos" }
+          }
         }
       ]
     },
@@ -423,12 +411,12 @@
         {
           "comment": "STACKING and CODE highlighting",
           "name": "variable.parameter",
-          "match": "\\b(?:STACKING|CODE)\\b\\s+\\d+"
+          "match": "\\b(?:STACKING|CODE)\\b\\s+\\d+\\s+"
         },
         {
           "comment": "VARIABLE + varName highlighting",
           "name": "variable.parameter",
-          "match": "\\bVARIABLE\\b\\s+\\b[A-Z_][A-Z_0-9]*\\b"
+          "match": "\\bVARIABLE\\b\\s+\\b\\w*\\b"
         }
       ]
     }
