@@ -1,5 +1,8 @@
 ## Release Notes
 
+## [0.1.6]
+Go To Declaration now works with builtins (takes you to the relevant line in the ModdingInfo.txt.built-ins in the extension folder)
+
 ## [0.1.5]
 Hover text now tells type of compound and its arguments if it has any
 
