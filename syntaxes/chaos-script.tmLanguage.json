@@ -55,37 +55,37 @@
           "begin": "^\\s*(Text:)",
           "end": "\\b(End)\\b",
           "captures": { "1": { "name": "storage.type.string.chaos" } },
-          "contentName": "string.quoted.triple.chaos",
+          "contentName": "string.unquoted.chaos",
           "patterns": [{ "include": "#text" }]
         },
         {
           "comment": "Flavour text line",
-          "name": "storage.type.string.text.chaos",
-          "begin": "\\s*FlavourText:",
-          "end": "End",
-          "contentName": "string.quoted.triple.chaos markup.italic",
+          "begin": "\\s*(FlavourText:)",
+          "end": "(End)",
+          "captures": { "1": { "name": "storage.type.string.chaos" } },
+          "contentName": "string.unquoted.chaos markup.italic",
           "patterns": [{ "include": "#text" }]
         },
         {
           "comment": "Ai Placement Rule",
-          "name": "entity.name.tag.placement.chaos",
-          "begin": "\\s*AiPlacementRule",
+          "begin": "\\s*(AiPlacementRule:)",
           "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq))",
+          "beginCaptures": { "1": { "name": "storage.type.placement.chaos" } },
           "patterns": [{ "include": "#compound" }]
         },
         {
           "comment": "LevelReq Level Requirement line",
-          "name": "entity.name.tag.chaos",
           "match": "\\s*(LevelReq)( \\d*)?",
           "captures": {
+            "1": { "name": "storage.type.tag.level.chaos" },
             "2": { "name": "constant.numeric.level.chaos" }
           }
         },
         {
           "comment": "IDENT Ai Identification Values",
-          "name": "entity.name.tag.ident.chaos",
           "match": "\\s*(IDENT)(\\s+[1-4])?(\\s+\\d+)?(\\s+\\d+)?(\\s+\\d+)?(\\s+\\d+)?",
           "captures": {
+            "1": { "name": "storage.type.tag.ident.chaos" },
             "2": { "name": "constant.numeric.rarity.chaos" },
             "3": { "name": "constant.numeric.worth.offense.chaos" },
             "4": { "name": "constant.numeric.worth.defense.chaos" },
@@ -95,18 +95,20 @@
         },
         {
           "comment": "TYPE tag",
-          "name": "entity.name.tag.type.chaos",
           "match": "\\s*(TYPE)\\s+(Special|Spell|Wall|Factory|Attacker|Healer|Modifier|Shooter|Mana|Movement)?",
-          "captures": { "2": { "name": "string" } }
+          "captures": {
+            "1": { "name": "storage.type.tag.type.chaos" },
+            "2": { "name": "entity.name.type.enum" }
+          }
         },
         {
           "comment": "Animation line",
-          "name": "entity.name.tag.animation.chaos",
           "begin": "\\s*(Animation:)(\\D+)(TRIGGER|BOOLEAN|DOUBLE|HP|CLOCK|TIME)\\s+(?:(0)\\s+(EQUAL\\s+)?(\\d+))?((?:\\s+\\d+)*)((?:\\s+\\w+)*)\\s*?$",
           "end": "^(?=\\s*(\\w+:|[A-Z]{3,4}|End|LevelReq))",
           "beginCaptures": {
+            "1": { "name": "storage.type.tag.animation.chaos" },
             "2": { "name": "string" },
-            "3": { "name": "entity.name.type.animation.chaos" },
+            "3": { "name": "entity.name.type.enum.animation.chaos" },
             "4": { "name": "constant.numeric.zero.chaos" },
             "5": { "name": "constant.language.equal.chaos" },
             "6": { "name": "constant.numeric.frame-count.chaos" },
@@ -117,9 +119,9 @@
         },
         {
           "comment": "Visual line",
-          "name": "entity.name.tag.visual.chaos",
           "match": "\\s*(Visual:)(\\s+Area \\d+)?(?:\\s+(Arrow|Mist|Square|Sword|Target|Plus))?(?:\\s+(-?\\d+))?(?:\\s+(-?\\d+))?(\\s+\\d+)?(\\s+\\d+)?(\\s+\\d+)?(\\s+[1-4])?",
           "captures": {
+            "1": { "name": "storage.type.tag.visual.chaos" },
             "2": { "name": "constant.language.area.chaos" },
             "3": { "name": "entity.name.type.visual.chaos" },
             "4": { "name": "constant.numeric.coordinate.x.chaos" },
@@ -165,7 +167,7 @@
           "name": "constant.language.text.chaos",
           "begin": "^\\s*Description:",
           "end": "\\bEnd\\b",
-          "contentName": "string.quoted.triple.chaos",
+          "contentName": "string.unquoted.chaos",
           "patterns": [{ "include": "#text" }]
         },
         {
@@ -246,7 +248,7 @@
           "name": "constant.language.text.chaos",
           "begin": "\\s*Text:",
           "end": "End",
-          "contentName": "string.quoted.triple.chaos",
+          "contentName": "string.unquoted.chaos",
           "patterns": [{ "include": "#text" }]
         },
         {
@@ -282,7 +284,7 @@
           "endCaptures": {
             "1": { "name": "keyword.control.end.chaos" }
           },
-          "contentName": "string.quoted.triple",
+          "contentName": "string.unquoted.chaos",
           "patterns": [{ "include": "#text" }]
         },
         {
@@ -335,7 +337,7 @@
 
               "captures": {
                 "1": {
-                  "name": "string.quoted.triple.chaos",
+                  "name": "string.unquoted.chaos",
                   "patterns": [{ "include": "#text" }]
                 }
               }
