@@ -14,10 +14,12 @@ export const defineTypeMap = new Map<string, number>();
 
 export const legend = (function () {
 	const tokenTypesLegend = [
-		'comment', 'string', 'keyword', 'number', 'regexp', 'operator', 'namespace',
-		'type', 'struct', 'class', 'interface', 'enum', 'typeParameter', 'function',
-		'method', 'decorator', 'macro', 'variable', 'parameter', 'property', 'label',
-		'modifier', 'event', 'enumMember'
+		'comment', 'string', 'keyword', 'number', 'regexp', 'operator', 
+		'namespace', 
+		'type', 'struct', 'class', 'interface', 'enum', 'typeParameter', 
+		'function', /*'member', deprecated redirects to method*/ 'method', 'macro', 
+		'variable', 'parameter', 'property', 'enumMember', 'event',  'decorator', 
+		'label'/*label actively maps to undefined*/
 	];
 	tokenTypesLegend.forEach((tokenType, index) => tokenTypes.set(tokenType, index));
 

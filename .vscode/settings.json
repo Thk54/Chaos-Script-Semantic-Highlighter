@@ -7,35 +7,35 @@
 			"*.static": {
 				"foreground": "#ff0000",
 				"fontStyle": "bold"
-			}/*,
+			}/* ,
 			"comment": {
 				"foreground": "#6A9955", //comment
 			},
 			"string": {
-				"foreground": "#ce9178", //string
+				"foreground": "#CE9178", //string
 			},
 			"keyword.control": {
 				"foreground": "#C586C0", //keyword
 			},
 			"constant.numeric": {
-				"foreground": "#b5cea8", //number
+				"foreground": "#B5CEA8", //number
 			},
 			"constant.regexp": {
 				"foreground": "#646695", //regexp
 			},
 			"keyword.operator": {
-				"foreground": "#d4d4d4", //operator
+				"foreground": "#D4D4D4", //operator
 			},
 			"entity.name.namespace": {
 				"foreground": "#4EC9B0", //namespace
 			},
-			"entity.name.type": {
+			"entity.name.type": { //also "support.type"
 				"foreground": "#4EC9B0", //type
 			},
 			"entity.name.type.struct": {
 				"foreground": "#4EC9B0", //struct
 			},
-			"entity.name.type.class": {
+			"entity.name.type.class": { //also "support.class"
 				"foreground": "#4EC9B0", //class
 			},
 			"entity.name.type.interface": {
@@ -47,19 +47,16 @@
 			"entity.name.type.parameter": {
 				"foreground": "#4EC9B0", //typeParameter
 			},
-			"entity.name.function": {
+			"entity.name.function": { //also "support.function"
 				"foreground": "#DCDCAA", //function
 			},
-			"entity.name.function1": {
-				"foreground": "#DCDCAA", //decorator
-			},
-			"entity.name.function.member": {
+			"entity.name.function.member": { //also support.function
 				"foreground": "#DCDCAA", //method
 			},
 			"entity.name.function.preprocessor": {
-				"foreground": "#569cd6", //macro
+				"foreground": "#569CD6", //macro
 			},
-			"variable.other.readwrite": {
+			"variable.other.readwrite": { //also entity.name.variable
 				"foreground": "#9CDCFE", //variable
 			},
 			"variable.parameter": {
@@ -68,10 +65,17 @@
 			"variable.other.property": {
 				"foreground": "#9CDCFE", //property
 			},
-			"N.A": { //label
+			"variable.other.enummember": {
+				"foreground": "#4FC1FF", //enumMember
 			},
-			"N.A1": { //modifier
-			}*/
+			"variable.other.event": {
+				"foreground": "#9CDCFE", //event
+			},
+			"entity.name.decorator": { //also "entity.name.function"
+				"foreground": "#DCDCAA", //decorator
+			},
+			"Undefined": { //label
+			} */
 		}
 	}
 }

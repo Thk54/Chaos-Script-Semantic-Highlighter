@@ -100,7 +100,7 @@
 		{
 			"scope": [
 				"constant.numeric", //magic string number maps to this
-				"variable.other.enummember", // from dark_vs overwritten by dark_plus
+				"variable.other.enummember", //magic string enumMember would map to this if it wasn't overwritten by dark_plus // from dark_vs overwritten by dark_plus
 				"keyword.operator.plus.exponent",
 				"keyword.operator.minus.exponent",
 				"markup.inserted",
@@ -147,10 +147,14 @@
 				"support.function.git-rebase",
 				"meta.structure.dictionary.key.python",
 				"meta.object-literal.key",
-                "variable", //magic strings variable, parameter, and property map to this //all of them are over-defined too
+                "variable", //magic strings variable, parameter, property, and event map to this //all of them are over-defined too
+			   //variable.other.readwrite
+			   //variable.parameter
+			   //variable.property
+			   //variable.other.event
                 "meta.definition.variable.name",
                 "support.variable",
-                "entity.name.variable",
+                "entity.name.variable", // magic string variable should also map to this
                 "constant.other.placeholder"
 			],
 			"settings": {
@@ -218,9 +222,12 @@
 		{
             "scope": [
                 "entity.name.function", //magic string function, decorator, and method map to this
-                "support.function",
+			   //entity.name.decorator //this should also map to magic string decorator (here because no "entity" or "entity.name" entries exist)
+			   //entity.name.function.member //magic string method
+                "support.function", //magic strings function and method should also map to this
                 "support.constant.handlebars",
-                "source.powershell variable.other.member",
+                "source.powershell",
+				"variable.other.member",
                 "entity.name.operator.custom-literal",
 				"keyword.operator.or.regexp",
                 "keyword.control.anchor.regexp"
@@ -231,9 +238,14 @@
         },
         {
             "scope": [
-                "support.class",
-                "support.type",
+                "support.class", //magic string class should also map to this
+                "support.type", //magic string type should also map to this
                 "entity.name.type", //magic strings type, struct, class, interface, enum, and typeParameter map to this
+			   //entity.name.type.struct
+			   //entity.name.type.class
+			   //entity.name.type.interface
+			   //entity.name.type.enum
+			   //entity.name.type.parameter
                 "entity.name.namespace", //magic string namespace maps to this
                 "entity.other.attribute",
                 "entity.name.scope-resolution",
@@ -291,7 +303,7 @@
         {
             "scope": [
                 "variable.other.constant",
-                "variable.other.enummember" //from dark_plus, overwrites dark_vs
+                "variable.other.enummember" //magic string enumMember maps to this //from dark_plus, overwrites dark_vs
             ],
             "settings": {
                 "foreground": "#4FC1FF"
