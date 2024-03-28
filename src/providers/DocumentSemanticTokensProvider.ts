@@ -31,11 +31,11 @@ async function builderTokens(builder: vscode.SemanticTokensBuilder, compound: ID
 			let tempType:IType = result.Type.Define === 'BUILT-IN' ? {Define:'COMPOUND',Compound:result.Type.Compound} : result.Type
 			let tokenStart = document.positionAt(word.index + mainOffset);
 			if (!(typeof (typesLegend.get(typeStringifyer(tempType))) === "number")) {
-				console.log('Unhandled Type: ' + typeStringifyer(result.Type) + ' defaulting to "UHANDLED"');
+				console.log('Unhandled Type: ' + typeStringifyer(result.Type) + ' from ' + result.Uri +' defaulting to "UHANDLED" Contents: '+ result.Contents.Capture.Text);
 				result.Type.Define = 'UHANDLED';
 				result.Type.Compound = 'UHANDLED';
 			}
-			builder.push(tokenStart.line, tokenStart.character, word[0].length, typesLegend.get(typeStringifyer(result.Type)));
+			builder.push(tokenStart.line, tokenStart.character, word[0].length, typesLegend.get(typeStringifyer(tempType)));
 		}
 	}
 	let nameStart = document.positionAt(compound.Name.Index);

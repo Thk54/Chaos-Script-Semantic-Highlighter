@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import { GatherResults, IArguments, ICompound, IDefined, IType, fileToDefines, fileToNameToCompoundDefine, fileToNameToDefine } from "../constants";
+import { GatherResults, IArguments, ICompound, IDefined, IType, fileToDefines } from "../constants";
 import { gatherDefinitions } from "../parser";
 
 export function typeStringifyer(type: IType): string {
-	return type.Define === 'COMPOUND'||'BUILT-IN' ? (type.Define + ' ' + type.Compound) : type.Define;
+	return type?.Compound ? (type.Define + ' ' + type.Compound) : type.Define;
 }
 
-export function getDefineFromWord(word:string):IDefined{
+/* export function getDefineFromWord(word:string):IDefined{
 	let result:[string,IDefined]
 	result = getATopMapKeyAndSubMapValueFromSubMapKey(fileToNameToCompoundDefine,word)
 
@@ -18,7 +18,7 @@ export function getDefineFromWord(word:string):IDefined{
 		return	result[1]
 	}
 	return
-}
+} */
 export function getATopMapKeyAndSubMapValueFromSubMapKey<topMap extends Map<topKey,subMap>, subMap extends Map<subMapKey,subMapValue>, topKey, subMapKey, subMapValue>(map:topMap,key:subMapKey):[topKey,subMapValue]{
 	for (let topEntries of map.entries()) {
 		let result = topEntries[1].get(key);
@@ -48,8 +48,6 @@ export async function updateFilesMapsIfEntries(document: { doc?: vscode.TextDocu
 				nameToDefine.set(defined.Name.Name, defined);
 			}
 		}
-		if (nameToCompound.size) fileToNameToCompoundDefine.set(document.uri.toString(), nameToCompound);
-		if (nameToDefine.size) fileToNameToDefine.set(document.uri.toString(), nameToDefine);
 	}
 }
 

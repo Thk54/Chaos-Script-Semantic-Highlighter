@@ -13,7 +13,7 @@
     //],
     // symbols that are auto closed when typing
     //"autoClosingPairs": [
-    //    ["{", "}"],
+    //    ["COMPOUND: ABILITY", " \n\nEnd"], //Moves currsor wrong
     //    ["[", "]"],
     //    ["(", ")"],
     //    ["\"", "\""],

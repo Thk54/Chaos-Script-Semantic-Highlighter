@@ -4,10 +4,8 @@ export const tokenModifiers = new Map<string, number>();
 export const typesLegend = new Map<string, number>();
 
 export const fileToDefines = new Map<string,IDefined[]>();
-export const builtins = new Map<string,IBuiltins[]>();
-export const fileToNameToCompoundDefine = new Map<string,Map<string,ICompound>>();
-export const fileToNameToDefine = new Map<string,Map<string,IDefined>>();
 export const nameToDefines = new Map<string,IDefined[]>();
+export const builtins = new Map<string,IBuiltins[]>();
 
 export const compoundTypeMap = new Map<string, number>();
 export const defineTypeMap = new Map<string, number>();

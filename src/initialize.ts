@@ -1,18 +1,18 @@
 import * as vscode from 'vscode';
-import { updateFilesMapsIfEntries } from './providers/commonFunctions';
 import { DeclarationProvider } from './providers/declarationProvider';
 import { FoldingRangeProvider } from './providers/foldingRangeProvider';
 import { DocumentSemanticTokensProvider } from './providers/documentSemanticTokensProvider';
 import { DocumentSymbolProvider } from './providers/documentSymbolProvider';
 import { WorkspaceSymbolProvider } from './providers/workspaceSymbolProvider';
 import { HoverProvider } from './providers/hoverProvider';
-import { IBuiltins, IArguments, legend, generateMaps, builtins, fileToNameToCompoundDefine, IDefined, GatherResults, fileToDefines, nameToDefines } from './constants';
+import { IBuiltins, IArguments, legend, generateMaps, builtins, IDefined, GatherResults, fileToDefines, nameToDefines } from './constants';
 import { gatherDefinitions } from './parser';
 
 export let initializeFinished = false
 
 export async function activate(context: vscode.ExtensionContext) {
 	generateMaps;
+	vscode.workspace.getConfiguration('', { languageId: 'chaos-script' }).update('editor.wordSeparators', ''/* default: `~!@#$%^&*()-=+[{]}\|;:'",.<>/? */, false, true);
 	await initialize(context);
 	context.subscriptions.push(vscode.languages.registerDeclarationProvider({ language: 'chaos-script' }, new DeclarationProvider));
 	context.subscriptions.push(vscode.languages.registerFoldingRangeProvider({ language: 'chaos-script' }, new FoldingRangeProvider()));
@@ -55,7 +55,6 @@ async function parseModdinginfo(uri: vscode.Uri) {
 		iBuiltins = [...iBuiltins,...await (set.value)]//really understand here
 	}
 	builtins.set(document.uri.toString(), iBuiltins)
-	fileToNameToCompoundDefine.set(document.uri.toString(),<Map<string,IDefined>>nameToBuiltins)
 	return {Defines:<IDefined[]>iBuiltins, Document:document};//built on a bed of confident lies
 }
 async function packBuiltins(match:RegExpMatchArray, nameToBuiltinsMap:Map<string,IBuiltins>, uriString:string): Promise<IBuiltins[]> {

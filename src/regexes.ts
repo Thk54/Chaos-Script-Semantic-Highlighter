@@ -68,6 +68,9 @@ export module regexes {
 	export function generateCaptureWordInLineFromPositionRegEx(pos:vscode.Position):RegExp {
 		return new RegExp(blankBehind+'\\S*?'+lookBehindify('^.{'+pos.character+'}')+'\\S*?'+blankAhead)
 	}
+	export function generateWorkspaceSymbolsFilter(query:string):RegExp{
+		return new RegExp('\\S*?'+Object.values(query).map((value:string)=>{return caseInsensify(value)+'\\S*?'}).join('').replaceAll(/(?:_|\\s)/g, '[_\\s]'))
+	}
 	function unnamedCapture(input:string):string{
 		return ('(?:'+input+')')
 	}
@@ -82,9 +85,8 @@ export module regexes {
 	}
 	function caseInsensify(input: string): string
 	function caseInsensify(input:string[]):string[]
-	function caseInsensify(input: string|string[]):string|string[] {
+	function caseInsensify(input:string|string[]):string|string[] {
 		if (typeof(input) === 'string') {
-			let result: string = '';
 			return Object.values(input).map((value: string) => { if (value.toUpperCase() !== value.toLowerCase()) { return ('[' + value.toUpperCase() + value.toLowerCase() + ']'); } else { return value; } }).join('') }
 		else {
 			let result = []
