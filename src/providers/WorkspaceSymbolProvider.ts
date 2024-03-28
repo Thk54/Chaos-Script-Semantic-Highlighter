@@ -34,7 +34,6 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
 	private _filterNames(query:string):string[] {
 		let output:string[] = []
 		let regex = regexes.generateWorkspaceSymbolsFilter(query)
-		console.log(query+': '+regex.source)
 		for (let name of nameToDefines.keys()){
 			if (regex.test(name)) output.push(name)
 		}

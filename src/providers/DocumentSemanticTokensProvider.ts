@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { updateFilesMapsIfEntries, typeStringifyer } from "./commonFunctions";
-import { typesLegend, fileToDefines, IDefined, nameToDefines, IType } from '../constants';
+import { typesLegend, fileToGatherResults, IDefined, nameToDefines, IType } from '../constants';
 import { regexes } from '../regexes';
 
 
@@ -13,7 +13,7 @@ export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTo
 		const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder();
 		//fileToCompoundsMap.set(document.uri, update)
 		let promises = [];
-		for (let defines of fileToDefines.get(document.uri.toString())?.values() ?? []) {
+		for (let defines of fileToGatherResults.get(document.uri.toString())?.Defines ?? []) {
 			promises.push(builderTokens(builder, defines, document));
 		}
 		await Promise.allSettled(promises);

@@ -5,7 +5,7 @@ import { DocumentSemanticTokensProvider } from './providers/documentSemanticToke
 import { DocumentSymbolProvider } from './providers/documentSymbolProvider';
 import { WorkspaceSymbolProvider } from './providers/workspaceSymbolProvider';
 import { HoverProvider } from './providers/hoverProvider';
-import { IBuiltins, IArguments, legend, generateMaps, builtins, IDefined, GatherResults, fileToDefines, nameToDefines } from './constants';
+import { IBuiltins, IArguments, legend, generateMaps, builtins, IDefined, GatherResults, fileToGatherResults, nameToDefines } from './constants';
 import { gatherDefinitions } from './parser';
 
 export let initializeFinished = false
@@ -22,7 +22,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.languages.registerHoverProvider({ language: 'chaos-script' }, new HoverProvider))
 }
 
-export async function initialize/*Compounds*/(context: vscode.ExtensionContext) {
+export async function initialize(context: vscode.ExtensionContext) {
 	console.log('Initialize map start'); console.time('Initialize map done in')
 	let files = vscode.workspace.findFiles('**/*.txt');
 	let promises = [];
@@ -31,11 +31,11 @@ export async function initialize/*Compounds*/(context: vscode.ExtensionContext) 
 		promises.push(gatherDefinitions({uri:txt}))
 	}
 	for (let defines of promises){
-		fileToDefines.set((await defines).Document.uri.toString(), (await defines).Defines)
+		fileToGatherResults.set((await defines).Document.uri.toString(), (await defines))
 	}
 	await Promise.allSettled(promises);
-	for (let defines of fileToDefines.values()){
-		for (let define of defines){
+	for (let defines of fileToGatherResults.values()){
+		for (let define of defines.Defines){
 			nameToDefines.has(define.Name.Name) ? nameToDefines.set(define.Name.Name, [...nameToDefines.get(define.Name.Name), define]) : nameToDefines.set(define.Name.Name, [define])
 		}
 	}
@@ -55,7 +55,7 @@ async function parseModdinginfo(uri: vscode.Uri) {
 		iBuiltins = [...iBuiltins,...await (set.value)]//really understand here
 	}
 	builtins.set(document.uri.toString(), iBuiltins)
-	return {Defines:<IDefined[]>iBuiltins, Document:document};//built on a bed of confident lies
+	return <GatherResults>{Defines:<IDefined[]>iBuiltins, Document:document};//built on a bed of confident lies
 }
 async function packBuiltins(match:RegExpMatchArray, nameToBuiltinsMap:Map<string,IBuiltins>, uriString:string): Promise<IBuiltins[]> {
 	let compounds: IBuiltins[] = [];

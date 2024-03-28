@@ -3,7 +3,7 @@ export const tokenTypes = new Map<string, number>();
 export const tokenModifiers = new Map<string, number>();
 export const typesLegend = new Map<string, number>();
 
-export const fileToDefines = new Map<string,IDefined[]>();
+export const fileToGatherResults = new Map<string,GatherResults>();
 export const nameToDefines = new Map<string,IDefined[]>();
 export const builtins = new Map<string,IBuiltins[]>();
 

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { GatherResults, IArguments, ICompound, IDefined, IType, fileToDefines } from "../constants";
+import { GatherResults, IArguments, ICompound, IDefined, IType, fileToGatherResults, nameToDefines } from "../constants";
 import { gatherDefinitions } from "../parser";
 
 export function typeStringifyer(type: IType): string {
@@ -35,20 +35,30 @@ export function returnArgumentsAsString(defined:ICompound):string{
 	return defined.Arguments.map((temp)=>(temp.Type)).join(' ')
 }
 export async function updateFilesMapsIfEntries(document: { doc?: vscode.TextDocument; uri?: vscode.Uri; }) {
+	//console.time('map time')
 	const gatherResults: GatherResults = (await gatherDefinitions(document?.doc ?? (await vscode.workspace.openTextDocument(document.uri))));
-	const iDefineds: IDefined[] = gatherResults.Defines;
-	if (iDefineds.length) {
-		fileToDefines.set(document.uri.toString(), iDefineds);
-		let nameToCompound = new Map<string, ICompound>();
-		let nameToDefine = new Map<string, IDefined>();
-		for (let defined of iDefineds) {
-			if (defined.Type.Define === 'COMPOUND') {
-				nameToCompound.set(defined.Name.Name, defined);
-			} else if (!(defined.Type.Define === 'ARTOVERRIDE')) { //probably need better override handling
-				nameToDefine.set(defined.Name.Name, defined);
+	const oldResults = fileToGatherResults.get(gatherResults.Document.uri.toString()) ?? undefined
+	if (oldResults !== undefined){
+		const oldNames = oldResults.Defines.map((value)=>{return value.Name.Name})
+		for (let name of oldNames){
+			let defines = nameToDefines.get(name)
+			let index = defines.findIndex((value)=>{return value.Uri === gatherResults.Document.uri.toString()})
+			while (index !== -1) {
+				defines.splice(index,1)
+				index = defines.findIndex((value)=>{value.Uri === gatherResults.Document.uri.toString()})
 			}
 		}
 	}
+	for (let define of gatherResults.Defines){
+		nameToDefines.has(define.Name.Name) ? nameToDefines.set(define.Name.Name, [...nameToDefines.get(define.Name.Name), define]) : nameToDefines.set(define.Name.Name, [define])
+	}
+	fileToGatherResults.set(gatherResults.Document.uri.toString(),gatherResults)
+	//console.timeLog('map time')
+	//console.timeEnd('map time')
 }
-
+/*	for (let defines of fileToGatherResults.values()){
+		for (let define of defines.Defines){
+			nameToDefines.has(define.Name.Name) ? nameToDefines.set(define.Name.Name, [...nameToDefines.get(define.Name.Name), define]) : nameToDefines.set(define.Name.Name, [define])
+		}
+	}*/
 //store 'to be filled arguments' in array and unshift stuff into the front of the array
