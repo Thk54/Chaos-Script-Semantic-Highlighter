@@ -26,7 +26,7 @@ async function builderTokens(builder: vscode.SemanticTokensBuilder, compound: ID
 	const mainOffset = compound.Contents.Index; // ./regexes.stringExcluderCapture() // Mostly verbose could be more function-ized
 	for (let word of compound.Contents.Content.matchAll(regexes.stringExcluderCapture)) {
 		if ((compound.Type.Define === 'TEXTTOOLTIP')) break //abort if tooltiptext but still highlight name
-		let result = nameToDefines.get(word[0].toLowerCase())[0]
+		let result = nameToDefines.get(word[0].toLowerCase())?.length ? nameToDefines.get(word[0].toLowerCase())[0] : null
 		if (result) {
 			let tokenStart = document.positionAt(word.index + mainOffset);
 			if (!(typeof (typesLegend.get(typeStringifyer(result.Type))) === "number")) {
