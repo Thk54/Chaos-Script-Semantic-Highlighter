@@ -1,5 +1,6 @@
 ## Release Notes
 
+**[Hotfix]** Unbroke semantic highlighting, oops
 ## [0.1.6]
 Go To Declaration now works with builtins (takes you to the relevant line in the ModdingInfo.txt.built-ins in the extension folder, might be annoying. Will figure out how settings work at some point so this can be disabled) some backend stuff improved. oh and **Klelik's syntax highlighting is in!** Syntax and semantic colors are not coordinated yet shhhhh
 
