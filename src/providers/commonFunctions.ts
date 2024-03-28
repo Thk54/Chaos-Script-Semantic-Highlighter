@@ -3,7 +3,7 @@ import { GatherResults, IArguments, ICompound, IDefined, IType, fileToDefines, f
 import { gatherDefinitions } from "../parser";
 
 export function typeStringifyer(type: IType): string {
-	return type.Define === 'COMPOUND' ? (type.Define + ' ' + type.Compound) : type.Define;
+	return type.Define === 'COMPOUND'||'BUILT-IN' ? (type.Define + ' ' + type.Compound) : type.Define;
 }
 
 export function getDefineFromWord(word:string):IDefined{

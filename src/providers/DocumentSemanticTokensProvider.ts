@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { updateFilesMapsIfEntries, typeStringifyer } from "./commonFunctions";
-import { typesLegend, fileToDefines, IDefined, nameToDefines } from '../constants';
+import { typesLegend, fileToDefines, IDefined, nameToDefines, IType } from '../constants';
 import { regexes } from '../regexes';
 
 
@@ -28,8 +28,9 @@ async function builderTokens(builder: vscode.SemanticTokensBuilder, compound: ID
 		if ((compound.Type.Define === 'TEXTTOOLTIP')) break //abort if tooltiptext but still highlight name
 		let result = nameToDefines.get(word[0].toLowerCase())?.length ? nameToDefines.get(word[0].toLowerCase())[0] : null
 		if (result) {
+			let tempType:IType = result.Type.Define === 'BUILT-IN' ? {Define:'COMPOUND',Compound:result.Type.Compound} : result.Type
 			let tokenStart = document.positionAt(word.index + mainOffset);
-			if (!(typeof (typesLegend.get(typeStringifyer(result.Type))) === "number")) {
+			if (!(typeof (typesLegend.get(typeStringifyer(tempType))) === "number")) {
 				console.log('Unhandled Type: ' + typeStringifyer(result.Type) + ' defaulting to "UHANDLED"');
 				result.Type.Define = 'UHANDLED';
 				result.Type.Compound = 'UHANDLED';

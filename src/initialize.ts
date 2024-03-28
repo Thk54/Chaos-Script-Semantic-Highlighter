@@ -74,7 +74,7 @@ async function packBuiltins(match:RegExpMatchArray, nameToBuiltinsMap:Map<string
 			else { args.push({ Type: generic[0].toUpperCase() }); }
 		}
 		let builtin = {
-			Type: { Define: 'COMPOUND', Compound:type },
+			Type: { Define: 'BUILT-IN', Compound:type },
 			Name: { Name: name[0].toLowerCase(), AsFound: name[0], Index:index },
 			Uri: uriString,
 			Arguments: args
