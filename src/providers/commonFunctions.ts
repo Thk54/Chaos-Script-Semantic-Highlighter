@@ -42,10 +42,10 @@ export async function updateFilesMapsIfEntries(document: { doc?: vscode.TextDocu
 		const oldNames = oldResults.Defines.map((value)=>{return value.Name.Name})
 		for (let name of oldNames){
 			let defines = nameToDefines.get(name)
-			let index = defines.findIndex((value)=>{return value.Uri === gatherResults.Document.uri.toString()})
+			let index = defines.findIndex((value)=>{return value.Doc.uri.toString() === gatherResults.Document.uri.toString()})
 			while (index !== -1) {
 				defines.splice(index,1)
-				index = defines.findIndex((value)=>{value.Uri === gatherResults.Document.uri.toString()})
+				index = defines.findIndex((value)=>{value.Doc.uri.toString() === gatherResults.Document.uri.toString()})
 			}
 		}
 	}

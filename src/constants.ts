@@ -30,30 +30,6 @@ export const legend = (function () {
 	return new vscode.SemanticTokensLegend(tokenTypesLegend, tokenModifiersLegend);
 })();
 export const generateMaps = (function () {
-	const compoundTypeKeyArray = [
-		'TRIGGER',
-		'ABILITY',
-		'ACTION',
-		'BOOLEAN',
-		'CUBE',
-		'DIRECTION',
-		'POSITION',
-		'DOUBLE',
-		'PERK',
-		'STRING'
-	];
-	compoundTypeKeyArray.forEach((TypeOfCompound, index) => compoundTypeMap.set(TypeOfCompound, index));
-	
-	const defineTypeKeyArray = [
-		'COMPOUND', //important that this maps to zero for else fallthough
-		'CUBE',
-		'PERK',
-		'SCENARIO',
-		'ARTOVERRIDE',
-		'TEXTTOOLTIP',
-		'COMMENT'
-	];
-	defineTypeKeyArray.forEach((TypeOfDefine, index) => defineTypeMap.set(TypeOfDefine, index));
 	const chaosMappings = [
 		'COMMENT', //'comment',//green
 		'COMPOUND ABILITY', //'string',//salmon
@@ -67,7 +43,7 @@ export const generateMaps = (function () {
 		'h', //'class',//teal
 		'i', //'interface',//teal
 		'COMPOUND BOOLEAN', //'enum',//teal
-		'k', //'typeParameter',//teal
+		'DOACTION', //'typeParameter',//teal
 		'ARTOVERRIDE', //'function',//pale yellow
 		'SCENARIO', //'method',//pale yellow
 		'COMPOUND POSITION', //'decorator',//pale yellow
@@ -80,10 +56,19 @@ export const generateMaps = (function () {
 	];
 	chaosMappings.forEach((TypeOfCompound, index) => typesLegend.set(TypeOfCompound, index));
 })();
-interface IProtoDefine{
+class CProtoDefine {
 	Type: IType;
 	Name: IName;
 	Uri: string;
+	constructor(type:IType, name:IName, uri:string) {
+		
+	}
+}
+
+interface IProtoDefine{
+	Type: IType;
+	Name: IName;
+	Doc: vscode.TextDocument;
 }
 export interface IBuiltins extends IProtoDefine{
 	Arguments?: IArguments[];

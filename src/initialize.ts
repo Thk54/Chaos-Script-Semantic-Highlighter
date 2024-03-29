@@ -45,11 +45,10 @@ export async function initialize(context: vscode.ExtensionContext) {
 
 async function parseModdinginfo(uri: vscode.Uri) {
 	const document = await vscode.workspace.openTextDocument(uri)
-	let nameToBuiltins = new Map<string,IBuiltins>();
 	let promises:any = []
 	let iBuiltins:IBuiltins[] = [];
 	for (let match of document.getText().matchAll(/^(Triggers?|Actions?|BOOLEAN|CUBE|DIRECTION|DOUBLE|PERK|POSITION|STRING): (?:$\s\s?^(?:.(?!\:))+$)+/gim)) {
-		promises.push(packBuiltins(match,nameToBuiltins,document.uri.toString()))
+		promises.push(packBuiltins(match,document))
 	}
 	for (let set of await <any>Promise.allSettled(promises)){//Much fuckery I don't
 		iBuiltins = [...iBuiltins,...await (set.value)]//really understand here
@@ -57,7 +56,7 @@ async function parseModdinginfo(uri: vscode.Uri) {
 	builtins.set(document.uri.toString(), iBuiltins)
 	return <GatherResults>{Defines:<IDefined[]>iBuiltins, Document:document};//built on a bed of confident lies
 }
-async function packBuiltins(match:RegExpMatchArray, nameToBuiltinsMap:Map<string,IBuiltins>, uriString:string): Promise<IBuiltins[]> {
+async function packBuiltins(match:RegExpMatchArray, document:vscode.TextDocument): Promise<IBuiltins[]> {
 	let compounds: IBuiltins[] = [];
 	let lines = match[0].split(/[\r\n]+/)
 	let type = lines[0].toUpperCase().match(/(.*?)S?: /)[1]; //todo fix plural types
@@ -75,10 +74,9 @@ async function packBuiltins(match:RegExpMatchArray, nameToBuiltinsMap:Map<string
 		let builtin = {
 			Type: { Define: 'BUILT-IN', Compound:type },
 			Name: { Name: name[0].toLowerCase(), AsFound: name[0], Index:index },
-			Uri: uriString,
+			Doc: document,
 			Arguments: args
 		};
-		nameToBuiltinsMap.set(builtin.Name.Name, builtin);
 		compounds.push(builtin);
 	}
 	return compounds;

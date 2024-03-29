@@ -19,7 +19,7 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
 		let output:{ iDefined: IDefined; document: vscode.TextDocument; }[] = []; {
 		let promises:Promise<{ iDefined: IDefined; document: vscode.TextDocument; }>[] = []
 		let resolveUri = async (defined:IDefined) => {
-			return { iDefined: defined, document: await vscode.workspace.openTextDocument(vscode.Uri.parse(defined.Uri, true)) }
+			return { iDefined: defined, document: defined.Doc }
 		}
 		for (let name of this._filterNames(query)) {
 			for (let defined of nameToDefines.get(name)){

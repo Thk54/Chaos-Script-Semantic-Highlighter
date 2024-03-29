@@ -2,11 +2,11 @@ import * as vscode from "vscode";
 import { IDefined, ICompound, IArguments, GatherResults } from './constants';
 import { regexes } from "./regexes";
 
-async function packIntoIDefined(capture: RegExpMatchArray,uri:string): Promise<IDefined>{
+async function packIntoIDefined(capture: RegExpMatchArray,document:vscode.TextDocument): Promise<IDefined>{
 	let defineType:string = capture?.groups['TypeOfDEFINE']?.toUpperCase() ?? "ABORT"
 	switch (defineType) {
 	case 'COMPOUND':
-		return (packIntoICompound(capture,uri))
+		return (packIntoICompound(capture,document))
 	case 'ARTOVERRIDE':
 		//ArtOverrideFolder ArtOverrideSubstring ArtOverridePerk ArtOverrideCube ArtOverrideName
 		let name = capture.groups['ARTOVERRIDEName'] ? 'ARTOVERRIDEName' : capture.groups['ARTOVERRIDECube'] ? 'ARTOVERRIDECube' : capture.groups['ARTOVERRIDEPerk'] ? 'ARTOVERRIDEPerk' : capture.groups['ARTOVERRIDEFolder']&&capture.groups['ARTOVERRIDESubstring'] ? ('Files in folder: "'+capture.groups['ARTOVERRIDEFolder']+'" containing "'+capture.groups['ARTOVERRIDESubstring']+'"') : '< Malformed >';
@@ -15,7 +15,7 @@ async function packIntoIDefined(capture: RegExpMatchArray,uri:string): Promise<I
 			Type: {Define:defineType}, // "[Boolean] ? [thing] : [thing2]" is an if else statement
 			Contents: {Capture:{Text:capture[0],Index:capture.index}, Content: capture[0].slice(12).trimStart(), Index: capture.index+(capture[0].length-capture[0].slice(12).trimStart().length)},
 			Name: {Name: 'ARTOVERRIDE'/* capture?.groups[name] ? name : capture.groups[name].toLowerCase() */, Index: capture.index/* capture.indices.groups[name][0] ?? capture[0].match(/\S*\s*\S*$/).index+capture.index */},
-			Uri:uri
+			Doc:document
 		})
 	case 'ABORT':
 		console.log('IDefined ABORT on capture: '+capture[0])
@@ -25,11 +25,11 @@ async function packIntoIDefined(capture: RegExpMatchArray,uri:string): Promise<I
 			Type: {Define:defineType},
 			Contents: {Capture:{Text:capture[0],Index:capture.index}, Content: capture.groups['ContentsOf'+defineType], Index: capture.indices.groups['ContentsOf'+defineType][0]},
 			Name: {Name: capture.groups['NameOf'+defineType].toLowerCase(), AsFound:capture.groups['NameOf'+defineType], Index: capture.indices.groups['NameOf'+defineType][0]},
-			Uri:uri
+			Doc:document
 		})
 	}
 }
-function packIntoICompound(capture: RegExpMatchArray,uri:string): ICompound {
+function packIntoICompound(capture: RegExpMatchArray,document:vscode.TextDocument): ICompound {
 	let args: IArguments[] = [];
 	for (let generic of capture.groups['ContentsOfCOMPOUND'].matchAll(regexes.genericsCapture)) {
 		if (generic.groups['CompoundGenerics'])
@@ -43,13 +43,13 @@ function packIntoICompound(capture: RegExpMatchArray,uri:string): ICompound {
 		Type: {Define:'COMPOUND', Compound:capture.groups['TypeOfCOMPOUND'].toUpperCase()},
 		Contents: {Capture:{Text:capture[0],Index:capture.index}, Content: capture.groups['ContentsOfCOMPOUND'], Index: capture.indices.groups['ContentsOfCOMPOUND'][0] },
 		Name: { Name: capture.groups['NameOfCOMPOUND'].toLowerCase(), AsFound:capture.groups['NameOfCOMPOUND'], Index: capture.indices.groups['NameOfCOMPOUND'][0] },
-		Uri:uri,
+		Doc:document,
 		Arguments: args
 	};
 }
-export async function gatherDefinitions(document:{ doc?: vscode.TextDocument; uri?: vscode.Uri; }): Promise<GatherResults> {
+export async function gatherDefinitions(toDocument:{ doc?: vscode.TextDocument; uri?: vscode.Uri; }): Promise<GatherResults> {
 	let iDefineds:IDefined[] = [] 
-	document = <vscode.TextDocument>(document?.doc ?? (await vscode.workspace.openTextDocument(document.uri)));
+	const document = <vscode.TextDocument>(toDocument?.doc ?? (await vscode.workspace.openTextDocument(toDocument.uri)));
 	let text: string = (<vscode.TextDocument>document).getText()
 	let comments = []
 	let commentsRegEx = text.matchAll(regexes.commentCapture); // Find all the comments
@@ -72,7 +72,7 @@ export async function gatherDefinitions(document:{ doc?: vscode.TextDocument; ur
 	}
 	let promises = []
 	for (let match of text.matchAll(regexes.primaryCapture)) {
-		promises.push(packIntoIDefined(match,document.uri.toString()))
+		promises.push(packIntoIDefined(match, document))
 		text = text.replace(match[0], ''.padEnd(match[0].length)); // replace them with spaces to preserve character count
 	}
 	let artoverrides = <any>[]
