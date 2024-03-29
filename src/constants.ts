@@ -17,7 +17,9 @@ export const legend = (function () {
 		'type', 'struct', 'class', 'interface', 'enum', 'typeParameter', 
 		'function', /*'member', deprecated redirects to method*/ 'method', 'macro', 
 		'variable', 'parameter', 'property', 'enumMember', 'event',  'decorator', 
-		'label'/*label actively maps to undefined*/
+		'label',/*label actively maps to undefined*/
+		'entity.other.attribute-name.position.chaos',
+		'unhandled.chaos'
 	];
 	tokenTypesLegend.forEach((tokenType, index) => tokenTypes.set(tokenType, index));
 
@@ -32,27 +34,30 @@ export const legend = (function () {
 export const generateMaps = (function () {
 	const chaosMappings = [
 		'COMMENT', //'comment',//green
-		'COMPOUND ABILITY', //'string',//salmon
+		'h', //'string',//salmon
 		'COMPOUND CUBE', //'keyword',//pink
 		'COMPOUND DOUBLE', //'number',//pale yellow
 		'COMPOUND STRING', //'regexp',//purple
-		'COMPOUND PERK', //'operator',//offwhite
-		'COMPOUND TRIGGER', //'namespace',//teal
+		'COMPOUND BOOLEAN', //'operator',//offwhite
+		'COMPOUND ABILITY', //'namespace',//teal
 		'TEXTTOOLTIP', //'type',//teal
 		'g', //'struct',//teal
-		'h', //'class',//teal
-		'i', //'interface',//teal
-		'COMPOUND BOOLEAN', //'enum',//teal
+		'COMPOUND TRIGGER', //'class',//teal
+		'ARTOVERRIDE', //'interface',//teal
+		'COMPOUND PERK', //'enum',//teal
 		'DOACTION', //'typeParameter',//teal
-		'ARTOVERRIDE', //'function',//pale yellow
+		'COMPOUND ACTION', //'function',//pale yellow
 		'SCENARIO', //'method',//pale yellow
-		'COMPOUND POSITION', //'decorator',//pale yellow
-		'COMPOUND ACTION', //'macro',//blue
+		'i', //'macro',//blue
 		'PERK', //'variable',//light sky blue
 		'CUBE', //'parameter',//light sky blue
-		'COMPOUND DIRECTION', //'property',//light sky blue
-		'COMPOUND TYPE', //'label'//text white 
-		'UHANDLED UHANDLED'
+		'z', //'property',//light sky blue
+		'a', //'enumMember',//bright light blue
+		'v', //'event',//light sky blue
+		'COMPOUND DIRECTION', //'decorator',//pale yellow
+		'COMPOUND TYPE', //'label'//undefined
+		'COMPOUND POSITION',//entity.other.attribute-name.position.chaos
+		'UHANDLED'
 	];
 	chaosMappings.forEach((TypeOfCompound, index) => typesLegend.set(TypeOfCompound, index));
 })();
