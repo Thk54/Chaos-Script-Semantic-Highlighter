@@ -2,7 +2,7 @@
 	"name": "chaos-script-semantic-highlighter",
 	"displayName": "Chaos Script Semantic Highlighter",
 	"description": "Semantic highlighter for Cube Chaos mod files.",
-	"version": "0.1.7",
+	"version": "0.1.8",
 	"publisher": "Thk",
 	"license": "MIT",
 	"repository": {
@@ -25,12 +25,7 @@
 					"chaos"
 				],
 				"extensions": [
-					".ch",
-					".chaos",
-					".txt",
-					".cc.txt",
-					".c.txt",
-					".chaos.txt"
+					".c.txt"
 				],
 				"configuration": "./language-configuration.json"
 			}

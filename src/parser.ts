@@ -36,10 +36,10 @@ export async function gatherDefinitions(toDocument:{ doc?: vscode.TextDocument; 
 		} else {artoverrides.push(match)}
 		text = text.replace(match[0], ''.padEnd(match[0].length)); // replace them with spaces to preserve character count
 	}
-	for (let define of promises){
-		(await define).type.define !== 'ARTOVERRIDE' ? cDefineds.push(await define) : artoverrides.push(await define)
-	}
 	let doactions = <any>[]
+	for (let define of promises){
+		cDefineds.push(await define)
+	}
 	return new GatherResults(
 		/* Document: */ <vscode.TextDocument>document, 
 		/* Defines: */ cDefineds, 
