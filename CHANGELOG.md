@@ -1,7 +1,7 @@
 ## Release Notes
 
 ## [0.1.7]
-The top bar # search now doesn't distiguish between " " and "\_" and only wants the characters in the right order. Semantic highlighting fix again (Probably need to figure out how tests work so I can perhaps notice what I break before updateing) backend defines are now stored diffrently, should hopefuly pave the way for diagnostics and words are now defined by whitespace only (so double clicking Steve_was-here will now select the whole thing instead of just Steve, was, or here)
+The top bar # search now doesn't distinguish between " " and "_" and only wants the characters in the right order. Semantic highlighting fix again (Probably need to figure out how tests work so I can perhaps notice what I break before updating) backend defines are now stored differently, should hopefully pave the way for diagnostics and words are now defined by whitespace only (so double clicking Steve_was-here will now select the whole thing instead of just Steve, was, or here)
 
 **[Hotfix]** Unbroke semantic highlighting, oops
 ## [0.1.6]
