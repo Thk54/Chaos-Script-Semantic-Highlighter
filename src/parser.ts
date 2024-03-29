@@ -3,49 +3,7 @@ import { CDefined, IArguments, GatherResults, CType } from './constants';
 import { regexes } from "./regexes";
 
 async function packIntoCDefined(capture: RegExpMatchArray,document:vscode.TextDocument): Promise<CDefined>{
-	let defineType:string = capture?.groups['TypeOfDEFINE']?.toUpperCase() ?? "ABORT"
-	switch (defineType) {
-	case 'COMPOUND':
-		return (packCompoundIntoCDefined(capture,document))
-/* 	case 'ARTOVERRIDE':
-		//ArtOverrideFolder ArtOverrideSubstring ArtOverridePerk ArtOverrideCube ArtOverrideName
-		let name = capture.groups['ARTOVERRIDEName'] ? 'ARTOVERRIDEName' : capture.groups['ARTOVERRIDECube'] ? 'ARTOVERRIDECube' : capture.groups['ARTOVERRIDEPerk'] ? 'ARTOVERRIDEPerk' : capture.groups['ARTOVERRIDEFolder']&&capture.groups['ARTOVERRIDESubstring'] ? ('Files in folder: "'+capture.groups['ARTOVERRIDEFolder']+'" containing "'+capture.groups['ARTOVERRIDESubstring']+'"') : '< Malformed >';
-		if (name === '< Malformed >') console.log("This shouldn't be possible (Pack ArtOverride) returning: \"< Malformed >\"") */
-		return new CDefined( 
-			/* Type: */ {DefineType:defineType}, // "[Boolean] ? [thing] : [thing2]" is an if else statement
-			/* Name: */ {Name: 'ARTOVERRIDE'/* capture?.groups[name] ? name : capture.groups[name].toLowerCase() */, Index: capture.index/* capture.indices.groups[name][0] ?? capture[0].match(/\S*\s*\S*$/).index+capture.index */},
-			/* Document: */ document,
-			/* Contents :*/ {Capture:{Text:capture[0],Index:capture.index}, Content: capture[0].slice(12).trimStart(), Index: capture.index+(capture[0].length-capture[0].slice(12).trimStart().length)}
-		)
-	case 'ABORT':
-		console.log('IDefined ABORT on capture: '+capture[0])
-		break;
-	default:
-		return new CDefined(
-			/* Type: */ {DefineType:defineType},
-			/* Name: */ {Name: capture.groups['NameOf'+defineType].toLowerCase(), AsFound:capture.groups['NameOf'+defineType], Index: capture.indices.groups['NameOf'+defineType][0]},
-			/* Document: */ document,
-			/* Contents: */ {Capture:{Text:capture[0],Index:capture.index}, Content: capture.groups['ContentsOf'+defineType], Index: capture.indices.groups['ContentsOf'+defineType][0]}
-		)
-	}
-}
-function packCompoundIntoCDefined(capture: RegExpMatchArray,document:vscode.TextDocument): CDefined {
-	let args: IArguments[] = [];
-	for (let generic of capture.groups['ContentsOfCOMPOUND'].matchAll(regexes.genericsCapture)) {
-		if (generic.groups['CompoundGenerics'])
-			args.push({
-				String: generic.groups['CompoundGenerics'],
-				Type: generic.groups['CompoundGenerics'].slice(7),
-				Index: generic.indices.groups['CompoundGenerics'][0] + capture.index
-			});
-	}
-	return new CDefined(
-		/* Type: */ {DefineType:'COMPOUND',CompoundType:capture.groups['TypeOfCOMPOUND'].toUpperCase()},
-		/* Name: */ { Name: capture.groups['NameOfCOMPOUND'].toLowerCase(), AsFound:capture.groups['NameOfCOMPOUND'], Index: capture.indices.groups['NameOfCOMPOUND'][0] },
-		/* Document: */document,
-		/* Contents: */ {Capture:{Text:capture[0],Index:capture.index}, Content: capture.groups['ContentsOfCOMPOUND'], Index: capture.indices.groups['ContentsOfCOMPOUND'][0] },
-		/* Arguments: */ args
-	);
+return new CDefined(capture,document)
 }
 export async function gatherDefinitions(toDocument:{ doc?: vscode.TextDocument; uri?: vscode.Uri; }): Promise<GatherResults> {
 	let cDefineds:CDefined[] = [] 

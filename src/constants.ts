@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { regexes } from "./regexes";
 export const tokenTypes = new Map<string, number>();
 export const tokenModifiers = new Map<string, number>();
 export const typesLegend = new Map<string, number>();
@@ -69,9 +70,24 @@ export class CBuiltIn {
 }
 export class CDefined extends CBuiltIn {
 	contents: IContents;
-	constructor(type:IType, name:IName, document:vscode.TextDocument, contents:IContents, args?:IArguments[]) {
-		super(type,name,document,args)
-		this.contents = contents
+	constructor(regex:RegExpMatchArray, document:vscode.TextDocument) {
+		let defineType = regex.groups['TypeOfDEFINE'].toUpperCase()
+		super({DefineType: defineType, CompoundType:regex?.groups['TypeOfCOMPOUND']?.toUpperCase()}, 
+		{Name:regex.groups['NameOf'+defineType].toLowerCase(), AsFound:regex.groups['NameOf'+defineType], Index: regex.indices.groups['NameOf'+defineType][0]}, 
+		document)
+		if (defineType === 'COMPOUND'){
+			let args = []
+			for (let generic of regex.groups['ContentsOfCOMPOUND'].matchAll(regexes.genericsCapture)) {
+				if (generic.groups['CompoundGenerics'])
+					args.push({
+						String: generic.groups['CompoundGenerics'],
+						Type: generic.groups['CompoundGenerics'].slice(7),
+						Index: generic.indices.groups['CompoundGenerics'][0] + regex.index
+					});
+			}
+			this.args = args
+		}
+		this.contents = {Capture:{Text:regex[0],Index:regex.index}, Content: regex.groups['ContentsOf'+defineType], Index: regex.indices.groups['ContentsOf'+defineType][0]}
 	}
 }
 interface IType {
