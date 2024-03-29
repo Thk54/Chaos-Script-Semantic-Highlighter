@@ -23,21 +23,21 @@ export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTo
 	}
 }
 async function builderTokens(builder: vscode.SemanticTokensBuilder, compound: CDefined, document: vscode.TextDocument) {
-	const mainOffset = compound.Contents.Index; // ./regexes.stringExcluderCapture() // Mostly verbose could be more function-ized
-	for (let word of compound.Contents.Content.matchAll(regexes.stringExcluderCapture)) {
-		if ((compound.Type.Define === 'TEXTTOOLTIP')) break //abort if tooltiptext but still highlight name
+	const mainOffset = compound.contents.Index; // ./regexes.stringExcluderCapture() // Mostly verbose could be more function-ized
+	for (let word of compound.contents.Content.matchAll(regexes.stringExcluderCapture)) {
+		if ((compound.type.define === 'TEXTTOOLTIP')) break //abort if tooltiptext but still highlight name
 		let result = nameToDefines.get(word[0].toLowerCase())?.length ? nameToDefines.get(word[0].toLowerCase())[0] : null
 		if (result) {
 			let tokenStart = document.positionAt(word.index + mainOffset);
-			if (!result.Type.isValidType()) {
-				console.log('Unhandled Type: ' + result.Type.typeString + ' from ' + result.UriString +' defaulting to "UHANDLED" Contents: '+ result.Contents.Capture.Text);
-				result.Type.Define = 'UHANDLED';
+			if (!result.type.isValidType()) {
+				console.log('Unhandled Type: ' + result.type.typeString + ' from ' + result.UriString +' defaulting to "UHANDLED" Contents: '+ result.contents.Capture.Text);
+				result.type.define = 'UHANDLED';
 			}
-			builder.push(tokenStart.line, tokenStart.character, word[0].length, result.Type.legendEntry);
+			builder.push(tokenStart.line, tokenStart.character, word[0].length, result.type.legendEntry);
 		}
 	}
-	let nameStart = document.positionAt(compound.Name.Index);
-	builder.push(nameStart.line, nameStart.character, compound.Name.Name.length, compound.Type.legendEntry);
+	let nameStart = document.positionAt(compound.name.Index);
+	builder.push(nameStart.line, nameStart.character, compound.name.Name.length, compound.type.legendEntry);
 	//return Promise
 	/*private _encodeTokenModifiers(strTokenModifiers: string[]): number {
 		let result = 0;

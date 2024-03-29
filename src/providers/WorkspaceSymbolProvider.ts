@@ -7,9 +7,9 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
 	async provideWorkspaceSymbols(query: string, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[]> {
 		let symbols: vscode.SymbolInformation[] = [];
 		for (let define of await this._findRelevantDefines(query)) {
-			if (define.iDefined.Name?.AsFound && define.iDefined.Name?.Index) {
-				let location = new vscode.Location(define.document.uri, new vscode.Range(define.document.positionAt(define.iDefined.Name.Index), define.document.positionAt(define.iDefined.Name.Index + define.iDefined.Name.AsFound.length)));
-				symbols.push({ name: define.iDefined.Name.AsFound, containerName: define.iDefined.Type.typeString, kind: define.iDefined.Type.legendEntry, location: location });
+			if (define.iDefined.name?.AsFound && define.iDefined.name?.Index) {
+				let location = new vscode.Location(define.document.uri, new vscode.Range(define.document.positionAt(define.iDefined.name.Index), define.document.positionAt(define.iDefined.name.Index + define.iDefined.name.AsFound.length)));
+				symbols.push({ name: define.iDefined.name.AsFound, containerName: define.iDefined.type.typeString, kind: define.iDefined.type.legendEntry, location: location });
 			}
 		}
 		return symbols;
@@ -18,7 +18,7 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
 		let output:{ iDefined: CDefined; document: vscode.TextDocument; }[] = []; {
 		let promises:Promise<{ iDefined: CDefined; document: vscode.TextDocument; }>[] = []
 		let resolveUri = async (defined:CDefined) => {
-			return { iDefined: defined, document: defined.Document }
+			return { iDefined: defined, document: defined.document }
 		}
 		for (let name of this._filterNames(query)) {
 			for (let defined of nameToDefines.get(name)){

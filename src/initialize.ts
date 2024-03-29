@@ -36,7 +36,7 @@ export async function initialize(context: vscode.ExtensionContext) {
 	await Promise.allSettled(promises);
 	for (let defines of fileToGatherResults.values()){
 		for (let define of defines.Defines){
-			nameToDefines.has(define.Name.Name) ? nameToDefines.set(define.Name.Name, [...nameToDefines.get(define.Name.Name), define]) : nameToDefines.set(define.Name.Name, [define])
+			nameToDefines.has(define.name.Name) ? nameToDefines.set(define.name.Name, [...nameToDefines.get(define.name.Name), define]) : nameToDefines.set(define.name.Name, [define])
 		}
 	}
 	console.timeEnd('Initialize map done in')

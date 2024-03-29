@@ -22,30 +22,29 @@ export function getATopMapKeyAndSubMapValueFromSubMapKey<topMap extends Map<topK
 	}
 	return
 }
-export function doesIDefineHaveArguments(tested:CDefined|CDefined):boolean{
-	let interum:any = tested
-	return interum?.Arguments.length ? true : false
+export function doesCDefineHaveArguments(tested:CDefined):boolean{
+	return tested?.args ? true : false
 }
 export function returnArgumentsAsString(defined:CDefined):string{
-	return defined.Arguments.map((temp)=>(temp.Type)).join(' ')
+	return defined.args.map((temp)=>(temp.Type)).join(' ')
 }
 export async function updateFilesMapsIfEntries(document: { doc?: vscode.TextDocument; uri?: vscode.Uri; }) {
 	//console.time('map time')
 	const gatherResults: GatherResults = (await gatherDefinitions(document?.doc ?? (await vscode.workspace.openTextDocument(document.uri))));
 	const oldResults = fileToGatherResults.get(gatherResults.Document.uri.toString()) ?? undefined
 	if (oldResults !== undefined){
-		const oldNames = oldResults.Defines.map((value)=>{return value.Name.Name})
+		const oldNames = oldResults.Defines.map((value)=>{return value.name.Name})
 		for (let name of oldNames){
 			let defines = nameToDefines.get(name)
-			let index = defines.findIndex((value)=>{return value.Document.uri.toString() === gatherResults.Document.uri.toString()})
+			let index = defines.findIndex((value)=>{return value.document.uri.toString() === gatherResults.Document.uri.toString()})
 			while (index !== -1) {
 				defines.splice(index,1)
-				index = defines.findIndex((value)=>{value.Document.uri.toString() === gatherResults.Document.uri.toString()})
+				index = defines.findIndex((value)=>{value.document.uri.toString() === gatherResults.Document.uri.toString()})
 			}
 		}
 	}
 	for (let define of gatherResults.Defines){
-		nameToDefines.has(define.Name.Name) ? nameToDefines.set(define.Name.Name, [...nameToDefines.get(define.Name.Name), define]) : nameToDefines.set(define.Name.Name, [define])
+		nameToDefines.has(define.name.Name) ? nameToDefines.set(define.name.Name, [...nameToDefines.get(define.name.Name), define]) : nameToDefines.set(define.name.Name, [define])
 	}
 	fileToGatherResults.set(gatherResults.Document.uri.toString(),gatherResults)
 	//console.timeLog('map time')

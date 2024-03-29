@@ -56,22 +56,22 @@ export const generateMaps = (function () {
 	chaosMappings.forEach((TypeOfCompound, index) => typesLegend.set(TypeOfCompound, index));
 })();
 export class CBuiltIn {
-	Type:CType
-	constructor(Type:IType, public Name:IName, public Document:vscode.TextDocument, public Arguments?:IArguments[]) {
-		this.Type = new CType(Type)
+	type:CType
+	constructor(type:IType, public name:IName, public document:vscode.TextDocument, public args?:IArguments[]) {
+		this.type = new CType(type)
 	}	
 	public get Uri() : vscode.Uri {
-		return this.Document.uri
+		return this.document.uri
 	} 
 	public get UriString() : string {
 		return this.Uri.toString()
 	}
 }
 export class CDefined extends CBuiltIn {
-	Contents: IContents;
-	constructor(type:{DefineType:string, CompoundType?:string}, name:IName, document:vscode.TextDocument, contents:IContents, args?:IArguments[]) {
+	contents: IContents;
+	constructor(type:IType, name:IName, document:vscode.TextDocument, contents:IContents, args?:IArguments[]) {
 		super(type,name,document,args)
-		this.Contents = contents
+		this.contents = contents
 	}
 }
 interface IType {
@@ -79,26 +79,26 @@ interface IType {
 	CompoundType?:string
 }
 export class CType {
-	Define:string
+	define:string
 	isCompoundDefine:boolean = false
 	isBuiltIn:boolean = false
 	typeString:string
 	legendEntry: number
 	constructor(Type:IType) {
-		if (Type?.CompoundType) {
+		if (Type?.CompoundType) { //if it has this argument it is a compound
 			this.isCompoundDefine = true
-			if (Type.CompoundType === 'BUILT-IN') {
+			if (Type.DefineType === 'BUILT-IN') { //some compounds are "Built-in"
 				this.isBuiltIn = true
-				this.typeString = 'BUILT-IN ' + Type.CompoundType
-			} else {this.typeString = 'COMPOUND ' + Type.CompoundType}
-			this.Define = Type.CompoundType.toUpperCase()
+				this.typeString = 'BUILT-IN ' + Type.CompoundType //and should show up as such
+			} else {this.typeString = 'COMPOUND ' + Type.CompoundType} //but otherwise be identical to normal compounds
+			this.define = Type.CompoundType.toUpperCase() 
 		} else {
-			this.Define = Type.DefineType.toUpperCase()
+			this.define = Type.DefineType.toUpperCase() //probably uppercaseing more than nessisary, but it has bit me too many times
 			this.typeString = Type.DefineType
 		}
-		this.legendEntry = typesLegend.get(this.isCompoundDefine ? 'COMPOUND '+this.Define : this.Define) ?? typesLegend.size
+		this.legendEntry = typesLegend.get(this.isCompoundDefine ? 'COMPOUND '+this.define : this.define) ?? typesLegend.size //set to something specific or the fallback last entry
 	}
-	public isValidType() {return this.legendEntry !== typesLegend.size}
+	public isValidType() {return this.legendEntry !== typesLegend.size} //if it is the fallback we don't know what to do with it
 }
 interface IName{
 	Name: string;
@@ -109,6 +109,10 @@ interface IContents {
 	Capture: ICapture;
 	Content: string;
 	Index: number;
+}
+export class CContents {
+	constructor(public Capture: ICapture, public Content: string, public Index: number) {
+	}
 }
 interface ICapture {
 	Text:string;
@@ -121,12 +125,7 @@ export interface IArguments {
 }
 export class GatherResults {
 	constructor(public Document: vscode.TextDocument, public Defines: CDefined[], public Comments?: RegExpMatchArray[], 
-		public Scenarios?: RegExpMatchArray[], public ArtOverrides?: CDefined[], public DoActions?: CDefined[]) {}
-	
-	public get value() : string {
-		return 
-	}
-	
+		public Scenarios?: RegExpMatchArray[], public ArtOverrides?: RegExpMatchArray[], public DoActions?: RegExpMatchArray[]) {}	
 }
 interface Token {
 	line: number;

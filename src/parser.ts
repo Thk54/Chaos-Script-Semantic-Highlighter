@@ -7,10 +7,10 @@ async function packIntoCDefined(capture: RegExpMatchArray,document:vscode.TextDo
 	switch (defineType) {
 	case 'COMPOUND':
 		return (packCompoundIntoCDefined(capture,document))
-	case 'ARTOVERRIDE':
+/* 	case 'ARTOVERRIDE':
 		//ArtOverrideFolder ArtOverrideSubstring ArtOverridePerk ArtOverrideCube ArtOverrideName
 		let name = capture.groups['ARTOVERRIDEName'] ? 'ARTOVERRIDEName' : capture.groups['ARTOVERRIDECube'] ? 'ARTOVERRIDECube' : capture.groups['ARTOVERRIDEPerk'] ? 'ARTOVERRIDEPerk' : capture.groups['ARTOVERRIDEFolder']&&capture.groups['ARTOVERRIDESubstring'] ? ('Files in folder: "'+capture.groups['ARTOVERRIDEFolder']+'" containing "'+capture.groups['ARTOVERRIDESubstring']+'"') : '< Malformed >';
-		if (name === '< Malformed >') console.log("This shouldn't be possible (Pack ArtOverride) returning: \"< Malformed >\"")
+		if (name === '< Malformed >') console.log("This shouldn't be possible (Pack ArtOverride) returning: \"< Malformed >\"") */
 		return new CDefined( 
 			/* Type: */ {DefineType:defineType}, // "[Boolean] ? [thing] : [thing2]" is an if else statement
 			/* Name: */ {Name: 'ARTOVERRIDE'/* capture?.groups[name] ? name : capture.groups[name].toLowerCase() */, Index: capture.index/* capture.indices.groups[name][0] ?? capture[0].match(/\S*\s*\S*$/).index+capture.index */},
@@ -70,14 +70,16 @@ export async function gatherDefinitions(toDocument:{ doc?: vscode.TextDocument; 
 			comments.push(comment)
 		}
 	}
+	let artoverrides = <any>[]
 	let promises = []
 	for (let match of text.matchAll(regexes.primaryCapture)) {
-		promises.push(packIntoCDefined(match, document))
+		if (match?.groups['TypeOfDEFINE']?.toUpperCase() !== 'ARTOVERRIDE') {
+			promises.push(packIntoCDefined(match, document))
+		} else {artoverrides.push(match)}
 		text = text.replace(match[0], ''.padEnd(match[0].length)); // replace them with spaces to preserve character count
 	}
-	let artoverrides = <any>[]
 	for (let define of promises){
-		(await define).Type.Define !== 'ARTOVERRIDE' ? cDefineds.push(await define) : artoverrides.push(await define)
+		(await define).type.define !== 'ARTOVERRIDE' ? cDefineds.push(await define) : artoverrides.push(await define)
 	}
 	let doactions = <any>[]
 	return new GatherResults(
