@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { fileToGatherResults, defineTypeMap } from '../constants';
+import { fileToGatherResults } from '../constants';
 
 
 export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {

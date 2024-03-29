@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { CDefined, defineTypeMap, nameToDefines } from '../constants';
+import { CDefined, nameToDefines } from '../constants';
 import { regexes } from '../regexes';
 
 

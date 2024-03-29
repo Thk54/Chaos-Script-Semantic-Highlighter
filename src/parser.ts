@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { CDefined, IArguments, GatherResults, CType } from './constants';
+import { CDefined, GatherResults, CType } from './constants';
 import { regexes } from "./regexes";
 
 async function packIntoCDefined(capture: RegExpMatchArray,document:vscode.TextDocument): Promise<CDefined>{
@@ -33,7 +33,9 @@ export async function gatherDefinitions(toDocument:{ doc?: vscode.TextDocument; 
 	for (let match of text.matchAll(regexes.primaryCapture)) {
 		if (match?.groups['TypeOfDEFINE']?.toUpperCase() !== 'ARTOVERRIDE') {
 			promises.push(packIntoCDefined(match, document))
-		} else {artoverrides.push(match)}
+		} else {
+			delete(match.input)
+			artoverrides.push(match)}
 		text = text.replace(match[0], ''.padEnd(match[0].length)); // replace them with spaces to preserve character count
 	}
 	let doactions = <any>[]

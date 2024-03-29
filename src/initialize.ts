@@ -5,7 +5,7 @@ import { DocumentSemanticTokensProvider } from './providers/documentSemanticToke
 import { DocumentSymbolProvider } from './providers/documentSymbolProvider';
 import { WorkspaceSymbolProvider } from './providers/workspaceSymbolProvider';
 import { HoverProvider } from './providers/hoverProvider';
-import { IArguments, legend, generateMaps, CDefined, GatherResults, fileToGatherResults, nameToDefines, CBuiltIn, CType } from './constants';
+import { IArguments, legend, generateMaps, CDefined, GatherResults, fileToGatherResults, nameToDefines, CBuiltIn } from './constants';
 import { gatherDefinitions } from './parser';
 
 export let initializeFinished = false

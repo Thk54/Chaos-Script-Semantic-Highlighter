@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { updateFilesMapsIfEntries } from "./commonFunctions";
-import { typesLegend, fileToGatherResults, CDefined, nameToDefines, CType } from '../constants';
+import { typesLegend, fileToGatherResults, CDefined, nameToDefines } from '../constants';
 import { regexes } from '../regexes';
 
 
