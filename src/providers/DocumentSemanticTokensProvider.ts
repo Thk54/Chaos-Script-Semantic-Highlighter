@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { updateFilesMapsIfEntries, typeStringifyer } from "./commonFunctions";
-import { typesLegend, fileToGatherResults, IDefined, nameToDefines, IType } from '../constants';
+import { updateFilesMapsIfEntries } from "./commonFunctions";
+import { typesLegend, fileToGatherResults, CDefined, nameToDefines, CType } from '../constants';
 import { regexes } from '../regexes';
 
 
@@ -22,24 +22,22 @@ export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTo
 
 	}
 }
-async function builderTokens(builder: vscode.SemanticTokensBuilder, compound: IDefined, document: vscode.TextDocument) {
+async function builderTokens(builder: vscode.SemanticTokensBuilder, compound: CDefined, document: vscode.TextDocument) {
 	const mainOffset = compound.Contents.Index; // ./regexes.stringExcluderCapture() // Mostly verbose could be more function-ized
 	for (let word of compound.Contents.Content.matchAll(regexes.stringExcluderCapture)) {
 		if ((compound.Type.Define === 'TEXTTOOLTIP')) break //abort if tooltiptext but still highlight name
 		let result = nameToDefines.get(word[0].toLowerCase())?.length ? nameToDefines.get(word[0].toLowerCase())[0] : null
 		if (result) {
-			let tempType:IType = result.Type.Define === 'BUILT-IN' ? {Define:'COMPOUND',Compound:result.Type.Compound} : result.Type
 			let tokenStart = document.positionAt(word.index + mainOffset);
-			if (!(typeof (typesLegend.get(typeStringifyer(tempType))) === "number")) {
-				console.log('Unhandled Type: ' + typeStringifyer(result.Type) + ' from ' + result.Doc +' defaulting to "UHANDLED" Contents: '+ result.Contents.Capture.Text);
+			if (!result.Type.isValidType()) {
+				console.log('Unhandled Type: ' + result.Type.typeString + ' from ' + result.UriString +' defaulting to "UHANDLED" Contents: '+ result.Contents.Capture.Text);
 				result.Type.Define = 'UHANDLED';
-				result.Type.Compound = 'UHANDLED';
 			}
-			builder.push(tokenStart.line, tokenStart.character, word[0].length, typesLegend.get(typeStringifyer(tempType)));
+			builder.push(tokenStart.line, tokenStart.character, word[0].length, result.Type.legendEntry);
 		}
 	}
 	let nameStart = document.positionAt(compound.Name.Index);
-	builder.push(nameStart.line, nameStart.character, compound.Name.Name.length, typesLegend.get(typeStringifyer(compound.Type)));
+	builder.push(nameStart.line, nameStart.character, compound.Name.Name.length, compound.Type.legendEntry);
 	//return Promise
 	/*private _encodeTokenModifiers(strTokenModifiers: string[]): number {
 		let result = 0;

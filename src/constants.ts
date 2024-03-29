@@ -4,8 +4,7 @@ export const tokenModifiers = new Map<string, number>();
 export const typesLegend = new Map<string, number>();
 
 export const fileToGatherResults = new Map<string,GatherResults>();
-export const nameToDefines = new Map<string,IDefined[]>();
-export const builtins = new Map<string,IBuiltins[]>();
+export const nameToDefines = new Map<string,CDefined[]>();
 
 export const compoundTypeMap = new Map<string, number>();
 export const defineTypeMap = new Map<string, number>();
@@ -56,30 +55,50 @@ export const generateMaps = (function () {
 	];
 	chaosMappings.forEach((TypeOfCompound, index) => typesLegend.set(TypeOfCompound, index));
 })();
-class CProtoDefine {
-	Type: IType;
-	Name: IName;
-	Uri: string;
-	constructor(type:IType, name:IName, uri:string) {
-		
+export class CBuiltIn {
+	Type:CType
+	constructor(Type:IType, public Name:IName, public Document:vscode.TextDocument, public Arguments?:IArguments[]) {
+		this.Type = new CType(Type)
+	}	
+	public get Uri() : vscode.Uri {
+		return this.Document.uri
+	} 
+	public get UriString() : string {
+		return this.Uri.toString()
 	}
 }
-
-interface IProtoDefine{
-	Type: IType;
-	Name: IName;
-	Doc: vscode.TextDocument;
-}
-export interface IBuiltins extends IProtoDefine{
-	Arguments?: IArguments[];
-}
-export interface IDefined extends IProtoDefine{
+export class CDefined extends CBuiltIn {
 	Contents: IContents;
+	constructor(type:{DefineType:string, CompoundType?:string}, name:IName, document:vscode.TextDocument, contents:IContents, args?:IArguments[]) {
+		super(type,name,document,args)
+		this.Contents = contents
+	}
 }
-export interface ICompound extends IDefined, IBuiltins {}
-export interface IType {
+interface IType {
+	DefineType:string
+	CompoundType?:string
+}
+export class CType {
 	Define:string
-	Compound?:string
+	isCompoundDefine:boolean = false
+	isBuiltIn:boolean = false
+	typeString:string
+	legendEntry: number
+	constructor(Type:IType) {
+		if (Type?.CompoundType) {
+			this.isCompoundDefine = true
+			if (Type.CompoundType === 'BUILT-IN') {
+				this.isBuiltIn = true
+				this.typeString = 'BUILT-IN ' + Type.CompoundType
+			} else {this.typeString = 'COMPOUND ' + Type.CompoundType}
+			this.Define = Type.CompoundType.toUpperCase()
+		} else {
+			this.Define = Type.DefineType.toUpperCase()
+			this.typeString = Type.DefineType
+		}
+		this.legendEntry = typesLegend.get(this.isCompoundDefine ? 'COMPOUND '+this.Define : this.Define) ?? typesLegend.size
+	}
+	public isValidType() {return this.legendEntry !== typesLegend.size}
 }
 interface IName{
 	Name: string;
@@ -100,13 +119,14 @@ export interface IArguments {
 	String?: string;
 	Index?: number;
 }
-export interface GatherResults {
-	Defines: IDefined[]
-	Document: vscode.TextDocument
-	Comments?: RegExpMatchArray[]
-	Scenarios?: RegExpMatchArray[]
-	ArtOverrides?: IDefined[]//to make specilized type for
-	DoActions?: IDefined[]//to make specilized type for
+export class GatherResults {
+	constructor(public Document: vscode.TextDocument, public Defines: CDefined[], public Comments?: RegExpMatchArray[], 
+		public Scenarios?: RegExpMatchArray[], public ArtOverrides?: CDefined[], public DoActions?: CDefined[]) {}
+	
+	public get value() : string {
+		return 
+	}
+	
 }
 interface Token {
 	line: number;
@@ -115,3 +135,4 @@ interface Token {
 	type: number;
 	modifiers?: number;
 }
+

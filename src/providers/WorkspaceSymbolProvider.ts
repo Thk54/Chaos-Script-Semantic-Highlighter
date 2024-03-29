@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
-import { IDefined, defineTypeMap, nameToDefines } from '../constants';
+import { CDefined, defineTypeMap, nameToDefines } from '../constants';
 import { regexes } from '../regexes';
-import { typeStringifyer } from "./commonFunctions";
 
 
 export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
@@ -10,16 +9,16 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
 		for (let define of await this._findRelevantDefines(query)) {
 			if (define.iDefined.Name?.AsFound && define.iDefined.Name?.Index) {
 				let location = new vscode.Location(define.document.uri, new vscode.Range(define.document.positionAt(define.iDefined.Name.Index), define.document.positionAt(define.iDefined.Name.Index + define.iDefined.Name.AsFound.length)));
-				symbols.push({ name: define.iDefined.Name.AsFound, containerName: define.iDefined.Type?.Compound ? typeStringifyer(define.iDefined.Type) : define.iDefined.Type.Define, kind: defineTypeMap.get(typeStringifyer(define.iDefined.Type)), location: location });
+				symbols.push({ name: define.iDefined.Name.AsFound, containerName: define.iDefined.Type.typeString, kind: define.iDefined.Type.legendEntry, location: location });
 			}
 		}
 		return symbols;
 	}
-	private async _findRelevantDefines(query: string): Promise<{ iDefined: IDefined; document: vscode.TextDocument; }[]> {
-		let output:{ iDefined: IDefined; document: vscode.TextDocument; }[] = []; {
-		let promises:Promise<{ iDefined: IDefined; document: vscode.TextDocument; }>[] = []
-		let resolveUri = async (defined:IDefined) => {
-			return { iDefined: defined, document: defined.Doc }
+	private async _findRelevantDefines(query: string): Promise<{ iDefined: CDefined; document: vscode.TextDocument; }[]> {
+		let output:{ iDefined: CDefined; document: vscode.TextDocument; }[] = []; {
+		let promises:Promise<{ iDefined: CDefined; document: vscode.TextDocument; }>[] = []
+		let resolveUri = async (defined:CDefined) => {
+			return { iDefined: defined, document: defined.Document }
 		}
 		for (let name of this._filterNames(query)) {
 			for (let defined of nameToDefines.get(name)){

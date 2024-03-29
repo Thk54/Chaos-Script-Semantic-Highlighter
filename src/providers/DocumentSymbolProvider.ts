@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { fileToGatherResults, defineTypeMap } from '../constants';
-import { typeStringifyer } from "./commonFunctions";
 
 
 export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
@@ -11,8 +10,8 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 			let defineRange = new vscode.Range(document.positionAt(define.Contents.Capture.Index), document.positionAt(define.Contents.Capture.Index + define.Contents.Capture.Text.length));
 			let symbolRange = new vscode.Range(document.positionAt(define.Name.Index), document.positionAt(define.Name.Index + define.Name.Name.length));
 			let symbolName = define.Name.Name;
-			let symbolDetail = typeStringifyer(define.Type);
-			let symbolKind = defineTypeMap.get(typeStringifyer(define.Type));
+			let symbolDetail = define.Type.typeString;
+			let symbolKind = define.Type.legendEntry;
 			docs.push(new vscode.DocumentSymbol(symbolName, symbolDetail, symbolKind, defineRange, symbolRange));
 		}
 		return docs;

@@ -1,10 +1,6 @@
 import * as vscode from "vscode";
-import { GatherResults, IArguments, ICompound, IDefined, IType, fileToGatherResults, nameToDefines } from "../constants";
+import { GatherResults, IArguments, CDefined, fileToGatherResults, nameToDefines } from "../constants";
 import { gatherDefinitions } from "../parser";
-
-export function typeStringifyer(type: IType): string {
-	return type?.Compound ? (type.Define + ' ' + type.Compound) : type.Define;
-}
 
 /* export function getDefineFromWord(word:string):IDefined{
 	let result:[string,IDefined]
@@ -26,12 +22,11 @@ export function getATopMapKeyAndSubMapValueFromSubMapKey<topMap extends Map<topK
 	}
 	return
 }
-export function doesIDefineHaveArguments(tested:ICompound|IDefined):boolean{
+export function doesIDefineHaveArguments(tested:CDefined|CDefined):boolean{
 	let interum:any = tested
 	return interum?.Arguments.length ? true : false
 }
-export function returnArgumentsAsString(defined:ICompound):string{
-	let temp:IArguments
+export function returnArgumentsAsString(defined:CDefined):string{
 	return defined.Arguments.map((temp)=>(temp.Type)).join(' ')
 }
 export async function updateFilesMapsIfEntries(document: { doc?: vscode.TextDocument; uri?: vscode.Uri; }) {
@@ -42,10 +37,10 @@ export async function updateFilesMapsIfEntries(document: { doc?: vscode.TextDocu
 		const oldNames = oldResults.Defines.map((value)=>{return value.Name.Name})
 		for (let name of oldNames){
 			let defines = nameToDefines.get(name)
-			let index = defines.findIndex((value)=>{return value.Doc.uri.toString() === gatherResults.Document.uri.toString()})
+			let index = defines.findIndex((value)=>{return value.Document.uri.toString() === gatherResults.Document.uri.toString()})
 			while (index !== -1) {
 				defines.splice(index,1)
-				index = defines.findIndex((value)=>{value.Doc.uri.toString() === gatherResults.Document.uri.toString()})
+				index = defines.findIndex((value)=>{value.Document.uri.toString() === gatherResults.Document.uri.toString()})
 			}
 		}
 	}
