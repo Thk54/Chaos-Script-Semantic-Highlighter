@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { updateFilesMapsIfEntries } from "./commonFunctions";
-import { typesLegend, fileToGatherResults, CDefined, nameToDefines } from '../constants';
+import { fileToGatherResults, CDefined, nameToDefines, tokenTypes, legend } from '../constants';
 import { regexes } from '../regexes';
 
 
@@ -10,7 +10,7 @@ export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTo
 		await updateFilesMapsIfEntries(document);
 		//get newly updated ICompounds
 		//determie tokens
-		const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder();
+		const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder(legend);
 		//fileToCompoundsMap.set(document.uri, update)
 		let promises = [];
 		for (let defines of fileToGatherResults.get(document.uri.toString())?.Defines ?? []) {
@@ -23,21 +23,24 @@ export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTo
 	}
 }
 async function builderTokens(builder: vscode.SemanticTokensBuilder, compound: CDefined, document: vscode.TextDocument) {
-	const mainOffset = compound.contents.Index; // ./regexes.stringExcluderCapture() // Mostly verbose could be more function-ized
-	for (let word of compound.contents.Content.matchAll(regexes.stringExcluderCapture)) {
+	const mainOffset = compound.contents.index; // ./regexes.stringExcluderCapture() // Mostly verbose could be more function-ized
+/* 	for (let word of compound.contents.content.matchAll(regexes.stringExcluderCapture)) {
 		if ((compound.type.define === 'TEXTTOOLTIP')) break //abort if tooltiptext but still highlight name
 		let result = nameToDefines.get(word[0].toLowerCase())?.length ? nameToDefines.get(word[0].toLowerCase())[0] : null
 		if (result) {
 			let tokenStart = document.positionAt(word.index + mainOffset);
 			if (!result.type.isValidType()) {
-				console.log('Unhandled Type: ' + result.type.typeString + ' from ' + result.UriString +' defaulting to "UHANDLED" Contents: '+ result.contents.Capture.Text);
+				console.log('Unhandled Type: ' + result.type.typeString + ' from ' + result.UriString +' defaulting to "UHANDLED" Contents: '+ result.contents.capture.Text);
 				result.type.define = 'UHANDLED';
 			}
-			builder.push(tokenStart.line, tokenStart.character, word[0].length, result.type.legendEntry);
+			builder.push(tokenStart.line, tokenStart.character, word[0].length, tokenTypes.get(result.type.legendEntry));
 		}
+	} */
+	for (let component of compound.contents.components){
+		builder.push(component.range, component.tokenType)
 	}
 	let nameStart = document.positionAt(compound.name.Index);
-	builder.push(nameStart.line, nameStart.character, compound.name.Name.length, compound.type.legendEntry);
+	builder.push(nameStart.line, nameStart.character, compound.name.Name.length, tokenTypes.get(compound.type.legendEntry));
 	//return Promise
 	/*private _encodeTokenModifiers(strTokenModifiers: string[]): number {
 		let result = 0;

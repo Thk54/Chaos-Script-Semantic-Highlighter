@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { CDefined, nameToDefines } from '../constants';
+import { CDefined, nameToDefines, tokenTypes } from '../constants';
 import { regexes } from '../regexes';
 
 
@@ -9,7 +9,7 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
 		for (let define of await this._findRelevantDefines(query)) {
 			if (define.iDefined.name?.AsFound && define.iDefined.name?.Index) {
 				let location = new vscode.Location(define.document.uri, new vscode.Range(define.document.positionAt(define.iDefined.name.Index), define.document.positionAt(define.iDefined.name.Index + define.iDefined.name.AsFound.length)));
-				symbols.push({ name: define.iDefined.name.AsFound, containerName: define.iDefined.type.typeString, kind: define.iDefined.type.legendEntry, location: location });
+				symbols.push({ name: define.iDefined.name.AsFound, containerName: define.iDefined.type.typeString, kind: tokenTypes.get(define.iDefined.type.legendEntry), location: location });
 			}
 		}
 		return symbols;

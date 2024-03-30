@@ -2,13 +2,10 @@ import * as vscode from "vscode";
 import { regexes } from "./regexes";
 export const tokenTypes = new Map<string, number>();
 export const tokenModifiers = new Map<string, number>();
-export const typesLegend = new Map<string, number>();
+export const typesLegend = new Map<string, string>();
 
 export const fileToGatherResults = new Map<string,GatherResults>();
 export const nameToDefines = new Map<string,CDefined[]>();
-
-export const compoundTypeMap = new Map<string, number>();
-export const defineTypeMap = new Map<string, number>();
 
 export const legend = (function () {
 	const tokenTypesLegend = [
@@ -28,10 +25,6 @@ export const legend = (function () {
 		'deprecated', 'modification', 'async', 'defaultLibrary'
 	];
 	tokenModifiersLegend.forEach((tokenModifier, index) => tokenModifiers.set(tokenModifier, index));
-
-	return new vscode.SemanticTokensLegend(tokenTypesLegend, tokenModifiersLegend);
-})();
-export const generateMaps = (function () {
 	const chaosMappings = [
 		'COMMENT', //'comment',//green
 		'h', //'string',//salmon
@@ -59,7 +52,12 @@ export const generateMaps = (function () {
 		'COMPOUND POSITION',//entity.other.attribute-name.position.chaos
 		'UHANDLED'
 	];
-	chaosMappings.forEach((TypeOfCompound, index) => typesLegend.set(TypeOfCompound, index));
+	chaosMappings.forEach((TypeOfCompound, index) => typesLegend.set(TypeOfCompound, tokenTypesLegend[index]));
+	return new vscode.SemanticTokensLegend(tokenTypesLegend, tokenModifiersLegend);
+})();
+
+export const generateMaps = (function () {
+
 })();
 export class CBuiltIn {
 	type:CType
@@ -74,7 +72,8 @@ export class CBuiltIn {
 	}
 }
 export class CDefined extends CBuiltIn {
-	contents: IContents;
+	static initializeFinished = false
+	contents: CContents;
 	constructor(regex:RegExpMatchArray, document:vscode.TextDocument) {
 		let defineType = regex.groups['TypeOfDEFINE'].toUpperCase()
 		super({DefineType: defineType, CompoundType:regex?.groups['TypeOfCOMPOUND']?.toUpperCase()}, 
@@ -92,7 +91,7 @@ export class CDefined extends CBuiltIn {
 			}
 			this.args = args
 		}
-		this.contents = {Capture:{Text:regex[0],Index:regex.index}, Content: regex.groups['ContentsOf'+defineType], Index: regex.indices.groups['ContentsOf'+defineType][0]}
+		this.contents = new CContents(regex,defineType,document)
 	}
 }
 interface IType {
@@ -104,7 +103,7 @@ export class CType {
 	isCompoundDefine:boolean = false
 	isBuiltIn:boolean = false
 	typeString:string
-	legendEntry: number
+	legendEntry: string
 	constructor(Type:IType) {
 		if (Type?.CompoundType) { //if it has this argument it is a compound
 			this.isCompoundDefine = true
@@ -117,24 +116,35 @@ export class CType {
 			this.define = Type.DefineType.toUpperCase() //probably uppercaseing more than nessisary, but it has bit me too many times
 			this.typeString = Type.DefineType
 		}
-		this.legendEntry = typesLegend.get(this.isCompoundDefine ? 'COMPOUND '+this.define : this.define) ?? typesLegend.size //set to something specific or the fallback last entry
+		this.legendEntry = typesLegend.get(this.isCompoundDefine ? 'COMPOUND '+this.define : this.define) ?? 'unhandled.chaos' //set to something specific or the fallback last entry
 	}
-	public isValidType() {return this.legendEntry !== typesLegend.size} //if it is the fallback we don't know what to do with it
+	public isValidType() {return tokenTypes.get(this.legendEntry) !== tokenTypes.size} //if it is the fallback we don't know what to do with it
 }
 interface IName{
 	Name: string;
 	AsFound?: string;
 	Index: number;
 }
-interface IContents {
-	Capture: ICapture;
-	Content: string;
-	Index: number;
-}
 export class CContents {
-	constructor(public Capture: ICapture, public Content: string, public Index: number) {
+	capture: ICapture;
+	content: string;
+	index: number;
+	components: CToken[] = []
+	constructor(regex:RegExpMatchArray,defineType:string,document:vscode.TextDocument) {
+		this.capture = {Text:regex[0],Index:regex.index}
+		this.content = regex.groups['ContentsOf'+defineType]
+		this.index = regex.indices.groups['ContentsOf'+defineType][0]
+		if (CDefined.initializeFinished) {
+			for (let word of this.content.matchAll(regexes.stringExcluderCapture)) {
+				if ((defineType === 'TEXTTOOLTIP')) break //abort if tooltiptext but still highlight name
+				let result = nameToDefines.get(word[0].toLowerCase())?.length ? nameToDefines.get(word[0].toLowerCase())[0] : null
+				if (result) {
+					let tokenStart = document.positionAt(this.index+word.index)
+					this.components.push(new CToken(result,tokenStart))
+				}
+		}
 	}
-}
+}}
 interface ICapture {
 	Text:string;
 	Index:number
@@ -147,6 +157,15 @@ export interface IArguments {
 export class GatherResults {
 	constructor(public Document: vscode.TextDocument, public Defines: CDefined[], public Comments?: RegExpMatchArray[], 
 		public Scenarios?: RegExpMatchArray[], public ArtOverrides?: RegExpMatchArray[], public DoActions?: RegExpMatchArray[]) {}	
+}
+class CToken {
+	range: vscode.Range
+	tokenType: string
+	tokenModifiers?: string[]
+	constructor(define:CDefined,tokenStart:vscode.Position){
+		this.tokenType = define.type.legendEntry
+		this.range = new vscode.Range(tokenStart, tokenStart.translate({characterDelta:define.name.Name.length}))
+	}
 }
 interface Token {
 	line: number;

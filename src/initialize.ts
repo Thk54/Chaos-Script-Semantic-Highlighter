@@ -8,7 +8,7 @@ import { HoverProvider } from './providers/hoverProvider';
 import { IArguments, legend, generateMaps, CDefined, GatherResults, fileToGatherResults, nameToDefines, CBuiltIn } from './constants';
 import { gatherDefinitions } from './parser';
 
-export let initializeFinished = false
+//export let initializeFinished = false
 
 export async function activate(context: vscode.ExtensionContext) {
 	generateMaps;
@@ -40,7 +40,7 @@ export async function initialize(context: vscode.ExtensionContext) {
 		}
 	}
 	console.timeEnd('Initialize map done in')
-	initializeFinished = true
+	CDefined.initializeFinished = true
 }
 
 async function parseModdinginfo(uri: vscode.Uri) {

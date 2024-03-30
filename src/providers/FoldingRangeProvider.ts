@@ -9,8 +9,8 @@ export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
 		let ranges: vscode.FoldingRange[] = [];
 		for (let iDefine of gatherResults.Defines ?? []) {
 			if (iDefine) {
-				let posStart = document.positionAt(iDefine.contents.Capture.Index);
-				let posEnd = document.positionAt(iDefine.contents.Capture.Index + iDefine.contents.Capture.Text.length);
+				let posStart = document.positionAt(iDefine.contents.capture.Index);
+				let posEnd = document.positionAt(iDefine.contents.capture.Index + iDefine.contents.capture.Text.length);
 				ranges.push({ start: posStart.line, end: posEnd.line });
 			}
 		}
