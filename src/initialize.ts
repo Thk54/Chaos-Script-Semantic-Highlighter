@@ -9,9 +9,9 @@ import { HoverProvider } from './providers/hoverProvider';
 import { IArguments, legend, generateMaps, fileToGatherResults, nameToDefines } from './constants';
 import { GatherResults, CDefined, CBuiltIn } from "./classes";
 import { gatherDefinitions } from './parser';
+export const protoDiagnostics = vscode.languages.createDiagnosticCollection('proto')
 
 //export let initializeFinished = false
-
 export async function activate(context: vscode.ExtensionContext) {
 	generateMaps;
 	vscode.workspace.getConfiguration('', { languageId: 'chaos-script' }).update('editor.wordSeparators', ''/* default: `~!@#$%^&*()-=+[{]}\|;:'",.<>/? */, false, true);

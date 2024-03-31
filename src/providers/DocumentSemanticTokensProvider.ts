@@ -5,7 +5,7 @@ import { CDefined } from "../classes";
 
 
 export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
-	async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
+	public async provideDocumentSemanticTokens(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.SemanticTokens> {
 		//update active file and wait for maps to be updated
 		await updateFilesMapsIfEntries(document);
 		const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder(legend);

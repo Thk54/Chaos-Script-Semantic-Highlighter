@@ -49,7 +49,7 @@ export async function updateFilesMapsIfEntries(document: { doc?: vscode.TextDocu
 	}*/
 //store 'to be filled arguments' in array and unshift stuff into the front of the array
 
-export function buildTree(define:CDefined) {
+export function buildTree(define:CDefined,diagnostics:vscode.Diagnostic[]) {
 	let words:RegExpMatchArray[] = []
 	let regex = define.contents.content.matchAll(/\S+/g)
 	for (let match of regex) {
@@ -64,34 +64,40 @@ export function buildTree(define:CDefined) {
 		root = new vscode.DocumentSymbol(symbolName, symbolDetail, tokenTypes.get(symbolKind), defineRange, symbolRange)
 		root.children = []}
 	let args:IArgs
-/* 	if (define.type.isCompoundDefine) {
+	if (define.type.isCompoundDefine) {
 		args = {type:define.type.define}	
-	} */
+	}
 	let temp = []
 	while (words.length > 0) {
-		temp.push(treeBuilder(words, define.contents.index, define.document, args))
+		temp.push(treeBuilder(words, define.contents.index, define.document, diagnostics, args))
 	}
 	root.children = temp
 	return root
 
 }
-function treeBuilder(words:RegExpMatchArray[], defineOffset:number, document:vscode.TextDocument, args:IArgs):vscode.DocumentSymbol {
+function treeBuilder(words:RegExpMatchArray[], defineOffset:number, document:vscode.TextDocument, diagnostics:vscode.Diagnostic[], args:IArgs):vscode.DocumentSymbol {
 	let regWord = words.shift()
+	if (regWord[0] === 'Text:'){while (words.length && !(regWord[0].toUpperCase()==='End'.toUpperCase())){regWord = words.shift()}}
 	let define = nameToDefines.get(regWord[0].toLowerCase())?.find((defines)=>{return defines?.args?.length}) ?? regWord[0]
 	let temp:vscode.DocumentSymbol[] = []
 	let startpos = document.positionAt(defineOffset+regWord.index)
 	let endpos = startpos.translate({characterDelta:regWord[0].length})
 	let endendpos = document.positionAt(defineOffset+regWord.index+regWord.input.length-regWord.index)
+	
 	let docSymbol
+	if (args?.type.toUpperCase() === 'string'.toUpperCase()) {define=regWord[0]}
 	if (typeof(define)==='string') {
 		docSymbol = new vscode.DocumentSymbol(regWord[0], define, 4,new vscode.Range(startpos,endendpos), new vscode.Range(startpos,endpos))
 	} else {
+		if (define.type.define.toUpperCase() === 'TRIGGER'){define.type.define='ABILITY'}
+		if (define.type.define.toUpperCase() !== args?.type.toUpperCase()){diagnostics.push(new vscode.Diagnostic(new vscode.Range(startpos,endpos),"expected "+args?.type+" and found "+define.type.define))}
 		docSymbol = new vscode.DocumentSymbol(regWord[0], define.type.typeString, 4,new vscode.Range(startpos,endendpos), new vscode.Range(startpos,endpos))
 		for (let arg of define?.args??[]){
 			if(!words.length) break
-			temp.push(treeBuilder(words, defineOffset, document, arg))
+			temp.push(treeBuilder(words, defineOffset, document, diagnostics, arg))
 		}
 		docSymbol.children = temp
 	}
+	
 	return docSymbol
 }
