@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { gatherDefinitions } from '../parser';
-import { GatherResults } from '../constants';
+import { GatherResults } from "../classes";
 
 
 export class FoldingRangeProvider implements vscode.FoldingRangeProvider {

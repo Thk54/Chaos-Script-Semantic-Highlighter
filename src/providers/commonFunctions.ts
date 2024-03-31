@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
-import { GatherResults, CDefined, fileToGatherResults, nameToDefines } from "../constants";
+import { fileToGatherResults, nameToDefines } from "../constants";
+import { GatherResults, CDefined } from "../classes";
 import { gatherDefinitions } from "../parser";
 
 /* export function getDefineFromWord(word:string):IDefined{

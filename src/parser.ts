@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { CDefined, GatherResults, CType } from './constants';
+import { GatherResults, CDefined } from "./classes";
 import { regexes } from "./regexes";
 
 async function packIntoCDefined(capture: RegExpMatchArray,document:vscode.TextDocument): Promise<CDefined>{

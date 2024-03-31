@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
 import { regexes } from '../regexes';
 import { doesCDefineHaveArguments, returnArgumentsAsString } from './commonFunctions';
-import { CDefined, nameToDefines } from '../constants';
+import { nameToDefines } from '../constants';
+import { CDefined } from "../classes";
 
 export class HoverProvider implements vscode.HoverProvider {
 	async provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Hover>{
