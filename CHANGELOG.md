@@ -1,5 +1,8 @@
 ## Release Notes
 
+## [0.2.0]
+Outline now arguably useful, and first iteration of diagnostics, the thing that tells you that thing expected an action and you gave it a boolean (warning buggy false positives and false negatives)
+
 ## [0.1.8]
 More mysterious behind the scenes stuff, also hover shows you all things with the hovered name. I even feel relatively confident I didn't break anything this time!
 
