@@ -73,10 +73,13 @@ export interface ICapture {
 	Text:string;
 	Index:number
 }
-export interface IArguments {
-	Type: string;
-	String?: string;
-	Index?: number;
+export interface IArgs {
+	type:string
+}
+export interface IArguments extends IArgs {
+	type: string;
+	string?: string;
+	index?: number;
 }
 interface Token {
 	line: number;

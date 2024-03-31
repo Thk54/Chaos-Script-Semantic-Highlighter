@@ -28,9 +28,9 @@ export class CDefined extends CBuiltIn {
 			for (let generic of regex.groups['ContentsOfCOMPOUND'].matchAll(regexes.genericsCapture)) {
 				if (generic.groups['CompoundGenerics'])
 					args.push({
-						String: generic.groups['CompoundGenerics'],
-						Type: generic.groups['CompoundGenerics'].slice(7),
-						Index: generic.indices.groups['CompoundGenerics'][0] + regex.index
+						string: generic.groups['CompoundGenerics'],
+						type: generic.groups['CompoundGenerics'].slice(7),
+						index: generic.indices.groups['CompoundGenerics'][0] + regex.index
 					});
 			}
 			this.args = args;
@@ -67,14 +67,16 @@ export class CContents {
 	content: string;
 	index: number;
 	components: CToken[] = [];
+	range:vscode.Range;
 	constructor(regex: RegExpMatchArray, defineType: string, document: vscode.TextDocument) {
 		this.capture = { Text: regex[0], Index: regex.index };
 		this.content = regex.groups['ContentsOf' + defineType];
 		this.index = regex.indices.groups['ContentsOf' + defineType][0];
+		this.range = new vscode.Range(document.positionAt(this.index),document.positionAt(this.index+this.content.length))
 		if (CDefined.initializeFinished) {
 			for (let word of this.content.matchAll(regexes.stringExcluderCapture)) { // Mostly verbose could be more function-ized
 				if ((defineType === 'TEXTTOOLTIP')) break; //abort if tooltiptext but still highlight name
-				let result = nameToDefines.get(word[0].toLowerCase())?.length ? nameToDefines.get(word[0].toLowerCase())[0] : null;
+				let result = nameToDefines.get(word[0].toLowerCase())?.length ? nameToDefines.get(word[0].toLowerCase()) : null;
 				if (result) {
 					let tokenStart = document.positionAt(this.index + word.index);
 					this.components.push(new CToken(result, tokenStart));
@@ -88,9 +90,11 @@ export class CToken {
 	range: vscode.Range;
 	tokenType: string;
 	tokenModifiers?: string[];
-	constructor(define: CDefined, tokenStart: vscode.Position) {
-		this.tokenType = define.type.legendEntry;
-		this.range = new vscode.Range(tokenStart, tokenStart.translate({ characterDelta: define.name.Name.length }));
+	mapValue: CDefined[];
+	constructor(defines: CDefined[], tokenStart: vscode.Position) {
+		this.tokenType = defines[0].type.legendEntry;
+		this.range = new vscode.Range(tokenStart, tokenStart.translate({ characterDelta: defines[0].name.Name.length }));
+		this.mapValue = defines
 	}
 }
 export class GatherResults {

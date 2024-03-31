@@ -1,21 +1,12 @@
 import * as vscode from "vscode";
-import { fileToGatherResults, nameToDefines } from "../constants";
+import { fileToGatherResults, nameToDefines, tokenTypes, IArguments, IArgs } from "../constants";
 import { GatherResults, CDefined } from "../classes";
 import { gatherDefinitions } from "../parser";
+import { regexes } from "../regexes";
 
-/* export function getDefineFromWord(word:string):IDefined{
-	let result:[string,IDefined]
-	result = getATopMapKeyAndSubMapValueFromSubMapKey(fileToNameToCompoundDefine,word)
-
-	if (!result) {
-		result = getATopMapKeyAndSubMapValueFromSubMapKey(fileToNameToDefine,word)
-	}
-	if (result) {
-		result[1].Uri = result[0]
-		return	result[1]
-	}
-	return
-} */
+export function getWordAtPosition(document:vscode.TextDocument,position:vscode.Position):string {
+	return (document.lineAt(position.line).text.match(regexes.generateCaptureWordInLineFromPositionRegEx(position))[0])
+}
 export function getATopMapKeyAndSubMapValueFromSubMapKey<topMap extends Map<topKey,subMap>, subMap extends Map<subMapKey,subMapValue>, topKey, subMapKey, subMapValue>(map:topMap,key:subMapKey):[topKey,subMapValue]{
 	for (let topEntries of map.entries()) {
 		let result = topEntries[1].get(key);
@@ -27,7 +18,7 @@ export function doesCDefineHaveArguments(tested:CDefined):boolean{
 	return tested?.args ? true : false
 }
 export function returnArgumentsAsString(defined:CDefined):string{
-	return defined.args.map((temp)=>(temp.Type)).join(' ')
+	return defined.args.map((temp)=>(temp.type)).join(' ')
 }
 export async function updateFilesMapsIfEntries(document: { doc?: vscode.TextDocument; uri?: vscode.Uri; }) {
 	//console.time('map time')
@@ -57,3 +48,50 @@ export async function updateFilesMapsIfEntries(document: { doc?: vscode.TextDocu
 		}
 	}*/
 //store 'to be filled arguments' in array and unshift stuff into the front of the array
+
+export function buildTree(define:CDefined) {
+	let words:RegExpMatchArray[] = []
+	let regex = define.contents.content.matchAll(/\S+/g)
+	for (let match of regex) {
+		words.push(match)
+	}
+	let root; {
+		let defineRange = new vscode.Range(define.document.positionAt(define.contents.capture.Index), define.document.positionAt(define.contents.capture.Index + define.contents.capture.Text.length));
+		let symbolRange = new vscode.Range(define.document.positionAt(define.name.Index), define.document.positionAt(define.name.Index + define.name.Name.length));
+		let symbolName = define.name.Name;
+		let symbolDetail = define.type.typeString;
+		let symbolKind = define.type.legendEntry;
+		root = new vscode.DocumentSymbol(symbolName, symbolDetail, tokenTypes.get(symbolKind), defineRange, symbolRange)
+		root.children = []}
+	let args:IArgs
+/* 	if (define.type.isCompoundDefine) {
+		args = {type:define.type.define}	
+	} */
+	let temp = []
+	while (words.length > 0) {
+		temp.push(treeBuilder(words, define.contents.index, define.document, args))
+	}
+	root.children = temp
+	return root
+
+}
+function treeBuilder(words:RegExpMatchArray[], defineOffset:number, document:vscode.TextDocument, args:IArgs):vscode.DocumentSymbol {
+	let regWord = words.shift()
+	let define = nameToDefines.get(regWord[0].toLowerCase())?.find((defines)=>{return defines?.args?.length}) ?? regWord[0]
+	let temp:vscode.DocumentSymbol[] = []
+	let startpos = document.positionAt(defineOffset+regWord.index)
+	let endpos = startpos.translate({characterDelta:regWord[0].length})
+	let endendpos = document.positionAt(defineOffset+regWord.index+regWord.input.length-regWord.index)
+	let docSymbol
+	if (typeof(define)==='string') {
+		docSymbol = new vscode.DocumentSymbol(regWord[0], define, 4,new vscode.Range(startpos,endendpos), new vscode.Range(startpos,endpos))
+	} else {
+		docSymbol = new vscode.DocumentSymbol(regWord[0], define.type.typeString, 4,new vscode.Range(startpos,endendpos), new vscode.Range(startpos,endpos))
+		for (let arg of define?.args??[]){
+			if(!words.length) break
+			temp.push(treeBuilder(words, defineOffset, document, arg))
+		}
+		docSymbol.children = temp
+	}
+	return docSymbol
+}

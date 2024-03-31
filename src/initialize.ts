@@ -16,7 +16,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	generateMaps;
 	vscode.workspace.getConfiguration('', { languageId: 'chaos-script' }).update('editor.wordSeparators', ''/* default: `~!@#$%^&*()-=+[{]}\|;:'",.<>/? */, false, true);
 	await initialize(context);
-	context.subscriptions.push(vscode.languages.registerCallHierarchyProvider({ language: 'chaos-script' }, new CallHierarchyProvider()))
+	//context.subscriptions.push(vscode.languages.registerCallHierarchyProvider({ language: 'chaos-script' }, new CallHierarchyProvider()))
 	context.subscriptions.push(vscode.languages.registerDeclarationProvider({ language: 'chaos-script' }, new DeclarationProvider));
 	context.subscriptions.push(vscode.languages.registerFoldingRangeProvider({ language: 'chaos-script' }, new FoldingRangeProvider()));
 	context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'chaos-script' }, new DocumentSemanticTokensProvider(), legend));
@@ -71,7 +71,7 @@ async function packBuiltins(match:RegExpMatchArray, document:vscode.TextDocument
 		let first: boolean = true;
 		for (let generic of line.matchAll(/\S+/ig)) {
 			if (first) { first = false; }
-			else { args.push({ Type: generic[0].toUpperCase() }); }
+			else { args.push({ type: generic[0].toUpperCase() }); }
 		}
 		let builtin:CBuiltIn = new CBuiltIn(
 			/* Type: */ { DefineType: 'BUILT-IN', CompoundType:type },
