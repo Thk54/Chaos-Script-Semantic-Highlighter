@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { CFlags } from "./constants";
 export module regexes {
 
 	const blankBehind = /(?<=\s|^)/.source //need to say above the exported generated constants so the generators don't try to use these constants before they are initialized
@@ -70,6 +71,9 @@ export module regexes {
 	}
 	export function generateWorkspaceSymbolsFilter(query:string):RegExp{
 		return new RegExp('\\S*?'+Object.values(query).map((value:string)=>{return caseInsensify(value)+'\\S*?'}).join('').replaceAll(/(?:_|\\s)/g, '[_\\s]'))
+	}
+	export function generateCompoundUsingFlagFinder():RegExp{
+		return new RegExp('')
 	}
 	function unnamedCapture(input:string):string{
 		return ('(?:'+input+')')

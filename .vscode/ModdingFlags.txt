@@ -30,7 +30,7 @@ POSITION
 
 Ability Compound Flags:
 Visual:
-Text:
+Text: End
 ExtraTrigger:
 CubeColourShift:
 NO_DUPLICATES

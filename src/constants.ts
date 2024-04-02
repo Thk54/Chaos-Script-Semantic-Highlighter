@@ -38,7 +38,7 @@ export const legend = (function () {
 		'g', //'struct',//teal
 		'COMPOUND TRIGGER', //'class',//teal
 		'ARTOVERRIDE', //'interface',//teal
-		'COMPOUND PERK', //'enum',//teal
+		'c'/* 'COMPOUND PERK' */, //'enum',//teal
 		'DOACTION', //'typeParameter',//teal
 		'COMPOUND ACTION', //'function',//pale yellow
 		'SCENARIO', //'method',//pale yellow
@@ -56,10 +56,47 @@ export const legend = (function () {
 	chaosMappings.forEach((TypeOfCompound, index) => typesLegend.set(TypeOfCompound, tokenTypesLegend[index]));
 	return new vscode.SemanticTokensLegend(tokenTypesLegend, tokenModifiersLegend);
 })();
-
-export const generateMaps = (function () {
-
-})();
+type tFlag = [string,IArgs?];
+export class CFlags {
+	static universal:tFlag[] = [['OVERRIDE']]
+	static compound:tFlag[] = [['ABILITY',{type:'TRIGGER'}],['ACTION',{type:'ACTION'}],['BOOLEAN',{type:'BOOLEAN'}], //unused property, handled elsewhere
+		['DIRECTION',{type:'DIRECTION'}],['DOUBLE',{type:'DOUBLE'}],['CUBE',{type:'CUBE'}],['POSITION',{type:'POSITION'}]]
+	static compoundAbility:tFlag[] = [['Visual:'/* ,{type:'VISUALTYPE'} */],['Text:',{type:'ENDUSER'}],['ExtraTrigger:',{type:'TRIGGER'}],
+		['CubeColorShift:'],['NO_DUPLICATES'],['LOCAL'],['INVISIBLE'],['VISIBLE']]
+	static perk:tFlag[] = [['Ability:',{type:'ABILITY'}],['WorldAbility:',{type:'ABILITY'}],['CampaignAbility:',{type:'ABILITY'}],['AbilityText:',{type:'ENDUSER'}],
+		['ExtraTrigger:',{type:'TRIGGER'}],['Invisible:'],['Visible:'],['PerkBarSplit:'],['ObtainAction:',{type:'ACTION'}],['ClickAction:',{type:'ACTION'}],
+		['RemoveAction:',{type:'ACTION'}],['PerkRequirement:'],['PerkRequirementAmount:'],['LevelRequirement:',{type:'DOUBLECONSTANT'}],['Requirement:'],['Debug'],
+		['DebugN'],['Unique'],['ReferenceCube:',{type:'CUBECONSTANT'}],['UpgradeFrom:',{type:'PERKCONSTANT'}],['IsUpgradeFrom:',{type:'PERKCONSTANT'}],['RemoveUponObtaining'],
+		['Description:',{type:'ENDUSER'}],['TODO:',{type:'ENDUSER'}],['UNUSED'],['BelongsTo:'],['Value:',{type:'DOUBLECONSTANT'}]]
+	static cube:tFlag[] = [['Ability:',{type:'ABILITY'}],['RNGAbility:'],['AiPlacementRule:'],['AiPlacementAdd:'],['AiPlacementAbility:'],['IDENT'],['ADDEDAICOST'],
+		['TYPE'],['Variable:'],['LevelReq:',{type:'DOUBLECONSTANT'}],['Debug'],['DebugE'],['Visual:'/* ,{type:'VISUALTYPE'} */],['Animation:'/* ,{type:'ANIMATIONTYPE'} */],
+		['Text:',{type:'ENDUSER'}],['ExtraTrigger:',{type:'TRIGGER'}],['FlavourText:',{type:'ENDUSER'}],['Invisible'],['UNUSUED']]
+	static compoundAbilityVisual:tFlag[] = [['Area'],['Arrow'],['Sword'],['Square'],['Target'],['Mist'],['Plus']]
+	static cubeVisual:tFlag[] = this.compoundAbilityVisual
+	static cubeAnimation:tFlag[] = [['CLOCK'],['TRIGGER'],['HP'],['DOUBLE'],['BOOLEAN'],['TIME']]
+	constructor() {}
+	public static get compoundFlags(){
+		return CFlags.universal
+	}
+	public static get compoundAbilityFlags(){
+		return CFlags.universal.concat(CFlags.compoundAbility)
+	}
+	public static get compoundAbilityVisualFlags(){
+		return CFlags.compoundAbilityVisual
+	}
+	public static get perkFlags(){
+		return CFlags.universal.concat(CFlags.perk)
+	}
+	public static get cubeFlags(){
+		return CFlags.universal.concat(CFlags.cube)
+	}
+	public static get cubeVisualFlags(){
+		return CFlags.cubeVisual
+	}
+	public static get cubeAnimationFlags(){
+		return CFlags.cubeAnimation
+	}
+}
 export interface IType {
 	DefineType:string
 	CompoundType?:string
