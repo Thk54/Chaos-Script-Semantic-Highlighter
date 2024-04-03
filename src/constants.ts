@@ -56,6 +56,39 @@ export const legend = (function () {
 	chaosMappings.forEach((TypeOfCompound, index) => typesLegend.set(TypeOfCompound, tokenTypesLegend[index]));
 	return new vscode.SemanticTokensLegend(tokenTypesLegend, tokenModifiersLegend);
 })();
+const argOptions = {
+	CCUBE: {type:'CUBE'},
+	CDOUBLE: {type:'DOUBLE'},
+	CACTION: {type:'ACTION'},
+	CBOOLEAN: {type:'BOOLEAN'},
+	CABILITY: {type:'ABILITY'},
+	CTRIGGER: {type:'TRIGGER'},
+	CDIRECTION: {type:'DIRECTION'},
+	CPOSITION: {type:'POSITION'},
+	OtherSTRING: {type:''},
+	CampaginValueSTRING: {type:''},
+	TypeSTRING: {type:''},
+	DTEXTTOOLTIP: {type:''},
+	DARTOVERRIDE: {type:''},
+	DDOACTION: {type:''},
+	DSCENARIO: {type:''},
+	DPERK: {type:''}, 
+	DCUBE: {type:''},
+	numConstant: {type:''},
+	VISUAL: {type:''},
+	ANIMATION: {type:''},
+	ENDUSER: {type:'ENDUSER'},
+	NONE: {type:''}
+}
+export const compoundAbilityFlags = new Map([['Visual:',[argOptions.VISUAL]],['Text:',[argOptions.ENDUSER]],['ExtraTrigger:',[argOptions.CTRIGGER]]/* ,['CubeColourShift:',],['NO_DUPLICATES',],['LOCAL',],['INVISIBLE',],['VISIBLE',],['OVERRIDE'] */])
+export const perkFlags = new Map([['Ability:',[argOptions.CABILITY]],['WorldAbility:',[argOptions.CABILITY]],['CampaignAbility:',[argOptions.CABILITY]],['AbilityText:',[argOptions.ENDUSER]],
+['ExtraTrigger:',[argOptions.CTRIGGER]],['Value:',[argOptions.numConstant]],['UpgradeFrom:',[argOptions.DPERK]],['IsUpgradeFrom:',[argOptions.DPERK]],['ObtainAction:',[argOptions.CACTION]],['ClickAction:',[argOptions.CACTION]],
+['RemoveAction:',[argOptions.CACTION]],['PerkRequirement:',[argOptions.DPERK]],['PerkRequirementAmount:',[argOptions.numConstant]],['LevelRequirement:',[argOptions.numConstant]],
+['ReferenceCube:',[argOptions.DCUBE]],['Description:',[argOptions.ENDUSER]],['TODO:',[argOptions.ENDUSER]]/* ,['UNUSED'],['BelongsTo:'],['Requirement:'],['Debug'],['Invisible:'],['Visible:'],['PerkBarSplit:'],['DebugN'],['Unique'],['RemoveUponObtaining'] */])
+export const cubeFlags = new Map([['Ability:',[argOptions.CABILITY]],['AiPlacementRule:',[argOptions.CBOOLEAN]],['AiPlacementAdd:',[argOptions.CDOUBLE,argOptions.CBOOLEAN]],['AiPlacementAbility:',[argOptions.CABILITY]],['ADDEDAICOST',[argOptions.numConstant]],
+['TYPE',[argOptions.TypeSTRING]],['Variable:',[argOptions.OtherSTRING]],['LevelReq:',[argOptions.numConstant]],['Visual:',[argOptions.VISUAL]],['Animation:',[argOptions.ANIMATION]],
+['Text:',[argOptions.ENDUSER]],['ExtraTrigger:',[argOptions.CTRIGGER]],['FlavourText:',[argOptions.ENDUSER]]/* ,['RNGAbility:'],['IDENT'],['Invisible'],['UNUSUED'],['Debug'],['DebugE'] */])
+
 type tFlag = [string,IArgs?];
 export class CFlags {
 	static universal:tFlag[] = [['OVERRIDE']]

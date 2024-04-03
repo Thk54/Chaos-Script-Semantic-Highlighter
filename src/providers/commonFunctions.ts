@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { fileToGatherResults, nameToDefines, tokenTypes, IArguments, IArgs } from "../constants";
+import { fileToGatherResults, nameToDefines, tokenTypes, IArguments, IArgs, compoundAbilityFlags, cubeFlags, perkFlags } from "../constants";
 import { GatherResults, CDefined } from "../classes";
 import { gatherDefinitions } from "../parser";
 import { regexes } from "../regexes";
@@ -49,12 +49,9 @@ export async function updateFilesMapsIfEntries(document: { doc?: vscode.TextDocu
 	}*/
 //store 'to be filled arguments' in array and unshift stuff into the front of the array
 
-export function buildTree(define:CDefined,diagnostics:vscode.Diagnostic[]) {
+export function buildTrees(define:CDefined,diagnostics:vscode.Diagnostic[]) {
 	let words:RegExpMatchArray[] = []
 	let regex = define.contents.content.matchAll(/\S+/g)
-	for (let match of regex) {
-		words.push(match)
-	}
 	let root; {
 		let defineRange = new vscode.Range(define.document.positionAt(define.contents.capture.Index), define.document.positionAt(define.contents.capture.Index + define.contents.capture.Text.length));
 		let symbolRange = new vscode.Range(define.document.positionAt(define.name.Index), define.document.positionAt(define.name.Index + define.name.Name.length));
@@ -63,19 +60,91 @@ export function buildTree(define:CDefined,diagnostics:vscode.Diagnostic[]) {
 		let symbolKind = define.type.legendEntry;
 		root = new vscode.DocumentSymbol(symbolName, symbolDetail, tokenTypes.get(symbolKind), defineRange, symbolRange)
 		root.children = []}
-	let args:IArgs
+	let args:IArgs[] = []
 	if (define.type.isCompoundDefine) {
-		args = {type:define.type.define}	
+		if (define.type.define === 'ABILITY') {
+			args = [{type:'TRIGGER'}]
+		} else {args = [{type:define.type.define}]}
 	}
 	let temp = []
-	while (words.length > 0) {
-		temp.push(treeBuilder(words, define.contents.index, define.document, diagnostics, args))
+	{let result = treeBuilder(regex, define, diagnostics, args)
+		if (result?.returnArray) {temp.push(result.returnArray)}}
+	args = []
+	let done:boolean
+	while (done !== true){
+		let result = treeBuilder(regex, define, diagnostics, args)
+		if (result?.returnArray) {temp.push(result.returnArray)}
+		if (result?.done) {done = result.done}
 	}
-	root.children = temp
+	root.children = [].concat(...temp)
 	return root
-
 }
-function treeBuilder(words:RegExpMatchArray[], defineOffset:number, document:vscode.TextDocument, diagnostics:vscode.Diagnostic[], args:IArgs):vscode.DocumentSymbol {
+
+	type treeReturn = {returnArray:vscode.DocumentSymbol[],deepestPos:vscode.Position,done?:boolean}
+function treeBuilder(words:IterableIterator<RegExpMatchArray>, context:CDefined, diagnostics:vscode.Diagnostic[], args?:IArgs[]):treeReturn{
+	if (!(args === undefined)){
+		let returnArray:vscode.DocumentSymbol[] = []
+		let childSymbols:vscode.DocumentSymbol[] = []
+		let deepestPos:vscode.Position
+		let offset = context.contents.index
+		let document = context.document
+		let iteratorResult:IteratorResult<RegExpMatchArray>
+		let word:RegExpMatchArray
+		if (args.length === 0) {
+			iteratorResult = words.next()
+			if (iteratorResult?.done) return {returnArray:[],deepestPos:deepestPos,done:iteratorResult.done}
+			word = iteratorResult.value
+			let isArgs = determineFlagArgs(word[0], context)
+			if (isArgs) {
+				let childSymbol:vscode.DocumentSymbol
+				let grandchildSymbols:vscode.DocumentSymbol[]
+				let startpos = document.positionAt(offset+word.index)
+				let endpos = startpos.translate({characterDelta:word[0].length})
+				let temp = treeBuilder(words, context, diagnostics, isArgs)
+				if (temp?.returnArray !== undefined) {
+					grandchildSymbols = temp.returnArray
+				} else {deepestPos = endpos}
+				childSymbol = new vscode.DocumentSymbol(word[0], '', 4,new vscode.Range(startpos,deepestPos ?? temp.deepestPos), new vscode.Range(startpos,endpos))
+				childSymbol.children = grandchildSymbols
+				returnArray = [childSymbol]
+			} else {return}
+		} else {for (let arg of args){
+				iteratorResult = words.next()
+				if (iteratorResult?.done) return {returnArray:[],deepestPos:deepestPos,done:iteratorResult.done}
+				word = iteratorResult.value
+				let childSymbol:vscode.DocumentSymbol
+				let grandchildSymbols:vscode.DocumentSymbol[]
+				let startpos = document.positionAt(offset+word.index)
+				let endpos = startpos.translate({characterDelta:word[0].length})
+				let localArgs = (nameToDefines.get(word[0].toLowerCase())?.find((value)=>{return value.type.define.toUpperCase() === arg.type.toUpperCase()})?.args ?? determineFlagArgs(word[0], context))
+				if (localArgs?.length === 0) {localArgs = undefined}
+				let temp = treeBuilder(words, context, diagnostics, localArgs)
+				if (temp?.returnArray !== undefined) {
+					grandchildSymbols = temp.returnArray
+					deepestPos = temp.deepestPos
+				} else {deepestPos = endpos}
+				childSymbol = new vscode.DocumentSymbol(word[0], '', 4,new vscode.Range(startpos,deepestPos ?? temp.deepestPos), new vscode.Range(startpos,endpos))
+				childSymbol.children = grandchildSymbols
+				childSymbols.push(childSymbol)
+			}
+			returnArray = childSymbols
+		}
+		return {returnArray:returnArray,deepestPos:deepestPos,done:iteratorResult.done}
+	} else {return}
+}
+function determineFlagArgs(word:string,context:CDefined):IArgs[]{
+	if (context.type.isCompoundDefine) {
+		if (context.type.define === 'ABILITY') {
+			return compoundAbilityFlags.get(word)
+		}
+	} else if (context.type.define === 'CUBE') {
+		return cubeFlags.get(word)
+	} else if (context.type.define === 'PERK') {
+		return perkFlags.get(word)
+	}
+	return;
+}
+/* function treeBuilder(words:RegExpMatchArray[], defineOffset:number, document:vscode.TextDocument, diagnostics:vscode.Diagnostic[], args:IArgs):vscode.DocumentSymbol {
 	let regWord = words.shift()
 	if (regWord[0] === 'Text:'){while (words.length && !(regWord[0].toUpperCase()==='End'.toUpperCase())){regWord = words.shift()}}
 	let define = nameToDefines.get(regWord[0].toLowerCase())?.find((defines)=>{return defines?.args?.length}) ?? regWord[0]
@@ -100,4 +169,6 @@ function treeBuilder(words:RegExpMatchArray[], defineOffset:number, document:vsc
 	}
 	
 	return docSymbol
-}
+} */
+
+
