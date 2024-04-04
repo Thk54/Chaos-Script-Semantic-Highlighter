@@ -6,7 +6,7 @@ import { DocumentSemanticTokensProvider } from './providers/documentSemanticToke
 import { DocumentSymbolProvider } from './providers/documentSymbolProvider';
 import { WorkspaceSymbolProvider } from './providers/workspaceSymbolProvider';
 import { HoverProvider } from './providers/hoverProvider';
-import { IArguments, legend, fileToGatherResults, nameToDefines } from './constants';
+import { IArgument, legend, fileToGatherResults, nameToDefines } from './constants';
 import { CGatherResults, CDefined, CBuiltIn } from "./classes";
 import { gatherDefinitions } from './parser';
 export const protoDiagnostics = vscode.languages.createDiagnosticCollection('proto')
@@ -33,11 +33,11 @@ export async function initialize(context: vscode.ExtensionContext) {
 		promises.push(gatherDefinitions({uri:txt}))
 	}
 	for (let defines of promises){
-		fileToGatherResults.set((await defines).Document.uri.toString(), (await defines))
+		fileToGatherResults.set((await defines).document.uri.toString(), (await defines))
 	}
 	await Promise.allSettled(promises);
 	for (let defines of fileToGatherResults.values()){
-		for (let define of defines.Defines){
+		for (let define of defines.defines){
 			nameToDefines.has(define.name.name) ? nameToDefines.set(define.name.name, [...nameToDefines.get(define.name.name), define]) : nameToDefines.set(define.name.name, [define])
 		}
 	}
@@ -55,22 +55,22 @@ async function parseModdinginfo(uri: vscode.Uri) {
 	for (let set of await <any>Promise.allSettled(promises)){//Much fuckery I don't
 		iBuiltins = [...iBuiltins,...await (set.value)]//really understand here
 	}
-	return <CGatherResults>{Defines:<CDefined[]>iBuiltins, Document:document};//built on a bed of confident lies
+	return <CGatherResults>{defines:<CDefined[]>iBuiltins, document:document};//built on a bed of confident lies
 }
 async function packBuiltins(match:RegExpMatchArray, document:vscode.TextDocument): Promise<CBuiltIn[]> {
 	let compounds: CBuiltIn[] = [];
 	let lines = match[0].split(/[\r\n]+/)
-	let type = lines[0].toUpperCase() //.match(/(.*?)S?: /)[1]; //todo fix plural types //handled by update
+	let type = lines[0].toUpperCase().slice(0,lines[0].length-2) //.match(/(.*?)S?: /)[1]; //todo fix plural types //handled by update
 	lines.shift();
 	for (let line of lines) {
-		let args: IArguments[] = [];
+		let args: IArgument[] = [];
 		let name = line.match(/^\S+/);
 		let index = match.index + match[0].indexOf(line)
 		line.slice(name.length);
 		let first: boolean = true;
 		for (let generic of line.matchAll(/\S+/ig)) {
 			if (first) { first = false; }
-			else { args.push({ type: generic[0].toUpperCase() }); }
+			else { args.push({ type: generic[0] }); }
 		}
 		let builtin:CBuiltIn = new CBuiltIn(
 			/* Type: */ { defineType: 'BUILT-IN', compoundType:type },

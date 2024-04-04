@@ -10,7 +10,7 @@ export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTo
 		await updateFilesMapsIfEntries(document);
 		const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder(legend);
 		let promises = [];
-		for (let defines of fileToGatherResults.get(document.uri.toString())?.Defines ?? []) {
+		for (let defines of fileToGatherResults.get(document.uri.toString())?.defines ?? []) {
 			promises.push(builderTokens(builder, defines, document));
 		}
 		await Promise.allSettled(promises);

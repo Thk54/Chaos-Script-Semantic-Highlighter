@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { fileToGatherResults, nameToDefines, tokenTypes, IArguments, IArgs, compoundAbilityFlags, cubeFlags, perkFlags } from "../constants";
+import { fileToGatherResults, nameToDefines, tokenTypes, IArgument, IArg, compoundAbilityFlags, cubeFlags, perkFlags } from "../constants";
 import { CGatherResults, CDefined } from "../classes";
 import { gatherDefinitions } from "../parser";
 import { regexes } from "../regexes";
@@ -23,22 +23,23 @@ export function returnArgumentsAsString(defined:CDefined):string{
 export async function updateFilesMapsIfEntries(document: { doc?: vscode.TextDocument; uri?: vscode.Uri; }) {
 	//console.time('map time')
 	const gatherResults: CGatherResults = (await gatherDefinitions(document?.doc ?? (await vscode.workspace.openTextDocument(document.uri))));
-	const oldResults = fileToGatherResults.get(gatherResults.Document.uri.toString()) ?? undefined
+	const oldResults = fileToGatherResults.get(gatherResults.document.uri.toString()) ?? undefined
 	if (oldResults !== undefined){
-		const oldNames = oldResults.Defines.map((value)=>{return value.name.name})
+		const oldNames = oldResults.defines.map((value)=>{return value.name.name})
 		for (let name of oldNames){
 			let defines = nameToDefines.get(name)
-			let index = defines.findIndex((value)=>{return value.document.uri.toString() === gatherResults.Document.uri.toString()})
+			let index = defines.findIndex((value)=>{return value.document.uri.toString() === gatherResults.document.uri.toString()})
 			while (index !== -1) {
 				defines.splice(index,1)
-				index = defines.findIndex((value)=>{value.document.uri.toString() === gatherResults.Document.uri.toString()})
+				index = defines.findIndex((value)=>{value.document.uri.toString() === gatherResults.document.uri.toString()})
 			}
+			if (!defines.length) {nameToDefines.delete(name)}
 		}
 	}
-	for (let define of gatherResults.Defines){
+	for (let define of gatherResults.defines){
 		nameToDefines.has(define.name.name) ? nameToDefines.set(define.name.name, [...nameToDefines.get(define.name.name), define]) : nameToDefines.set(define.name.name, [define])
 	}
-	fileToGatherResults.set(gatherResults.Document.uri.toString(),gatherResults)
+	fileToGatherResults.set(gatherResults.document.uri.toString(),gatherResults)
 	//console.timeLog('map time')
 	//console.timeEnd('map time')
 }
@@ -60,7 +61,7 @@ export function buildTrees(define:CDefined,diagnostics:vscode.Diagnostic[]) {
 		let symbolKind = define.type.legendEntry;
 		root = new vscode.DocumentSymbol(symbolName, symbolDetail, tokenTypes.get(symbolKind), defineRange, symbolRange)
 		root.children = []}
-	let args:IArgs[] = []
+	let args:IArg[] = []
 	if (define.type.isCompoundDefine) {
 		if (define.type.define === 'ABILITY') {
 			args = [{type:'TRIGGER'}]
@@ -81,7 +82,7 @@ export function buildTrees(define:CDefined,diagnostics:vscode.Diagnostic[]) {
 }
 
 	type treeReturn = {returnArray:vscode.DocumentSymbol[],deepestPos:vscode.Position,done?:boolean}
-function treeBuilder(words:IterableIterator<RegExpMatchArray>, context:CDefined, diagnostics:vscode.Diagnostic[], args?:IArgs[]):treeReturn{
+function treeBuilder(words:IterableIterator<RegExpMatchArray>, context:CDefined, diagnostics:vscode.Diagnostic[], args?:IArg[]):treeReturn{
 	if (!(args === undefined)){
 		let returnArray:vscode.DocumentSymbol[] = []
 		let childSymbols:vscode.DocumentSymbol[] = []
@@ -132,7 +133,7 @@ function treeBuilder(words:IterableIterator<RegExpMatchArray>, context:CDefined,
 		return {returnArray:returnArray,deepestPos:deepestPos,done:iteratorResult.done}
 	} else {return}
 }
-function determineFlagArgs(word:string,context:CDefined):IArgs[]{
+function determineFlagArgs(word:string,context:CDefined):IArg[]{
 	if (context.type.isCompoundDefine) {
 		if (context.type.define === 'ABILITY') {
 			return compoundAbilityFlags.get(word)

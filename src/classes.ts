@@ -1,17 +1,17 @@
 import * as vscode from "vscode";
-import { IType, IName, IArguments, typesLegend, tokenTypes, ICapture, nameToDefines } from "./constants";
+import { IType, IName, IArgument, typesLegend, tokenTypes, ICapture, nameToDefines } from "./constants";
 import { regexes } from "./regexes";
 
 export class CBuiltIn {
 	type: CType;
-	constructor(type: IType, public name: IName, public document: vscode.TextDocument, public args?: IArguments[]) {
+	constructor(type: IType, public name: IName, public document: vscode.TextDocument, public args?: IArgument[]) {
 		this.type = new CType(type);
 	}
-	public get Uri(): vscode.Uri {
+	public get uri(): vscode.Uri {
 		return this.document.uri;
 	}
-	public get UriString(): string {
-		return this.Uri.toString();
+	public get uriString(): string {
+		return this.uri.toString();
 	}
 }
 
@@ -58,8 +58,10 @@ export class CType {
 			this.typeString = Type.defineType;
 		}
 		this.legendEntry = typesLegend.get(this.isCompoundDefine ? 'COMPOUND ' + this.define : this.define) ?? 'unhandled.chaos'; //set to something specific or the fallback last entry
+
 	}
 	public isValidType() { return tokenTypes.get(this.legendEntry) !== tokenTypes.size; } //if it is the fallback we don't know what to do with it
+	public satisfiesArgument(arg:string):boolean{return} 
 }
 
 export class CContents {
@@ -73,10 +75,11 @@ export class CContents {
 		this.content = regex.groups['ContentsOf' + defineType];
 		this.index = regex.indices.groups['ContentsOf' + defineType][0];
 		this.range = new vscode.Range(document.positionAt(this.index),document.positionAt(this.index+this.content.length))
-		if (CDefined.initializeFinished) {
+		if (CDefined.initializeFinished) {// todo some hash stuff or something
 			for (let word of this.content.matchAll(regexes.stringExcluderCapture)) { // Mostly verbose could be more function-ized
 				if ((defineType === 'TEXTTOOLTIP')) break; //abort if tooltiptext but still highlight name
-				let result = nameToDefines.get(word[0].toLowerCase())?.length ? nameToDefines.get(word[0].toLowerCase()) : null;
+				//let result = nameToDefines.get(word[0].toLowerCase())?.length ? nameToDefines.get(word[0].toLowerCase()) : null;
+				let result = nameToDefines.get(word[0].toLowerCase()) ?? null;
 				if (result) {
 					let tokenStart = document.positionAt(this.index + word.index);
 					this.components.push(new CToken(result, tokenStart));
@@ -98,6 +101,6 @@ export class CToken {
 	}
 }
 export class CGatherResults {
-	constructor(public Document: vscode.TextDocument, public Defines: CDefined[], public Comments?: RegExpMatchArray[],
-		public Scenarios?: RegExpMatchArray[], public ArtOverrides?: RegExpMatchArray[], public DoActions?: RegExpMatchArray[]) { }
+	constructor(public document: vscode.TextDocument, public defines: CDefined[], public comments?: RegExpMatchArray[],
+		public scenarios?: RegExpMatchArray[], public ArtOverrides?: RegExpMatchArray[], public doActions?: RegExpMatchArray[]) { }
 }

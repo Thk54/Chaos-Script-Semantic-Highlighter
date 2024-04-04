@@ -1,6 +1,6 @@
 Modding Info 
 
-Triggers: 
+Trigger: 
 AfterACubeCollides Action
 AfterACubeCreationIsBlocked Action
 AfterACubeDies Action
@@ -65,7 +65,7 @@ Counter Action
 EveryTick Action
 Nothing DOUBLE
 
-Actions: 
+Action: 
 EveryXTimes DOUBLE Action
 Both Action Action
 If BOOLEAN Action
@@ -93,6 +93,8 @@ SeperateEffect Action
 EveryXAmount DOUBLE Action
 XFeedY DOUBLE DOUBLE Action
 EveryMapNodeWhich BOOLEAN Action
+RandomlyX List
+SeperateEventAmount Action
 TakeXDamage DOUBLE
 TakeXDamageEffect DOUBLE int String
 ChangeMaxHp DOUBLE
@@ -144,6 +146,7 @@ GainThisAbility
 GainAllAbilitiesOfPerk PERK
 GainObtainAction Action
 AddPerkAbility Ability
+SetAbilitiesPerkConnection DOUBLE
 AddCubeToInventory CUBE
 RemoveCubeFromInventory CUBE
 AddCubeToDeck CUBE
@@ -183,6 +186,7 @@ SetSpriteToPerk PERK
 DisablePerkAutoSort
 ReadAPartialScenario String
 TriggerWorldSomething String
+PrintDouble DOUBLE
 
 BOOLEAN: 
 IsEnemyToCaster CUBE
@@ -307,6 +311,7 @@ ARandomMapNodeWhich BOOLEAN
 DoubleFromDirection DIRECTION
 CopiableAbilitiesOfPerk PERK
 AmountOfCubesInHandOfFactionWhich DOUBLE BOOLEAN
+PerkInventorySlot
 Addition DOUBLE DOUBLE
 Subtraction DOUBLE DOUBLE
 Division DOUBLE DOUBLE

@@ -92,7 +92,7 @@ export const cubeFlags = new Map([['Ability:',[argOptions.CTRIGGER]],['AiPlaceme
 ['TYPE',[argOptions.TypeSTRING]],['Variable:',[argOptions.OtherSTRING]],['LevelReq:',[argOptions.numConstant]],['Visual:',[argOptions.VISUAL]],['Animation:',[argOptions.ANIMATION]],
 ['Text:',[argOptions.ENDUSER]],['ExtraTrigger:',[argOptions.CTRIGGER]],['FlavourText:',[argOptions.ENDUSER]]/* ,['IDENT'],['Invisible'],['Debug'],['DebugE'],['UNUSUED'],['RNGAbility:'] */])
 
-type tFlag = [string,IArgs?];
+type tFlag = [string,IArg?];
 export class CFlags {
 	static universal:tFlag[] = [['OVERRIDE']]
 	static compound:tFlag[] = [['ABILITY',{type:'TRIGGER'}],['ACTION',{type:'ACTION'}],['BOOLEAN',{type:'BOOLEAN'}], //unused property, handled elsewhere
@@ -146,10 +146,10 @@ export interface ICapture {
 	text:string;
 	index:number
 }
-export interface IArgs {
+export interface IArg {
 	type:string
 }
-export interface IArguments extends IArgs {
+export interface IArgument extends IArg {
 	type: string;
 	string?: string;
 	index?: number;
