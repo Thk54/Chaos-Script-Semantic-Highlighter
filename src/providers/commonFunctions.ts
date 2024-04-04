@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { fileToGatherResults, nameToDefines, tokenTypes, IArguments, IArgs, compoundAbilityFlags, cubeFlags, perkFlags } from "../constants";
-import { GatherResults, CDefined } from "../classes";
+import { CGatherResults, CDefined } from "../classes";
 import { gatherDefinitions } from "../parser";
 import { regexes } from "../regexes";
 
@@ -22,10 +22,10 @@ export function returnArgumentsAsString(defined:CDefined):string{
 }
 export async function updateFilesMapsIfEntries(document: { doc?: vscode.TextDocument; uri?: vscode.Uri; }) {
 	//console.time('map time')
-	const gatherResults: GatherResults = (await gatherDefinitions(document?.doc ?? (await vscode.workspace.openTextDocument(document.uri))));
+	const gatherResults: CGatherResults = (await gatherDefinitions(document?.doc ?? (await vscode.workspace.openTextDocument(document.uri))));
 	const oldResults = fileToGatherResults.get(gatherResults.Document.uri.toString()) ?? undefined
 	if (oldResults !== undefined){
-		const oldNames = oldResults.Defines.map((value)=>{return value.name.Name})
+		const oldNames = oldResults.Defines.map((value)=>{return value.name.name})
 		for (let name of oldNames){
 			let defines = nameToDefines.get(name)
 			let index = defines.findIndex((value)=>{return value.document.uri.toString() === gatherResults.Document.uri.toString()})
@@ -36,7 +36,7 @@ export async function updateFilesMapsIfEntries(document: { doc?: vscode.TextDocu
 		}
 	}
 	for (let define of gatherResults.Defines){
-		nameToDefines.has(define.name.Name) ? nameToDefines.set(define.name.Name, [...nameToDefines.get(define.name.Name), define]) : nameToDefines.set(define.name.Name, [define])
+		nameToDefines.has(define.name.name) ? nameToDefines.set(define.name.name, [...nameToDefines.get(define.name.name), define]) : nameToDefines.set(define.name.name, [define])
 	}
 	fileToGatherResults.set(gatherResults.Document.uri.toString(),gatherResults)
 	//console.timeLog('map time')
@@ -53,9 +53,9 @@ export function buildTrees(define:CDefined,diagnostics:vscode.Diagnostic[]) {
 	let words:RegExpMatchArray[] = []
 	let regex = define.contents.content.matchAll(/\S+/g)
 	let root; {
-		let defineRange = new vscode.Range(define.document.positionAt(define.contents.capture.Index), define.document.positionAt(define.contents.capture.Index + define.contents.capture.Text.length));
-		let symbolRange = new vscode.Range(define.document.positionAt(define.name.Index), define.document.positionAt(define.name.Index + define.name.Name.length));
-		let symbolName = define.name.Name;
+		let defineRange = new vscode.Range(define.document.positionAt(define.contents.capture.index), define.document.positionAt(define.contents.capture.index + define.contents.capture.text.length));
+		let symbolRange = new vscode.Range(define.document.positionAt(define.name.index), define.document.positionAt(define.name.index + define.name.name.length));
+		let symbolName = define.name.name;
 		let symbolDetail = define.type.typeString;
 		let symbolKind = define.type.legendEntry;
 		root = new vscode.DocumentSymbol(symbolName, symbolDetail, tokenTypes.get(symbolKind), defineRange, symbolRange)
@@ -116,7 +116,7 @@ function treeBuilder(words:IterableIterator<RegExpMatchArray>, context:CDefined,
 				let grandchildSymbols:vscode.DocumentSymbol[]
 				let startpos = document.positionAt(offset+word.index)
 				let endpos = startpos.translate({characterDelta:word[0].length})
-				let localArgs = (nameToDefines.get(word[0].toLowerCase())?.find((value)=>{return value.type.define.toUpperCase() === arg.type.toUpperCase()})?.args ?? determineFlagArgs(word[0], context))
+				let localArgs = (nameToDefines.get(word[0].toLowerCase())?.find((value)=>{return value.type.define.toUpperCase() === arg.type.toUpperCase()/* make this handled triggers/abilites */})?.args ?? determineFlagArgs(word[0], context))
 				if (localArgs?.length === 0) {localArgs = undefined}
 				let temp = treeBuilder(words, context, diagnostics, localArgs)
 				if (temp?.returnArray !== undefined) {
@@ -144,31 +144,5 @@ function determineFlagArgs(word:string,context:CDefined):IArgs[]{
 	}
 	return;
 }
-/* function treeBuilder(words:RegExpMatchArray[], defineOffset:number, document:vscode.TextDocument, diagnostics:vscode.Diagnostic[], args:IArgs):vscode.DocumentSymbol {
-	let regWord = words.shift()
-	if (regWord[0] === 'Text:'){while (words.length && !(regWord[0].toUpperCase()==='End'.toUpperCase())){regWord = words.shift()}}
-	let define = nameToDefines.get(regWord[0].toLowerCase())?.find((defines)=>{return defines?.args?.length}) ?? regWord[0]
-	let temp:vscode.DocumentSymbol[] = []
-	let startpos = document.positionAt(defineOffset+regWord.index)
-	let endpos = startpos.translate({characterDelta:regWord[0].length})
-	let endendpos = document.positionAt(defineOffset+regWord.index+regWord.input.length-regWord.index)
-	
-	let docSymbol
-	if (args?.type.toUpperCase() === 'string'.toUpperCase()) {define=regWord[0]}
-	if (typeof(define)==='string') {
-		docSymbol = new vscode.DocumentSymbol(regWord[0], define, 4,new vscode.Range(startpos,endendpos), new vscode.Range(startpos,endpos))
-	} else {
-		if (define.type.define.toUpperCase() === 'TRIGGER'){define.type.define='ABILITY'}
-		if (define.type.define.toUpperCase() !== args?.type.toUpperCase()){diagnostics.push(new vscode.Diagnostic(new vscode.Range(startpos,endpos),"expected "+args?.type+" and found "+define.type.define))}
-		docSymbol = new vscode.DocumentSymbol(regWord[0], define.type.typeString, 4,new vscode.Range(startpos,endendpos), new vscode.Range(startpos,endpos))
-		for (let arg of define?.args??[]){
-			if(!words.length) break
-			temp.push(treeBuilder(words, defineOffset, document, diagnostics, arg))
-		}
-		docSymbol.children = temp
-	}
-	
-	return docSymbol
-} */
 
 

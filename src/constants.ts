@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
 import { CDefined } from "./classes";
-import { GatherResults } from "./classes";
+import { CGatherResults } from "./classes";
 export const tokenTypes = new Map<string, number>();
 export const tokenModifiers = new Map<string, number>();
 export const typesLegend = new Map<string, string>();
 
-export const fileToGatherResults = new Map<string,GatherResults>();
+export const fileToGatherResults = new Map<string,CGatherResults>();
 export const nameToDefines = new Map<string,CDefined[]>();
 
 export const legend = (function () {
@@ -65,15 +65,18 @@ const argOptions = {
 	CTRIGGER: {type:'TRIGGER'},
 	CDIRECTION: {type:'DIRECTION'},
 	CPOSITION: {type:'POSITION'},
+
 	OtherSTRING: {type:''},
 	CampaginValueSTRING: {type:''},
 	TypeSTRING: {type:''},
+
 	DTEXTTOOLTIP: {type:''},
 	DARTOVERRIDE: {type:''},
 	DDOACTION: {type:''},
 	DSCENARIO: {type:''},
 	DPERK: {type:''}, 
 	DCUBE: {type:''},
+
 	numConstant: {type:''},
 	VISUAL: {type:''},
 	ANIMATION: {type:''},
@@ -81,13 +84,13 @@ const argOptions = {
 	NONE: {type:''}
 }
 export const compoundAbilityFlags = new Map([['Visual:',[argOptions.VISUAL]],['Text:',[argOptions.ENDUSER]],['ExtraTrigger:',[argOptions.CTRIGGER]]/* ,['CubeColourShift:',],['NO_DUPLICATES',],['LOCAL',],['INVISIBLE',],['VISIBLE',],['OVERRIDE'] */])
-export const perkFlags = new Map([['Ability:',[argOptions.CABILITY]],['WorldAbility:',[argOptions.CABILITY]],['CampaignAbility:',[argOptions.CABILITY]],['AbilityText:',[argOptions.ENDUSER]],
+export const perkFlags = new Map([['Ability:',[argOptions.CTRIGGER]],['WorldAbility:',[argOptions.CTRIGGER]],['CampaignAbility:',[argOptions.CTRIGGER]],['AbilityText:',[argOptions.ENDUSER]],
 ['ExtraTrigger:',[argOptions.CTRIGGER]],['Value:',[argOptions.numConstant]],['UpgradeFrom:',[argOptions.DPERK]],['IsUpgradeFrom:',[argOptions.DPERK]],['ObtainAction:',[argOptions.CACTION]],['ClickAction:',[argOptions.CACTION]],
 ['RemoveAction:',[argOptions.CACTION]],['PerkRequirement:',[argOptions.DPERK]],['PerkRequirementAmount:',[argOptions.numConstant]],['LevelRequirement:',[argOptions.numConstant]],
-['ReferenceCube:',[argOptions.DCUBE]],['Description:',[argOptions.ENDUSER]],['TODO:',[argOptions.ENDUSER]]/* ,['UNUSED'],['BelongsTo:'],['Requirement:'],['Debug'],['Invisible:'],['Visible:'],['PerkBarSplit:'],['DebugN'],['Unique'],['RemoveUponObtaining'] */])
-export const cubeFlags = new Map([['Ability:',[argOptions.CABILITY]],['AiPlacementRule:',[argOptions.CBOOLEAN]],['AiPlacementAdd:',[argOptions.CDOUBLE,argOptions.CBOOLEAN]],['AiPlacementAbility:',[argOptions.CABILITY]],['ADDEDAICOST',[argOptions.numConstant]],
+['ReferenceCube:',[argOptions.DCUBE]],['Description:',[argOptions.ENDUSER]],['TODO:',[argOptions.ENDUSER]],['DebugN',[argOptions.numConstant]],['BelongsTo:',[argOptions.TypeSTRING]],['Requirement:',[argOptions.CBOOLEAN]]/* ,['Unique'],['RemoveUponObtaining'],['UNUSED'],['Debug'],['Invisible:'],['Visible:'],['PerkBarSplit:'] */])
+export const cubeFlags = new Map([['Ability:',[argOptions.CTRIGGER]],['AiPlacementRule:',[argOptions.CBOOLEAN]],['AiPlacementAdd:',[argOptions.CDOUBLE,argOptions.CBOOLEAN]],['AiPlacementAbility:',[argOptions.CABILITY]],['ADDEDAICOST',[argOptions.numConstant]],
 ['TYPE',[argOptions.TypeSTRING]],['Variable:',[argOptions.OtherSTRING]],['LevelReq:',[argOptions.numConstant]],['Visual:',[argOptions.VISUAL]],['Animation:',[argOptions.ANIMATION]],
-['Text:',[argOptions.ENDUSER]],['ExtraTrigger:',[argOptions.CTRIGGER]],['FlavourText:',[argOptions.ENDUSER]]/* ,['RNGAbility:'],['IDENT'],['Invisible'],['UNUSUED'],['Debug'],['DebugE'] */])
+['Text:',[argOptions.ENDUSER]],['ExtraTrigger:',[argOptions.CTRIGGER]],['FlavourText:',[argOptions.ENDUSER]]/* ,['IDENT'],['Invisible'],['Debug'],['DebugE'],['UNUSUED'],['RNGAbility:'] */])
 
 type tFlag = [string,IArgs?];
 export class CFlags {
@@ -131,17 +134,17 @@ export class CFlags {
 	}
 }
 export interface IType {
-	DefineType:string
-	CompoundType?:string
+	defineType:string
+	compoundType?:string
 }
 export interface IName{
-	Name: string;
-	AsFound?: string;
-	Index: number;
+	name: string;
+	asFound?: string;
+	index: number;
 }
 export interface ICapture {
-	Text:string;
-	Index:number
+	text:string;
+	index:number
 }
 export interface IArgs {
 	type:string
@@ -151,11 +154,3 @@ export interface IArguments extends IArgs {
 	string?: string;
 	index?: number;
 }
-interface Token {
-	line: number;
-	character: number;
-	length: number;
-	type: number;
-	modifiers?: number;
-}
-

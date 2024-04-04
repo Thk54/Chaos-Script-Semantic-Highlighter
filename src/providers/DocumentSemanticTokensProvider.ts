@@ -23,8 +23,8 @@ async function builderTokens(builder: vscode.SemanticTokensBuilder, compound: CD
 	for (let component of compound.contents.components){
 		builder.push(component.range, component.tokenType)
 	}
-	let nameStart = document.positionAt(compound.name.Index);
-	builder.push(nameStart.line, nameStart.character, compound.name.Name.length, tokenTypes.get(compound.type.legendEntry));
+	let nameStart = document.positionAt(compound.name.index);
+	builder.push(nameStart.line, nameStart.character, compound.name.name.length, tokenTypes.get(compound.type.legendEntry));
 	//return Promise
 	/*private _encodeTokenModifiers(strTokenModifiers: string[]): number {
 		let result = 0;

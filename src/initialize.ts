@@ -7,7 +7,7 @@ import { DocumentSymbolProvider } from './providers/documentSymbolProvider';
 import { WorkspaceSymbolProvider } from './providers/workspaceSymbolProvider';
 import { HoverProvider } from './providers/hoverProvider';
 import { IArguments, legend, fileToGatherResults, nameToDefines } from './constants';
-import { GatherResults, CDefined, CBuiltIn } from "./classes";
+import { CGatherResults, CDefined, CBuiltIn } from "./classes";
 import { gatherDefinitions } from './parser';
 export const protoDiagnostics = vscode.languages.createDiagnosticCollection('proto')
 
@@ -38,7 +38,7 @@ export async function initialize(context: vscode.ExtensionContext) {
 	await Promise.allSettled(promises);
 	for (let defines of fileToGatherResults.values()){
 		for (let define of defines.Defines){
-			nameToDefines.has(define.name.Name) ? nameToDefines.set(define.name.Name, [...nameToDefines.get(define.name.Name), define]) : nameToDefines.set(define.name.Name, [define])
+			nameToDefines.has(define.name.name) ? nameToDefines.set(define.name.name, [...nameToDefines.get(define.name.name), define]) : nameToDefines.set(define.name.name, [define])
 		}
 	}
 	console.timeEnd('Initialize map done in')
@@ -49,18 +49,18 @@ async function parseModdinginfo(uri: vscode.Uri) {
 	const document = await vscode.workspace.openTextDocument(uri)
 	let promises:any = []
 	let iBuiltins:CBuiltIn[] = [];
-	for (let match of document.getText().matchAll(/^(Triggers?|Actions?|BOOLEAN|CUBE|DIRECTION|DOUBLE|PERK|POSITION|STRING): (?:$\s\s?^(?:.(?!\:))+$)+/gim)) {
+	for (let match of document.getText().matchAll(/^(Trigger|Action|BOOLEAN|CUBE|DIRECTION|DOUBLE|PERK|POSITION|STRING): (?:$\s\s?^(?:.(?!\:))+$)+/gim)) {
 		promises.push(packBuiltins(match,document))
 	}
 	for (let set of await <any>Promise.allSettled(promises)){//Much fuckery I don't
 		iBuiltins = [...iBuiltins,...await (set.value)]//really understand here
 	}
-	return <GatherResults>{Defines:<CDefined[]>iBuiltins, Document:document};//built on a bed of confident lies
+	return <CGatherResults>{Defines:<CDefined[]>iBuiltins, Document:document};//built on a bed of confident lies
 }
 async function packBuiltins(match:RegExpMatchArray, document:vscode.TextDocument): Promise<CBuiltIn[]> {
 	let compounds: CBuiltIn[] = [];
 	let lines = match[0].split(/[\r\n]+/)
-	let type = lines[0].toUpperCase().match(/(.*?)S?: /)[1]; //todo fix plural types
+	let type = lines[0].toUpperCase() //.match(/(.*?)S?: /)[1]; //todo fix plural types //handled by update
 	lines.shift();
 	for (let line of lines) {
 		let args: IArguments[] = [];
@@ -73,8 +73,8 @@ async function packBuiltins(match:RegExpMatchArray, document:vscode.TextDocument
 			else { args.push({ type: generic[0].toUpperCase() }); }
 		}
 		let builtin:CBuiltIn = new CBuiltIn(
-			/* Type: */ { DefineType: 'BUILT-IN', CompoundType:type },
-			/* Name: */ { Name: name[0].toLowerCase(), AsFound: name[0], Index:index },
+			/* Type: */ { defineType: 'BUILT-IN', compoundType:type },
+			/* Name: */ { name: name[0].toLowerCase(), asFound: name[0], index:index },
 			/* Document: */ document,
 			/* Arguments: */ args
 		);

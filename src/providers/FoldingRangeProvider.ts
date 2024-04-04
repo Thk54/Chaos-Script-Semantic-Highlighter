@@ -1,16 +1,16 @@
 import * as vscode from 'vscode';
 import { gatherDefinitions } from '../parser';
-import { GatherResults } from "../classes";
+import { CGatherResults } from "../classes";
 
 
 export class FoldingRangeProvider implements vscode.FoldingRangeProvider {
 	async provideFoldingRanges(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.FoldingRange[]> {
-		let gatherResults: GatherResults = (await gatherDefinitions(document));
+		let gatherResults: CGatherResults = (await gatherDefinitions(document));
 		let ranges: vscode.FoldingRange[] = [];
 		for (let iDefine of gatherResults.Defines ?? []) {
 			if (iDefine) {
-				let posStart = document.positionAt(iDefine.contents.capture.Index);
-				let posEnd = document.positionAt(iDefine.contents.capture.Index + iDefine.contents.capture.Text.length);
+				let posStart = document.positionAt(iDefine.contents.capture.index);
+				let posEnd = document.positionAt(iDefine.contents.capture.index + iDefine.contents.capture.text.length);
 				ranges.push({ start: posStart.line, end: posEnd.line });
 			}
 		}

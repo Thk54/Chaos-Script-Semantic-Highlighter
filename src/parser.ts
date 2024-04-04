@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
-import { GatherResults, CDefined } from "./classes";
+import { CGatherResults, CDefined } from "./classes";
 import { regexes } from "./regexes";
 
 async function packIntoCDefined(capture: RegExpMatchArray,document:vscode.TextDocument): Promise<CDefined>{
 return new CDefined(capture,document)
 }
-export async function gatherDefinitions(toDocument:{ doc?: vscode.TextDocument; uri?: vscode.Uri; }): Promise<GatherResults> {
+export async function gatherDefinitions(toDocument:{ doc?: vscode.TextDocument; uri?: vscode.Uri; }): Promise<CGatherResults> {
 	let cDefineds:CDefined[] = [] 
 	const document = <vscode.TextDocument>(toDocument?.doc ?? (await vscode.workspace.openTextDocument(toDocument.uri)));
 	let text: string = (<vscode.TextDocument>document).getText()
@@ -42,7 +42,7 @@ export async function gatherDefinitions(toDocument:{ doc?: vscode.TextDocument; 
 	for (let define of promises){
 		cDefineds.push(await define)
 	}
-	return new GatherResults(
+	return new CGatherResults(
 		/* Document: */ <vscode.TextDocument>document, 
 		/* Defines: */ cDefineds, 
 		/* Comments: */ comments.length ? comments : null, 

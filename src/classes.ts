@@ -20,8 +20,8 @@ export class CDefined extends CBuiltIn {
 	contents: CContents;
 	constructor(regex: RegExpMatchArray, document: vscode.TextDocument) {
 		let defineType = regex.groups['TypeOfDEFINE'].toUpperCase();
-		super({ DefineType: defineType, CompoundType: regex?.groups['TypeOfCOMPOUND']?.toUpperCase() },
-			{ Name: regex.groups['NameOf' + defineType].toLowerCase(), AsFound: regex.groups['NameOf' + defineType], Index: regex.indices.groups['NameOf' + defineType][0] },
+		super(<IType>{ defineType: defineType, compoundType: regex?.groups['TypeOfCOMPOUND']?.toUpperCase() },
+			<IName>{ name: regex.groups['NameOf' + defineType].toLowerCase(), asFound: regex.groups['NameOf' + defineType], index: regex.indices.groups['NameOf' + defineType][0] },
 			document);
 		if (defineType === 'COMPOUND') {
 			let args = [];
@@ -46,16 +46,16 @@ export class CType {
 	typeString: string;
 	legendEntry: string;
 	constructor(Type: IType) {
-		if (Type?.CompoundType) { //if it has this argument it is a compound
+		if (Type?.compoundType) { //if it has this argument it is a compound
 			this.isCompoundDefine = true;
-			if (Type.DefineType === 'BUILT-IN') { //some compounds are "Built-in"
+			if (Type.defineType === 'BUILT-IN') { //some compounds are "Built-in"
 				this.isBuiltIn = true;
-				this.typeString = 'BUILT-IN ' + Type.CompoundType; //and should show up as such
-			} else { this.typeString = 'COMPOUND ' + Type.CompoundType; } //but otherwise be identical to normal compounds
-			this.define = Type.CompoundType.toUpperCase();
+				this.typeString = 'BUILT-IN ' + Type.compoundType; //and should show up as such
+			} else { this.typeString = 'COMPOUND ' + Type.compoundType; } //but otherwise be identical to normal compounds
+			this.define = Type.compoundType.toUpperCase();
 		} else {
-			this.define = Type.DefineType.toUpperCase(); //probably uppercaseing more than nessisary, but it has bit me too many times
-			this.typeString = Type.DefineType;
+			this.define = Type.defineType.toUpperCase(); //probably uppercaseing more than nessisary, but it has bit me too many times
+			this.typeString = Type.defineType;
 		}
 		this.legendEntry = typesLegend.get(this.isCompoundDefine ? 'COMPOUND ' + this.define : this.define) ?? 'unhandled.chaos'; //set to something specific or the fallback last entry
 	}
@@ -69,7 +69,7 @@ export class CContents {
 	components: CToken[] = [];
 	range:vscode.Range;
 	constructor(regex: RegExpMatchArray, defineType: string, document: vscode.TextDocument) {
-		this.capture = { Text: regex[0], Index: regex.index };
+		this.capture = { text: regex[0], index: regex.index };
 		this.content = regex.groups['ContentsOf' + defineType];
 		this.index = regex.indices.groups['ContentsOf' + defineType][0];
 		this.range = new vscode.Range(document.positionAt(this.index),document.positionAt(this.index+this.content.length))
@@ -93,11 +93,11 @@ export class CToken {
 	mapValue: CDefined[];
 	constructor(defines: CDefined[], tokenStart: vscode.Position) {
 		this.tokenType = defines[0].type.legendEntry;
-		this.range = new vscode.Range(tokenStart, tokenStart.translate({ characterDelta: defines[0].name.Name.length }));
+		this.range = new vscode.Range(tokenStart, tokenStart.translate({ characterDelta: defines[0].name.name.length }));
 		this.mapValue = defines
 	}
 }
-export class GatherResults {
+export class CGatherResults {
 	constructor(public Document: vscode.TextDocument, public Defines: CDefined[], public Comments?: RegExpMatchArray[],
 		public Scenarios?: RegExpMatchArray[], public ArtOverrides?: RegExpMatchArray[], public DoActions?: RegExpMatchArray[]) { }
 }
