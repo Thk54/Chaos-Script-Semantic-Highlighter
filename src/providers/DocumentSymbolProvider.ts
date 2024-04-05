@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { fileToGatherResults, tokenTypes } from '../constants';
-import { buildTrees } from './commonFunctions';
+import { buildTree } from "./treeFunctions";
 import { protoDiagnostics } from '../initialize'
 
 
@@ -10,7 +10,7 @@ export class DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
 		let docs = [];
 		let diagnostics:vscode.Diagnostic[] = []
 		for (let define of defines) {
-			docs.push(buildTrees(define,diagnostics))
+			docs.push(buildTree(define,diagnostics))
 /* 			let defineRange = new vscode.Range(document.positionAt(define.contents.capture.Index), document.positionAt(define.contents.capture.Index + define.contents.capture.Text.length));
 			let symbolRange = new vscode.Range(document.positionAt(define.name.Index), document.positionAt(define.name.Index + define.name.Name.length));
 			let symbolName = define.name.Name;
