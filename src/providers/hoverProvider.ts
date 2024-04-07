@@ -11,6 +11,9 @@ export class HoverProvider implements vscode.HoverProvider {
 		for (let define of defines){
 			string.push(define.type.typeString+'  \n'+(define.name.asFound ?? define.name.name)+(doesCDefineHaveArguments(define)?('  \n'+returnArgumentsAsString(<CDefined>define)):''))
 		}
-		return new vscode.Hover(string.join('  \n***  \n'))
+		if (string.length) {
+			return new vscode.Hover(string.join('  \n***  \n'))
+		} else {return}
+		
 	}
 }

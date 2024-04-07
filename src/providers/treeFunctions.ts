@@ -39,51 +39,31 @@ function treeBuilder(words: IterableIterator<RegExpMatchArray>, context: CDefine
 		let iteratorResult: IteratorResult<RegExpMatchArray>;
 		let word: RegExpMatchArray;
 		let i = 0
-		/* if (args.length === 0) {
+		do {
+			let arg = args[i]
+			i += 1
 			iteratorResult = words.next();
 			if (iteratorResult?.done) return { returnArray: [], deepestPos: deepestPos, done: iteratorResult.done };
 			word = iteratorResult.value;
-			let isArgs = determineFlagArgs(word[0], context);
-			if (isArgs) {
-				let childSymbol: vscode.DocumentSymbol;
-				let grandchildSymbols: vscode.DocumentSymbol[];
-				let startpos = document.positionAt(offset + word.index);
-				let endpos = startpos.translate({ characterDelta: word[0].length });
-				let temp = treeBuilder(words, context, diagnostics, isArgs);
-				if (temp?.done || temp?.returnArray === undefined) { deepestPos = endpos; 
-				} else { 
-					grandchildSymbols = temp.returnArray;
-					deepestPos = temp.deepestPos;
-				}
-				childSymbol = new vscode.DocumentSymbol(word[0], '', 4, new vscode.Range(startpos, deepestPos ?? temp.deepestPos), new vscode.Range(startpos, endpos));
-				childSymbol.children = grandchildSymbols;
-				returnArray = [childSymbol];
-			} else { return; }
-		} else  */{
-			/* for (let arg of args) */ do {
-				let arg = args[i]
-				i += 1
-				iteratorResult = words.next();
-				if (iteratorResult?.done) return { returnArray: [], deepestPos: deepestPos, done: iteratorResult.done };
-				word = iteratorResult.value;
-				let childSymbol: vscode.DocumentSymbol;
-				let grandchildSymbols: vscode.DocumentSymbol[];
-				let startpos = document.positionAt(offset + word.index);
-				let endpos = startpos.translate({ characterDelta: word[0].length });
-				let childArgs = (nameToDefines.get(word[0].toLowerCase())?.find((value) => { return value.type.define.toUpperCase() === arg?.type.toUpperCase(); /* make this handled triggers/abilites */ })?.args ?? determineFlagArgs(word[0], context));
-				if (!childArgs?.length) { childArgs = undefined; if (!args.length) return} //If we are neither looking for a child or something that wants children we are done
-				let temp = treeBuilder(words, context, diagnostics, childArgs);
-				if (temp?.done || temp?.returnArray === undefined) { deepestPos = endpos; 
-				} else { 
-					grandchildSymbols = temp.returnArray;
-					deepestPos = temp.deepestPos;
-				}
-				childSymbol = new vscode.DocumentSymbol(word[0], '', 4, new vscode.Range(startpos, deepestPos ?? temp.deepestPos), new vscode.Range(startpos, endpos));
-				childSymbol.children = grandchildSymbols;
-				childSymbols.push(childSymbol);
-			} while (i < args.length)
-			returnArray = childSymbols;
-		}
+			let childSymbol: vscode.DocumentSymbol;
+			let grandchildSymbols: vscode.DocumentSymbol[];
+			let startpos = document.positionAt(offset + word.index);
+			let endpos = startpos.translate({ characterDelta: word[0].length });
+			let childArgs = (nameToDefines.get(word[0].toLowerCase())?.find((value) => 
+				{ return value.type.define.toUpperCase() === arg?.type.toUpperCase(); })?.args /* make this handled triggers/abilites */
+				?? determineFlagArgs(word[0], context));
+			if (!childArgs?.length) { childArgs = undefined; if (!args.length) return} //If we are neither looking for a child or something that wants children we are done
+			let temp = treeBuilder(words, context, diagnostics, childArgs);
+			if (temp?.done || temp?.returnArray === undefined) { deepestPos = endpos; 
+			} else { 
+				grandchildSymbols = temp.returnArray;
+				deepestPos = temp.deepestPos;
+			}
+			childSymbol = new vscode.DocumentSymbol(word[0], '', 4, new vscode.Range(startpos, deepestPos ?? temp.deepestPos), new vscode.Range(startpos, endpos));
+			childSymbol.children = grandchildSymbols;
+			childSymbols.push(childSymbol);
+		} while (i < args.length)
+		returnArray = childSymbols;
 		return { returnArray: returnArray, deepestPos: deepestPos, done: iteratorResult.done };
 	} else { return; }
 }

@@ -17,7 +17,9 @@ export class CBuiltIn {
 
 export class CDefined extends CBuiltIn {
 	static initializeFinished = false;
+	nameMapEntryValue?: CDefined[] = null
 	contents: CContents;
+	define: CDefined[];
 	constructor(regex: RegExpMatchArray, document: vscode.TextDocument) {
 		let defineType = regex.groups['TypeOfDEFINE'].toUpperCase();
 		super(<IType>{ defineType: defineType, compoundType: regex?.groups['TypeOfCOMPOUND']?.toUpperCase() },
@@ -36,6 +38,10 @@ export class CDefined extends CBuiltIn {
 			this.args = args;
 		}
 		this.contents = new CContents(regex, defineType, document);
+	}
+	public setMapEntryValue(input:CDefined[]):CDefined {
+		this.nameMapEntryValue = input
+		return this
 	}
 }
 
@@ -78,9 +84,8 @@ export class CContents {
 		if (CDefined.initializeFinished) {// todo some hash stuff or something
 			for (let word of this.content.matchAll(regexes.stringExcluderCapture)) { // Mostly verbose could be more function-ized
 				if ((defineType === 'TEXTTOOLTIP')) break; //abort if tooltiptext but still highlight name
-				//let result = nameToDefines.get(word[0].toLowerCase())?.length ? nameToDefines.get(word[0].toLowerCase()) : null;
 				let result = nameToDefines.get(word[0].toLowerCase()) ?? null;
-				if (result) {
+				if (result?.length) {
 					let tokenStart = document.positionAt(this.index + word.index);
 					this.components.push(new CToken(result, tokenStart));
 				}

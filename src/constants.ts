@@ -6,7 +6,7 @@ export const tokenModifiers = new Map<string, number>();
 export const typesLegend = new Map<string, string>();
 
 export const fileToGatherResults = new Map<string,CGatherResults>();
-export const nameToDefines = new Map<string,CDefined[]>();
+export let nameToDefines = new Map<string,CDefined[]>();
 
 export const legend = (function () {
 	const tokenTypesLegend = [

@@ -9,6 +9,7 @@ import { HoverProvider } from './providers/hoverProvider';
 import { IArgument, legend, fileToGatherResults, nameToDefines } from './constants';
 import { CGatherResults, CDefined, CBuiltIn } from "./classes";
 import { gatherDefinitions } from './parser';
+import { addCDefinedToMapWithRefrenceToOwnEntryValue } from './providers/commonFunctions';
 export const protoDiagnostics = vscode.languages.createDiagnosticCollection('proto')
 
 //export let initializeFinished = false
@@ -38,7 +39,7 @@ export async function initialize(context: vscode.ExtensionContext) {
 	await Promise.allSettled(promises);
 	for (let defines of fileToGatherResults.values()){
 		for (let define of defines.defines){
-			nameToDefines.has(define.name.name) ? nameToDefines.set(define.name.name, [...nameToDefines.get(define.name.name), define]) : nameToDefines.set(define.name.name, [define])
+			addCDefinedToMapWithRefrenceToOwnEntryValue(nameToDefines,define)
 		}
 	}
 	console.timeEnd('Initialize map done in')
