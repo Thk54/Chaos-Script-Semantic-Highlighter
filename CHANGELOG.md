@@ -1,5 +1,8 @@
 ## Release Notes
 
+## [0.2.1]
+Bunch more behind the scenes stuff, the diagnostics is now significantly more intelligent and less angry
+
 ## [0.2.0]
 Outline now arguably useful, and first iteration of diagnostics, the thing that tells you that thing expected an action and you gave it a boolean (warning buggy false positives and false negatives)
 
