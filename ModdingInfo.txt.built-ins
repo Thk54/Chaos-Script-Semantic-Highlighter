@@ -11,6 +11,7 @@ AfterACubeMoves Action
 AfterACubeTakesDamage Action
 AfterACubeTeleports Action
 AfterAMapIsGenerated Action
+AfterAnotherAllyIsCreated Action
 AfterBlockedTeleport Action
 AfterCampaignSomething
 AfterEndOfTheBattle Action
@@ -32,14 +33,17 @@ AfterYouLoseAPerk Action
 AfterYouReroll Action
 AfterYouUpgradeAPerk Action
 AfterYouWin
+AiAggressiveBurrowing
 AiPlacement BOOLEAN
+AiPlacementAdd DOUBLE BOOLEAN
 AiPlacementRule Action
-AtTheStartOfTheBattle Action
+AiWarrior
 BeforeACubeDies Action
 BeforeACubeGainsAnAbility Action
 BeforeACubeHeals Action
 BeforeACubeIsAddedToAHand Action
 BeforeACubeIsAddedToInventory Action
+BeforeACubeIsAddedToYourHand Action
 BeforeACubeMoves Action
 BeforeACubeMovesNegation Action
 BeforeACubeTakesDamage Action
@@ -61,7 +65,18 @@ BeforeTime Action
 BeforeYouLose Action
 BeforeYouTakeAStep Action
 BeforeYouWin Action
-Counter Action
+Every10Minutes Action
+Every10Seconds Action
+Every10Ticks Action
+Every20Seconds Action
+Every2Seconds Action
+Every30Seconds Action
+Every30Ticks Action
+Every3Seconds Action
+Every5Seconds Action
+Every5Ticks Action
+EveryMinute Action
+EverySecond Action
 EveryTick Action
 Nothing DOUBLE
 
@@ -187,6 +202,37 @@ DisablePerkAutoSort
 ReadAPartialScenario String
 TriggerWorldSomething String
 PrintDouble DOUBLE
+1Shot Action
+Then Action
+UntilSuccess Action
+GenerateXMana DOUBLE
+AddCubeToHandOfThis CUBE
+SetHp DOUBLE
+EveryCube Action
+GainXExtraHp DOUBLE
+ChangeCurrency DOUBLE
+ChangeRerollCost DOUBLE
+ChangeStartingMana DOUBLE
+ChangeStartingMaxMana DOUBLE
+ChangeDifficulty DOUBLE
+ChangeStartingHandSize DOUBLE
+EveryLeaderOfFaction DOUBLE Action
+EveryAlliedLeader Action
+EveryAlly Action
+RefundX DOUBLE
+NoManaCost
+EveryCubeInRadiusXAroundTarget DOUBLE Action
+ResetManaCost
+AddDepthRow CUBE
+LoseThisPerk
+EnergyNegation
+ResetAdjacencyAtTarget
+GainARandomBonus
+GainInspatial
+TriggerTargetFragment
+TriggerEffectFragment
+GetLeastFragment
+SufferXWounds CONSTANT
 
 BOOLEAN: 
 IsEnemyToCaster CUBE
@@ -225,6 +271,63 @@ MapNodeIsType DOUBLE String
 XOr BOOLEAN BOOLEAN
 WorldExists
 StringContainsString STRING STRING
+False
+IsPlaced
+IsCubeInfront
+IsEmptyAbove
+AboveExists
+NoCubeAbove
+IsNotAllyInfront
+HaveMoreThanXMana DOUBLE
+IsALeader CUBE
+BattleOngoing
+FirstMap
+MapLeft
+IsNotInHandOfThis CUBE
+IsInShieldArea
+IsInAoEAroundTarget
+IsSurroundedByAllies
+IsDamaged
+IsEnemy CUBE
+IsAlly CUBE
+IsNeutral CUBE
+HasNameOfCube CUBE CUBE
+PerkHasNameOfPerk PERK PERK
+CubeHasName CUBE NAME
+ExcludeLastXNodes DOUBLE
+AiBackline
+AiDefense
+AiFrontline
+AiEmptyInfront
+AiAllyInfront
+AiEnemyInfront
+AiEmptyBehind
+AiAllyBehind
+AiEmptyNorth
+AiCubeBelow
+AiEmptySouth
+AiCubeSouth
+AiAllySouth
+AiAllyNorth
+AiEnemySouth
+AiNeutralSouth
+AiLeaderSouth
+AiLeaderBehind
+AiVoidSouth
+AiLiquidSouth
+AiDangerSouth
+AiStacking
+AiAnyDistanceAboveSafety
+AiBurrowing
+AiFlying
+AiMissile
+AiDelay DOUBLE
+AiLimit CONSTANT
+IsCubeOnLeftSide CUBE
+IsTestPerkCubable
+IsRightTargetFragment
+IsRightEffectFragment
+EffectConnectable
 
 CUBE: 
 Caster
@@ -250,6 +353,16 @@ APRandomCubeInLibraryWhich BOOLEAN
 ARandomCubeInInventoryWhich BOOLEAN
 TheXSlotInHandOfFaction DOUBLE DOUBLE
 CopyWithAction CUBE Action
+ARandomEnemy
+ARandomAlly
+ARandomDamagedAlly
+ARandomNotLeaderEnemy
+ARandomLeaderOfFaction DOUBLE
+ARandomAlliedLeader
+ARandomCube
+FreeCopy CUBE
+NeutralCopy CUBE
+ARandomDragonEgg
 
 DIRECTION: 
 Forwards
@@ -261,6 +374,13 @@ DirectionFromDouble DOUBLE
 RotateClock DIRECTION
 RotateCounterClock DIRECTION
 DirectionFromPosToPos POSITION POSITION
+North
+East
+South
+West
+Backwards
+RandomDirection
+GravityDirection
 
 DOUBLE: 
 DoubleConstant double
@@ -324,6 +444,15 @@ RoundedDown DOUBLE
 Minus DOUBLE
 InvertedFaction DOUBLE
 % DOUBLE DOUBLE
+1/2
+FactionOfThis
+EnemyFaction
+Currency
+Difficulty
+CurrentMapNode
+MapNodeAmount
+Nightmares
+GetEnergy
 
 PERK: 
 Target
@@ -341,6 +470,13 @@ OriginalPosition
 PositionXInfrontYBelowPosition DOUBLE DOUBLE POSITION
 PositionFromXAndY DOUBLE DOUBLE
 GenericPosition
+PositionOfThis
+PositionInDirectionFromThis DIRECTION
+TopPositionAboveCube CUBE
+ARandomPosition
+ARandomLeftPosition
+ARandomTopPosition
+ARandomRightPosition
 
 STRING: 
 ScenarioOfMapNode DOUBLE
