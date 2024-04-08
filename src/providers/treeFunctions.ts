@@ -57,15 +57,10 @@ function treeBuilder(words: IterableIterator<RegExpMatchArray>, context: CDefine
 			let startpos = document.positionAt(offset + word.index);
 			let endpos = startpos.translate({ characterDelta: word[0].length });
 			let childArgs = (nameToDefines.get(word[0].toLowerCase())?.find((value) => 
-				{ return value.type.define === arg?.type 
-				?? determineFlagArgs(word[0], context)
-				?? ([argOptions.INTconst.type,argOptions.DOUBLEconst.type,argOptions.DOUBLEcompound.type].includes(arg?.type)&&/^-?\d+$/.test(word[0]))
-					? undefined
-				: ([argOptions.STRINGconst.type||argOptions.STRINGcompound.type].includes(arg?.type))&&/^\S+$/.test(word[0])
-					? undefined 
-				: (arg?.type)
-					? convertToUndefined(diagnostics.push(new vscode.Diagnostic(new vscode.Range(startpos,endpos),createDiagnosticText(arg.type, nameToDefines.get(word[0].toLowerCase()), word[0]),2)))
-					: undefined})?.args /* make this handled triggers/abilites */);
+				{ return value.type.define === arg?.type })?.args /* make this handled triggers/abilites */
+				?? determineFlagArgs(word[0], context))
+			/* bad form but should work */ let diag = createDiagnostic(new vscode.Range(startpos,endpos), arg?.type, nameToDefines.get(word[0].toLowerCase()) ?? [], word[0])
+			if (diag && arg) diagnostics.push(diag)
 			if (!childArgs?.length) { childArgs = undefined; if (!args.length) return} //If we are neither looking for a child or something that wants children we are done
 			let temp = treeBuilder(words, context, diagnostics, childArgs);
 			if (temp?.done || temp?.returnArray === undefined) { deepestPos = endpos; 
@@ -102,12 +97,15 @@ function handleEndUser(words:IterableIterator<RegExpMatchArray>):IteratorResult<
 }
 
 function convertToUndefined(any:any):undefined{return undefined}
-function createDiagnosticText(arg:IArg['type'],defines:CDefined[],word:string):string{
+function createDiagnostic(range:vscode.Range,arg:IArg['type'],defines:CDefined[],word:string):vscode.Diagnostic{
 	let thingsFound:Set<string> = new Set<string>
+	arg?.replace('const', 'compound')
 	for (let define of defines){
+		define.type.define.replace('const', 'compound')
 		thingsFound.add(define.type.define)
 	}
 	if (/^-?\d+$/.test(word)) thingsFound.add(argOptions.INTconst.type).add(argOptions.DOUBLEconst.type);
 	if (/^\S+$/.test(word)) thingsFound.add(argOptions.STRINGconst.type)
-	return 'Expected: '+arg+'\nFound: '+[...thingsFound.values()].join(', ')
+	if (thingsFound.has('TIMEcompound')) thingsFound.add(argOptions.DOUBLEcompound.type)
+	if (thingsFound.has(arg)) {return} else {return new vscode.Diagnostic(range,'Expected: '+arg+'\nFound: '+[...thingsFound.values()].join(', '),2)}
 }

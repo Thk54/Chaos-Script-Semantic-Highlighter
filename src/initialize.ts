@@ -74,9 +74,9 @@ async function packBuiltins(match:RegExpMatchArray, document:vscode.TextDocument
 				first = false;
 			} else {
 				let temp
-				if (generic[0].toUpperCase() === generic[0]) {
+				if (/* generic[0].toUpperCase() === generic[0] */true) {
 					temp = generic[0].toUpperCase() + 'compound';
-				} else { temp = generic[0].toUpperCase() + 'compound'}
+				} else { temp = generic[0].toUpperCase() + 'const'}
 				if (temp === 'TRIGGERcompound') temp = argOptions.ABILITYcompound.type
 				args.push({ type: temp });
 			}

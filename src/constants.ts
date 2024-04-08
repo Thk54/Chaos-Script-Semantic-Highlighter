@@ -19,16 +19,16 @@ export const argOptions = { //this will probably need to be redone *sigh*
 	STRINGcompound: {type:'STRINGcompound'},
 	TRIGGERcompound: {type:'ABILITYcompound'},
 
-	STRINGconst: {type:'STRINGconst'},//catchall string
+	STRINGconst: {type:'STRINGcompound'},//catchall string
 	ACTIONconst: {type:'ACTIONcompound'},
 	TRIGGERconst: {type:'ABILITYcompound'},
-	DOUBLEconst: {type:'NUMBERconst'},
+	DOUBLEconst: {type:'DOUBLEcompound'},
 	ABILITYconst: {type:'ABILITYcompound'},
 	INTconst: {type:'INTconst'}, //int
 
-	STRINGvar: {type:''},//catchall string
-	STRINGcampaginValue: {type:''},//todo figure out valid campgain values
-	STRINGtype: {type:''},//todo list types
+	STRINGvar: {type:'STRINGcompound'},//catchall string
+	STRINGcampaginValue: {type:'STRINGcompound'},//todo figure out valid campgain values
+	STRINGtype: {type:'STRINGcompound'},//todo list types
 
 	TEXTTOOLTIPdefine: {type:'TEXTTOOLTIPdefine'},
 	ARTOVERRIDEdefine: {type:'ARTOVERRIDEdefine'},

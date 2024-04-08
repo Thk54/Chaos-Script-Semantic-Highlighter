@@ -32,7 +32,8 @@ export class CDefined extends CBuiltIn {
 					let type = generic.groups['CompoundGenerics'].slice(7)
 					if (type.toUpperCase() === type) {
 						type = type.toUpperCase() + 'compound';
-					} else { type = type.toUpperCase() + 'const'}
+					} else { type = type.toUpperCase() + 'compound'}
+					if (type === 'TIMEcompound') type = argOptions.DOUBLEcompound.type
 					args.push({
 						string: generic.groups['CompoundGenerics'],
 						type: type,
