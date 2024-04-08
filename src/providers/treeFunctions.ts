@@ -107,5 +107,10 @@ function createDiagnostic(range:vscode.Range,arg:IArg['type'],defines:CDefined[]
 	if (/^-?\d+$/.test(word)) thingsFound.add(argOptions.INTconst.type).add(argOptions.DOUBLEconst.type);
 	if (/^\S+$/.test(word)) thingsFound.add(argOptions.STRINGconst.type)
 	if (thingsFound.has('TIMEcompound')) thingsFound.add(argOptions.DOUBLEcompound.type)
-	if (thingsFound.has(arg)) {return} else {return new vscode.Diagnostic(range,'Expected: '+arg+'\nFound: '+[...thingsFound.values()].join(', '),2)}
+	if (thingsFound.has('CUBEdefine')) thingsFound.add(argOptions.CUBEcompound.type)
+	if (thingsFound.has('PERKdefine')) thingsFound.add(argOptions.PERKcompound.type)
+	if (arg === "NAMEcompound") arg = argOptions.STRINGcompound.type
+	if (arg === "STACKINGcompound") arg = argOptions.DOUBLEcompound.type
+	if (arg === "CONSTANTcompound") arg = argOptions.DOUBLEcompound.type
+	if (thingsFound.has(arg)||(arg === argOptions.VISUAL.type)||(arg === argOptions.ANIMATION.type)) {return} else {return new vscode.Diagnostic(range,'Expected: '+arg+'\nFound: '+[...thingsFound.values()].join(', '),2)}
 }

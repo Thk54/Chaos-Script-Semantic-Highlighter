@@ -18,13 +18,14 @@ export const argOptions = { //this will probably need to be redone *sigh*
 	POSITIONcompound: {type:'POSITIONcompound'},
 	STRINGcompound: {type:'STRINGcompound'},
 	TRIGGERcompound: {type:'ABILITYcompound'},
+	PERKcompound: {type:'PERKcompound'},
 
 	STRINGconst: {type:'STRINGcompound'},//catchall string
 	ACTIONconst: {type:'ACTIONcompound'},
 	TRIGGERconst: {type:'ABILITYcompound'},
 	DOUBLEconst: {type:'DOUBLEcompound'},
 	ABILITYconst: {type:'ABILITYcompound'},
-	INTconst: {type:'INTconst'}, //int
+	INTconst: {type:'INTcompound'}, //int
 
 	STRINGvar: {type:'STRINGcompound'},//catchall string
 	STRINGcampaginValue: {type:'STRINGcompound'},//todo figure out valid campgain values
