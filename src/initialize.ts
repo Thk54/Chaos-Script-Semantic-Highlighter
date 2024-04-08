@@ -6,7 +6,7 @@ import { DocumentSemanticTokensProvider } from './providers/documentSemanticToke
 import { DocumentSymbolProvider } from './providers/documentSymbolProvider';
 import { WorkspaceSymbolProvider } from './providers/workspaceSymbolProvider';
 import { HoverProvider } from './providers/hoverProvider';
-import { IArgument, legend, fileToGatherResults, nameToDefines } from './constants';
+import { IArgument, legend, fileToGatherResults, nameToDefines, argOptions } from './constants';
 import { CGatherResults, CDefined, CBuiltIn } from "./classes";
 import { gatherDefinitions } from './parser';
 import { addCDefinedToMapWithRefrenceToOwnEntryValue } from './providers/commonFunctions';
@@ -61,7 +61,7 @@ async function parseModdinginfo(uri: vscode.Uri) {
 async function packBuiltins(match:RegExpMatchArray, document:vscode.TextDocument): Promise<CBuiltIn[]> {
 	let compounds: CBuiltIn[] = [];
 	let lines = match[0].split(/[\r\n]+/)
-	let type = lines[0].toUpperCase().slice(0,lines[0].length-2) //.match(/(.*?)S?: /)[1]; //todo fix plural types //handled by update
+	let type = lines[0].toUpperCase().slice(0,lines[0].length-2) //.match(/(.*?)S?: /)[1];
 	lines.shift();
 	for (let line of lines) {
 		let args: IArgument[] = [];
@@ -70,9 +70,18 @@ async function packBuiltins(match:RegExpMatchArray, document:vscode.TextDocument
 		line.slice(name.length);
 		let first: boolean = true;
 		for (let generic of line.matchAll(/\S+/ig)) {
-			if (first) { first = false; }
-			else { args.push({ type: generic[0] }); }
+			if (first) {
+				first = false;
+			} else {
+				let temp
+				if (generic[0].toUpperCase() === generic[0]) {
+					temp = generic[0].toUpperCase() + 'compound';
+				} else { temp = generic[0].toUpperCase() + 'compound'}
+				if (temp === 'TRIGGERcompound') temp = argOptions.ABILITYcompound.type
+				args.push({ type: temp });
+			}
 		}
+		if (type === 'TRIGGER') {type = 'ABILITY'}
 		let builtin:CBuiltIn = new CBuiltIn(
 			/* Type: */ { defineType: 'BUILT-IN', compoundType:type },
 			/* Name: */ { name: name[0].toLowerCase(), asFound: name[0], index:index },
@@ -84,3 +93,31 @@ async function packBuiltins(match:RegExpMatchArray, document:vscode.TextDocument
 	return compounds;
 }
 
+function fixExeptions(){
+/* 	TakeXDamageEffect DOUBLE int String
+	SetVariable String DOUBLE
+	ChangeVariable String DOUBLE
+	RemoveAbilityWithName String
+	ChangeAbilityStacking String DOUBLE
+	ReadAScenario String
+	ChangeCampaignVariable String DOUBLE
+	SetCampaignVariable String DOUBLE
+	SetScoringScenario String
+	PlaySound String
+	TriggerCampaignSomething String
+	SetMapNodeScenario DOUBLE String
+	ReadAPartialScenario String
+	TriggerWorldSomething String
+	HasAbilityWithName CUBE String
+	HasCategory CUBE String
+	PerkIsType PERK String
+	IsType String
+	MapNodeIsType DOUBLE String
+	CubeConstant String
+	GetVariableOnCube String CUBE
+	GetCampaignVariable String
+	GetBestScore String
+	GetStackingOfAbilityOnCube String CUBE
+	PerkConstant String
+	StringConstant String */
+}

@@ -8,6 +8,45 @@ export const typesLegend = new Map<string, string>();
 export const fileToGatherResults = new Map<string,CGatherResults>();
 export let nameToDefines = new Map<string,CDefined[]>();
 
+export const argOptions = { //this will probably need to be redone *sigh*
+	CUBEcompound: {type:'CUBEcompound'},
+	DOUBLEcompound: {type:'DOUBLEcompound'},
+	ACTIONcompound: {type:'ACTIONcompound'},
+	BOOLEANcompound: {type:'BOOLEANcompound'},
+	ABILITYcompound: {type:'ABILITYcompound'},
+	DIRECTIONcompound: {type:'DIRECTIONcompound'},
+	POSITIONcompound: {type:'POSITIONcompound'},
+	STRINGcompound: {type:'STRINGcompound'},
+	TRIGGERcompound: {type:'ABILITYcompound'},
+
+	STRINGconst: {type:'STRINGconst'},//catchall string
+	ACTIONconst: {type:'ACTIONcompound'},
+	TRIGGERconst: {type:'ABILITYcompound'},
+	DOUBLEconst: {type:'NUMBERconst'},
+	ABILITYconst: {type:'ABILITYcompound'},
+	INTconst: {type:'INTconst'}, //int
+
+	STRINGvar: {type:''},//catchall string
+	STRINGcampaginValue: {type:''},//todo figure out valid campgain values
+	STRINGtype: {type:''},//todo list types
+
+	TEXTTOOLTIPdefine: {type:'TEXTTOOLTIPdefine'},
+	ARTOVERRIDEdefine: {type:'ARTOVERRIDEdefine'},
+	DOACTIONdefine: {type:'DOACTIONdefine'},
+	SCENARIOdefine: {type:'SCENARIOdefine'},
+	PERKdefine: {type:'PERKdefine'}, 
+	CUBEdefine: {type:'CUBEdefine'},
+
+	VISUAL: {type:'VISUALS'},
+	ANIMATION: {type:'ANIMATIONS'},
+	ENDUSER: {type:'ENDUSER'},
+
+	TYPEcompound: {type:'TYPEcompound'},
+	NONE: {type:''}
+}
+export const defineTypeToArgOptionMap = new Map(
+	[['String',argOptions.STRINGconst],['Action',argOptions.ACTIONconst],['Trigger',argOptions.TRIGGERconst],['double',argOptions.DOUBLEconst],['Ability',argOptions.ABILITYconst],['int',argOptions.INTconst]]
+)
 export const legend = (function () {
 	const tokenTypesLegend = [
 		'comment', 'string', 'keyword', 'number', 'regexp', 'operator', 
@@ -26,7 +65,7 @@ export const legend = (function () {
 		'deprecated', 'modification', 'async', 'defaultLibrary'
 	];
 	tokenModifiersLegend.forEach((tokenModifier, index) => tokenModifiers.set(tokenModifier, index));
-	const chaosMappings = [
+	const chaosMappingsOld = [
 		'COMMENT', //'comment',//green
 		'h', //'string',//salmon
 		'COMPOUND CUBE', //'keyword',//pink
@@ -53,44 +92,47 @@ export const legend = (function () {
 		'COMPOUND POSITION',//entity.other.attribute-name.position.chaos
 		'UHANDLED'
 	];
+	const chaosMappings = [
+		'COMMENT', //'comment',//green
+		'h', //'string',//salmon
+		argOptions.CUBEcompound.type, //'keyword',//pink
+		argOptions.DOUBLEcompound.type, //'number',//pale yellow
+		argOptions.STRINGcompound.type, //'regexp',//purple
+		argOptions.BOOLEANcompound.type, //'operator',//offwhite
+		argOptions.ABILITYcompound.type, //'namespace',//teal
+		argOptions.TEXTTOOLTIPdefine.type, //'type',//teal
+		'g', //'struct',//teal
+		argOptions.TRIGGERcompound.type, //'class',//teal
+		argOptions.ARTOVERRIDEdefine.type, //'interface',//teal
+		'c'/* 'COMPOUND PERK' */, //'enum',//teal
+		argOptions.DOACTIONdefine.type, //'typeParameter',//teal
+		argOptions.ACTIONcompound.type, //'function',//pale yellow
+		argOptions.SCENARIOdefine.type, //'method',//pale yellow
+		'i', //'macro',//blue
+		argOptions.PERKdefine.type, //'variable',//light sky blue
+		argOptions.CUBEdefine.type, //'parameter',//light sky blue
+		'z', //'property',//light sky blue
+		'a', //'enumMember',//bright light blue
+		'v', //'event',//light sky blue
+		argOptions.DIRECTIONcompound.type, //'decorator',//pale yellow
+		argOptions.TYPEcompound.type, //'label'//undefined
+		argOptions.POSITIONcompound.type,//entity.other.attribute-name.position.chaos
+		'UHANDLED'
+	];
 	chaosMappings.forEach((TypeOfCompound, index) => typesLegend.set(TypeOfCompound, tokenTypesLegend[index]));
 	return new vscode.SemanticTokensLegend(tokenTypesLegend, tokenModifiersLegend);
 })();
-const argOptions = {
-	CCUBE: {type:'CUBE'},
-	CDOUBLE: {type:'DOUBLE'},
-	CACTION: {type:'ACTION'},
-	CBOOLEAN: {type:'BOOLEAN'},
-	CABILITY: {type:'ABILITY'},
-	CTRIGGER: {type:'TRIGGER'},
-	CDIRECTION: {type:'DIRECTION'},
-	CPOSITION: {type:'POSITION'},
 
-	OtherSTRING: {type:''},
-	CampaginValueSTRING: {type:''},
-	TypeSTRING: {type:''},
 
-	DTEXTTOOLTIP: {type:''},
-	DARTOVERRIDE: {type:''},
-	DDOACTION: {type:''},
-	DSCENARIO: {type:''},
-	DPERK: {type:''}, 
-	DCUBE: {type:''},
 
-	numConstant: {type:''},
-	VISUAL: {type:''},
-	ANIMATION: {type:''},
-	ENDUSER: {type:'ENDUSER'},
-	NONE: {type:''}
-}
-export const compoundAbilityFlags = new Map([['Visual:',[argOptions.VISUAL]],['Text:',[argOptions.ENDUSER]],['ExtraTrigger:',[argOptions.CTRIGGER]]/* ,['CubeColourShift:',],['NO_DUPLICATES',],['LOCAL',],['INVISIBLE',],['VISIBLE',],['OVERRIDE'] */])
-export const perkFlags = new Map([['Ability:',[argOptions.CTRIGGER]],['WorldAbility:',[argOptions.CTRIGGER]],['CampaignAbility:',[argOptions.CTRIGGER]],['AbilityText:',[argOptions.ENDUSER]],
-['ExtraTrigger:',[argOptions.CTRIGGER]],['Value:',[argOptions.numConstant]],['UpgradeFrom:',[argOptions.DPERK]],['IsUpgradeFrom:',[argOptions.DPERK]],['ObtainAction:',[argOptions.CACTION]],['ClickAction:',[argOptions.CACTION]],
-['RemoveAction:',[argOptions.CACTION]],['PerkRequirement:',[argOptions.DPERK]],['PerkRequirementAmount:',[argOptions.numConstant]],['LevelRequirement:',[argOptions.numConstant]],
-['ReferenceCube:',[argOptions.DCUBE]],['Description:',[argOptions.ENDUSER]],['TODO:',[argOptions.ENDUSER]],['DebugN',[argOptions.numConstant]],['BelongsTo:',[argOptions.TypeSTRING]],['Requirement:',[argOptions.CBOOLEAN]]/* ,['Unique'],['RemoveUponObtaining'],['UNUSED'],['Debug'],['Invisible:'],['Visible:'],['PerkBarSplit:'] */])
-export const cubeFlags = new Map([['Ability:',[argOptions.CTRIGGER]],['AiPlacementRule:',[argOptions.CBOOLEAN]],['AiPlacementAdd:',[argOptions.CDOUBLE,argOptions.CBOOLEAN]],['AiPlacementAbility:',[argOptions.CABILITY]],['ADDEDAICOST',[argOptions.numConstant]],
-['TYPE',[argOptions.TypeSTRING]],['Variable:',[argOptions.OtherSTRING]],['LevelReq:',[argOptions.numConstant]],['Visual:',[argOptions.VISUAL]],['Animation:',[argOptions.ANIMATION]],
-['Text:',[argOptions.ENDUSER]],['ExtraTrigger:',[argOptions.CTRIGGER]],['FlavourText:',[argOptions.ENDUSER]]/* ,['IDENT'],['Invisible'],['Debug'],['DebugE'],['UNUSUED'],['RNGAbility:'] */])
+export const compoundAbilityFlags = new Map([['Visual:',[argOptions.VISUAL]],['Text:',[argOptions.ENDUSER]],['ExtraTrigger:',[argOptions.TRIGGERcompound]]/* ,['CubeColourShift:',],['NO_DUPLICATES',],['LOCAL',],['INVISIBLE',],['VISIBLE',],['OVERRIDE'] */])
+export const perkFlags = new Map([['Ability:',[argOptions.TRIGGERcompound]],['WorldAbility:',[argOptions.TRIGGERcompound]],['CampaignAbility:',[argOptions.TRIGGERcompound]],['AbilityText:',[argOptions.ENDUSER]],
+['ExtraTrigger:',[argOptions.TRIGGERcompound]],['Value:',[argOptions.INTconst]],['UpgradeFrom:',[argOptions.PERKdefine]],['IsUpgradeFrom:',[argOptions.PERKdefine]],['ObtainAction:',[argOptions.ACTIONcompound]],['ClickAction:',[argOptions.ACTIONcompound]],
+['RemoveAction:',[argOptions.ACTIONcompound]],['PerkRequirement:',[argOptions.PERKdefine]],['PerkRequirementAmount:',[argOptions.INTconst]],['LevelRequirement:',[argOptions.INTconst]],
+['ReferenceCube:',[argOptions.CUBEdefine]],['Description:',[argOptions.ENDUSER]],['TODO:',[argOptions.ENDUSER]],['DebugN',[argOptions.INTconst]],['BelongsTo:',[argOptions.STRINGtype]],['Requirement:',[argOptions.BOOLEANcompound]]/* ,['Unique'],['RemoveUponObtaining'],['UNUSED'],['Debug'],['Invisible:'],['Visible:'],['PerkBarSplit:'] */])
+export const cubeFlags = new Map([['Ability:',[argOptions.TRIGGERcompound]],['AiPlacementRule:',[argOptions.BOOLEANcompound]],['AiPlacementAdd:',[argOptions.DOUBLEcompound,argOptions.BOOLEANcompound]],['AiPlacementAbility:',[argOptions.ABILITYcompound]],['ADDEDAICOST',[argOptions.INTconst]],
+['TYPE',[argOptions.STRINGtype]],['Variable:',[argOptions.STRINGvar]],['LevelReq:',[argOptions.INTconst]],['Visual:',[argOptions.VISUAL]],['Animation:',[argOptions.ANIMATION]],
+['Text:',[argOptions.ENDUSER]],['ExtraTrigger:',[argOptions.TRIGGERcompound]],['FlavourText:',[argOptions.ENDUSER]]/* ,['IDENT'],['Invisible'],['Debug'],['DebugE'],['UNUSUED'],['RNGAbility:'] */])
 
 type tFlag = [string,IArg?];
 export class CFlags {

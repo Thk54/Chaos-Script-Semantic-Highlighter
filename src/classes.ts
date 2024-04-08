@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { IType, IName, IArgument, typesLegend, tokenTypes, ICapture, nameToDefines } from "./constants";
+import { IType, IName, IArgument, typesLegend, tokenTypes, ICapture, nameToDefines, IArg, argOptions } from "./constants";
 import { regexes } from "./regexes";
 
 export class CBuiltIn {
@@ -28,12 +28,16 @@ export class CDefined extends CBuiltIn {
 		if (defineType === 'COMPOUND') {
 			let args = [];
 			for (let generic of regex.groups['ContentsOfCOMPOUND'].matchAll(regexes.genericsCapture)) {
-				if (generic.groups['CompoundGenerics'])
+				if (generic.groups['CompoundGenerics']){
+					let type = generic.groups['CompoundGenerics'].slice(7)
+					if (type.toUpperCase() === type) {
+						type = type.toUpperCase() + 'compound';
+					} else { type = type.toUpperCase() + 'const'}
 					args.push({
 						string: generic.groups['CompoundGenerics'],
-						type: generic.groups['CompoundGenerics'].slice(7),
+						type: type,
 						index: generic.indices.groups['CompoundGenerics'][0] + regex.index
-					});
+					});}
 			}
 			this.args = args;
 		}
@@ -58,16 +62,31 @@ export class CType {
 				this.isBuiltIn = true;
 				this.typeString = 'BUILT-IN ' + Type.compoundType; //and should show up as such
 			} else { this.typeString = 'COMPOUND ' + Type.compoundType; } //but otherwise be identical to normal compounds
-			this.define = Type.compoundType.toUpperCase();
+			if (Type.compoundType.toUpperCase() === Type.compoundType) {
+				this.define = Type.compoundType.toUpperCase() + 'compound';
+			} else { this.define = Type.compoundType.toUpperCase() + 'const'}
+			
 		} else {
-			this.define = Type.defineType.toUpperCase(); //probably uppercaseing more than nessisary, but it has bit me too many times
+			this.define = Type.defineType.toUpperCase() + 'define'; //probably uppercaseing more than nessisary, but it has bit me too many times
 			this.typeString = Type.defineType;
 		}
-		this.legendEntry = typesLegend.get(this.isCompoundDefine ? 'COMPOUND ' + this.define : this.define) ?? 'unhandled.chaos'; //set to something specific or the fallback last entry
+		this.legendEntry = typesLegend.get(this.define) ?? 'unhandled.chaos'; //set to something specific or the fallback last entry
 
 	}
 	public isValidType() { return tokenTypes.get(this.legendEntry) !== tokenTypes.size; } //if it is the fallback we don't know what to do with it
-	public satisfiesArgument(arg:string):boolean{return} 
+	public satisfiesArgument(arg:string):boolean{
+		
+		return
+	} 
+	public defaultArgs():IArg[]{
+		let args:IArg[] = []
+		if (this.isCompoundDefine) {
+			if (this.define === argOptions.ABILITYcompound.type) {
+				args = [argOptions.TRIGGERconst];
+			} else { args = [{ type: this.define }]; }
+		}
+		return args
+	}
 }
 
 export class CContents {
@@ -81,7 +100,7 @@ export class CContents {
 		this.content = regex.groups['ContentsOf' + defineType];
 		this.index = regex.indices.groups['ContentsOf' + defineType][0];
 		this.range = new vscode.Range(document.positionAt(this.index),document.positionAt(this.index+this.content.length))
-		if (CDefined.initializeFinished) {// todo some hash stuff or something
+		if (CDefined.initializeFinished) {// todo some hash stuff or something // turns out raw string compare is faster
 			for (let word of this.content.matchAll(regexes.stringExcluderCapture)) { // Mostly verbose could be more function-ized
 				if ((defineType === 'TEXTTOOLTIP')) break; //abort if tooltiptext but still highlight name
 				let result = nameToDefines.get(word[0].toLowerCase()) ?? null;
