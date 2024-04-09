@@ -9,7 +9,7 @@ export class HoverProvider implements vscode.HoverProvider {
 		let defines = nameToDefines.get(getWordAtPosition(document, position).toLowerCase()) ?? []
 		let string:string[] = []
 		for (let define of defines){
-			string.push(define.type.typeString+'  \n'+(define.name.asFound ?? define.name.name)+(doesCDefineHaveArguments(define)?('  \n'+returnArgumentsAsString(<CDefined>define)):''))
+			string.push(define.type.typeString+'  \n'+(define.name.asFound ?? define.name.name)+(doesCDefineHaveArguments(define)?('  \n'+returnArgumentsAsString(<CDefined>define).replaceAll('compound', '')):''))
 		}
 		if (string.length) {
 			return new vscode.Hover(string.join('  \n***  \n'))

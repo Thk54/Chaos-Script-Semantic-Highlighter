@@ -98,6 +98,7 @@ function fixExeptions(){
 	SetVariable String DOUBLE
 	ChangeVariable String DOUBLE
 	RemoveAbilityWithName String
+	GainAbilityText Ability ENDUSER
 	ChangeAbilityStacking String DOUBLE
 	ReadAScenario String
 	ChangeCampaignVariable String DOUBLE

@@ -43,11 +43,13 @@ function treeBuilder(words: IterableIterator<RegExpMatchArray>, context: CDefine
 		do {
 			let arg = args[i]
 			endHelper = false
+			let listMarker
+			if (arg?.type === argOptions.LISTcompound.type) {listMarker = true; arg = argOptions.DOUBLEcompound}
 			//i += 1
 			if (arg?.type === argOptions.ENDUSER.type) {
 				handleEndUser(words)
 				args.splice(args.findIndex((value)=>{value === arg}),1)
-				endHelper = true
+				if (i<=0) endHelper = true
 				continue
 			} else {i += 1; iteratorResult = words.next();}
 			if (iteratorResult?.done) return { returnArray: [], deepestPos: deepestPos, done: iteratorResult.done };
@@ -59,8 +61,18 @@ function treeBuilder(words: IterableIterator<RegExpMatchArray>, context: CDefine
 			let childArgs = (nameToDefines.get(word[0].toLowerCase())?.find((value) => 
 				{ return value.type.define === arg?.type })?.args /* make this handled triggers/abilites */
 				?? determineFlagArgs(word[0], context))
+			if (word[0] === 'GainAbilityText') childArgs.push(argOptions.ENDUSER)
 			/* bad form but should work */ let diag = createDiagnostic(new vscode.Range(startpos,endpos), arg?.type, nameToDefines.get(word[0].toLowerCase()) ?? [], word[0])
-			if (diag && arg) diagnostics.push(diag)
+			if (diag && arg) {diagnostics.push(diag);
+			} else {
+				if (listMarker){
+					let n = Number(word[0])
+					if (!Number.isNaN(n) && !(n===0)) {if (!childArgs?.length){childArgs = []}
+						childArgs.length = childArgs.length + n
+						childArgs.fill(argOptions.ACTIONcompound,-n)
+					}
+				}
+			};
 			if (!childArgs?.length) { childArgs = undefined; if (!args.length) return} //If we are neither looking for a child or something that wants children we are done
 			let temp = treeBuilder(words, context, diagnostics, childArgs);
 			if (temp?.done || temp?.returnArray === undefined) { deepestPos = endpos; 
@@ -104,7 +116,7 @@ function createDiagnostic(range:vscode.Range,arg:IArg['type'],defines:CDefined[]
 		define.type.define.replace('const', 'compound')
 		thingsFound.add(define.type.define)
 	}
-	if (/^-?\d+$/.test(word)) thingsFound.add(argOptions.INTconst.type).add(argOptions.DOUBLEconst.type);
+	if (/^[-+]?\d+$/.test(word)) thingsFound.add(argOptions.INTconst.type).add(argOptions.DOUBLEconst.type);
 	if (/^\S+$/.test(word)) thingsFound.add(argOptions.STRINGconst.type)
 	if (thingsFound.has('TIMEcompound')) thingsFound.add(argOptions.DOUBLEcompound.type)
 	if (thingsFound.has('CUBEdefine')) thingsFound.add(argOptions.CUBEcompound.type)

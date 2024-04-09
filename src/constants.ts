@@ -19,6 +19,7 @@ export const argOptions = { //this will probably need to be redone *sigh*
 	STRINGcompound: {type:'STRINGcompound'},
 	TRIGGERcompound: {type:'ABILITYcompound'},
 	PERKcompound: {type:'PERKcompound'},
+	LISTcompound: {type:'LISTcompound'},
 
 	STRINGconst: {type:'STRINGcompound'},//catchall string
 	ACTIONconst: {type:'ACTIONcompound'},

@@ -2,7 +2,7 @@
 	"name": "chaos-script-semantic-highlighter",
 	"displayName": "Chaos Script Semantic Highlighter",
 	"description": "Semantic highlighter for Cube Chaos mod files.",
-	"version": "0.2.1",
+	"version": "0.2.2",
 	"publisher": "Thk",
 	"license": "MIT",
 	"repository": {
