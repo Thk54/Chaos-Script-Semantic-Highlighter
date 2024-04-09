@@ -1,7 +1,7 @@
 ## Release Notes
 
 ## [0.2.2]
-Minor update this time. Diagnostics should now not produce false positives, and I think false negitives should be restricted to things that demand constants, Visual: and Animation:, but probably don't trust me on that.
+Minor update this time. Diagnostics should now not produce false positives, and I think false negatives should be restricted to things that demand constants, (especially strings) Visual:, and Animation:, but probably don't trust me on that.
 
 ## [0.2.1]
 Bunch more behind the scenes stuff, the diagnostics is now significantly more intelligent and less angry
