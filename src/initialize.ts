@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { CallHierarchyProvider } from './providers/callHierarchyProvider';
+import { CompletionItemProvider } from './providers/CompletionItemProvider';
 import { DeclarationProvider } from './providers/declarationProvider';
 import { FoldingRangeProvider } from './providers/foldingRangeProvider';
 import { DocumentSemanticTokensProvider } from './providers/documentSemanticTokensProvider';
@@ -11,11 +12,13 @@ import { CGatherResults, CDefined, CBuiltIn } from "./classes";
 import { gatherDefinitions } from './parser';
 import { addCDefinedToMapWithRefrenceToOwnEntryValue } from './providers/commonFunctions';
 export const protoDiagnostics = vscode.languages.createDiagnosticCollection('proto')
+//let docSymProvider = new DocumentSymbolProvider
 
 //export let initializeFinished = false
 export async function activate(context: vscode.ExtensionContext) {
-	vscode.workspace.getConfiguration('', { languageId: 'chaos-script' }).update('editor.wordSeparators', ''/* default: `~!@#$%^&*()-=+[{]}\|;:'",.<>/? */, false, true);
+	vscode.workspace.getConfiguration('', ).update('editor.wordSeparators', ''/* default: `~!@#$%^&*()-=+[{]}\|;:'",.<>/? */, false, true);
 	await initialize(context);
+	//context.subscriptions.push(vscode.languages.registerCompletionItemProvider({ language: 'chaos-script' }, new CompletionItemProvider()))
 	//context.subscriptions.push(vscode.languages.registerCallHierarchyProvider({ language: 'chaos-script' }, new CallHierarchyProvider()))
 	context.subscriptions.push(vscode.languages.registerDeclarationProvider({ language: 'chaos-script' }, new DeclarationProvider));
 	context.subscriptions.push(vscode.languages.registerFoldingRangeProvider({ language: 'chaos-script' }, new FoldingRangeProvider()));
@@ -23,6 +26,8 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'chaos-script' }, new DocumentSymbolProvider()));
 	context.subscriptions.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider()));
 	context.subscriptions.push(vscode.languages.registerHoverProvider({ language: 'chaos-script' }, new HoverProvider()))
+	context.subscriptions.push(vscode.languages.setLanguageConfiguration('chaos-script', {wordPattern:/\\S+/}))
+	//context.subscriptions.push(vscode.workspace.onDidChangeTextDocument((e)=>{console.log(e.document.uri.toString())}))
 }
 
 export async function initialize(context: vscode.ExtensionContext) {
