@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { IType, IName, IArgument, typesLegend, tokenTypes, ICapture, nameToDefines, IArg, argOptions } from "./constants";
+import { IType, IName, IArgument, typesLegend, tokenTypes, ICapture, nameToDefines, IArg, argOptions, fileToGatherResults } from "./constants";
 import { regexes } from "./regexes";
 
 export class CBuiltIn {
@@ -25,24 +25,29 @@ export class CDefined extends CBuiltIn {
 		super(<IType>{ defineType: defineType, compoundType: regex?.groups['TypeOfCOMPOUND']?.toUpperCase() },
 			<IName>{ name: regex.groups['NameOf' + defineType].toLowerCase(), asFound: regex.groups['NameOf' + defineType], index: regex.indices.groups['NameOf' + defineType][0] },
 			document);
-		if (defineType === 'COMPOUND') {
-			let args = [];
-			for (let generic of regex.groups['ContentsOfCOMPOUND'].matchAll(regexes.genericsCapture)) {
-				if (generic.groups['CompoundGenerics']){
-					let type = generic.groups['CompoundGenerics'].slice(7)
-					if (type.toUpperCase() === type) {
-						type = type.toUpperCase() + 'compound';
-					} else { type = type.toUpperCase() + 'compound'}
-					if (type === 'TIMEcompound') type = argOptions.DOUBLEcompound.type
-					args.push({
-						string: generic.groups['CompoundGenerics'],
-						type: type,
-						index: generic.indices.groups['CompoundGenerics'][0] + regex.index
-					});}
+/* 		let existingSameDefine = fileToGatherResults.get(document.uri.toString())?.defines.find(define => define.contents.capture.text === regex[0])
+		if (existingSameDefine) {
+				
+		} else */ {
+			if (defineType === 'COMPOUND') {
+				let args = [];
+				for (let generic of regex.groups['ContentsOfCOMPOUND'].matchAll(regexes.genericsCapture)) {
+					if (generic.groups['CompoundGenerics']){
+						let type = generic.groups['CompoundGenerics'].slice(7)
+						if (type.toUpperCase() === type) {
+							type = type.toUpperCase() + 'compound';
+						} else { type = type.toUpperCase() + 'compound'}
+						if (type === 'TIMEcompound') type = argOptions.DOUBLEcompound.type
+						args.push({
+							string: generic.groups['CompoundGenerics'],
+							type: type,
+							index: generic.indices.groups['CompoundGenerics'][0] + regex.index
+						});}
+				}
+				this.args = args;
 			}
-			this.args = args;
+			this.contents = new CContents(regex, defineType, document);
 		}
-		this.contents = new CContents(regex, defineType, document);
 	}
 	public setMapEntryValue(input:CDefined[]):CDefined {
 		this.nameMapEntryValue = input

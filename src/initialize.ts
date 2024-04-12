@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { CallHierarchyProvider } from './providers/callHierarchyProvider';
-import { CompletionItemProvider } from './providers/CompletionItemProvider';
+import { CompletionItemProvider } from './providers/completionItemProvider';
 import { DeclarationProvider } from './providers/declarationProvider';
 import { FoldingRangeProvider } from './providers/foldingRangeProvider';
 import { DocumentSemanticTokensProvider } from './providers/documentSemanticTokensProvider';
