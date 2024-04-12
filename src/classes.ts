@@ -38,10 +38,12 @@ export class CDefined extends CBuiltIn {
 							type = type.toUpperCase() + 'compound';
 						} else { type = type.toUpperCase() + 'compound'}
 						if (type === 'TIMEcompound') type = argOptions.DOUBLEcompound.type
+						let startPos = document.positionAt(generic.indices.groups['CompoundGenerics'][0] + regex.index)
 						args.push({
 							string: generic.groups['CompoundGenerics'],
 							type: type,
-							index: generic.indices.groups['CompoundGenerics'][0] + regex.index
+							index: generic.indices.groups['CompoundGenerics'][0] + regex.index,
+							location: new vscode.Location(document.uri,new vscode.Range(startPos,startPos.translate({characterDelta:generic.groups['CompoundGenerics'].length})))
 						});}
 				}
 				this.args = args;
@@ -99,13 +101,13 @@ export class CContents {
 	capture: ICapture;
 	content: string;
 	index: number;
+	location: vscode.Location
 	components: CToken[] = [];
-	range:vscode.Range;
 	constructor(regex: RegExpMatchArray, defineType: string, document: vscode.TextDocument) {
-		this.capture = { text: regex[0], index: regex.index };
+		this.capture = { text: regex[0], index: regex.index, location: new vscode.Location(document.uri,new vscode.Range(document.positionAt(regex.index),document.positionAt(regex.index+regex[0].length)))};
 		this.content = regex.groups['ContentsOf' + defineType];
 		this.index = regex.indices.groups['ContentsOf' + defineType][0];
-		this.range = new vscode.Range(document.positionAt(this.index),document.positionAt(this.index+this.content.length))
+		this.location = new vscode.Location(document.uri,new vscode.Range(document.positionAt(this.index+regex.index),document.positionAt(this.index+this.content.length+regex.index)))
 		if (CDefined.initializeFinished) {// todo some hash stuff or something // turns out raw string compare is faster
 			for (let word of this.content.matchAll(regexes.stringExcluderCapture)) { // Mostly verbose could be more function-ized
 				if ((defineType === 'TEXTTOOLTIP')) break; //abort if tooltiptext but still highlight name

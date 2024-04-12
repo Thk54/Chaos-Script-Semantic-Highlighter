@@ -31,10 +31,10 @@ export async function gatherDefinitions(toDocument:{ doc?: vscode.TextDocument; 
 	let artoverrides = <any>[]
 	let promises = []
 	for (let match of text.matchAll(regexes.primaryCapture)) {
+		delete(match.input)
 		if (match?.groups['TypeOfDEFINE']?.toUpperCase() !== 'ARTOVERRIDE') {
 			promises.push(packIntoCDefined(match, document))
 		} else {
-			delete(match.input)
 			artoverrides.push(match)}
 		text = text.replace(match[0], ''.padEnd(match[0].length)); // replace them with spaces to preserve character count
 	}

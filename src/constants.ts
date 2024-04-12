@@ -189,6 +189,7 @@ export interface IName{
 export interface ICapture {
 	text:string;
 	index:number
+	location:vscode.Location
 }
 export interface IArg {
 	type:string
@@ -197,4 +198,5 @@ export interface IArgument extends IArg {
 	type: string;
 	string?: string;
 	index?: number;
+	location?: vscode.Location
 }
