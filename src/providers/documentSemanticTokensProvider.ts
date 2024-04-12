@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { updateFilesMapsIfEntries } from "./commonFunctions";
 import { fileToGatherResults, tokenTypes, legend } from '../constants';
 import { CDefined } from "../classes";
+import { protoDiagnostics } from '../initialize';
 
 
 export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTokensProvider {
@@ -9,22 +10,27 @@ export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTo
 		//update active file and wait for maps to be updated
 		await updateFilesMapsIfEntries(document);
 		const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder(legend);
+		let diagnostics: vscode.Diagnostic[] = []
 		let promises = [];
-		for (let defines of fileToGatherResults.get(document.uri.toString())?.defines ?? []) {
-			promises.push(builderTokens(builder, defines, document));
+		for (let define of fileToGatherResults.get(document.uri.toString())?.defines ?? []) {
+			promises.push(builderTokens(builder, define));
+			diagnostics.push(...define.contents.diagnostics)
 		}
 		await Promise.allSettled(promises);
+		protoDiagnostics.set(document.uri, diagnostics)
 		return builder.build();
 
 	}
 }
-async function builderTokens(builder: vscode.SemanticTokensBuilder, compound: CDefined, document: vscode.TextDocument) {
-	const mainOffset = compound.contents.index; 
-	for (let component of compound.contents.components){
-		builder.push(component.range, component.tokenType)
+async function builderTokens(builder: vscode.SemanticTokensBuilder, compound: CDefined) {
+	const mainOffset = compound.contents.index;
+	if (!compound.type.isBuiltIn) {
+		for (let symbol of compound.contents.tree.semanticSymbols){
+			builder.push(symbol.range, symbol.tokenType)
+		}
+		let nameStart = compound.name.index;
+		builder.push(nameStart.line, nameStart.character, compound.name.name.length, tokenTypes.get(compound.type.legendEntry));
 	}
-	let nameStart = compound.name.index;
-	builder.push(nameStart.line, nameStart.character, compound.name.name.length, tokenTypes.get(compound.type.legendEntry));
 	//return Promise
 	/*private _encodeTokenModifiers(strTokenModifiers: string[]): number {
 		let result = 0;

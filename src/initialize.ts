@@ -47,6 +47,12 @@ export async function initialize(context: vscode.ExtensionContext) {
 			addCDefinedToMapWithRefrenceToOwnEntryValue(nameToDefines,define)
 		}
 	}
+	for (let defines of fileToGatherResults.values()){
+		for (let define of defines.defines){
+			if (!define.type.isBuiltIn) define.contents.buildTheTree()
+		}
+	}
+
 	console.timeEnd('Initialize map done in')
 	CDefined.initializeFinished = true
 }

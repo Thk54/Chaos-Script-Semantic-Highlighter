@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { CDefined } from "../classes";
+import { CDefined, DocumentSymbolPlus } from "../classes";
 import { nameToDefines, tokenTypes, IArg, compoundAbilityFlags, cubeFlags, perkFlags, argOptions } from "../constants";
 
 export function buildTree(define: CDefined, diagnostics: vscode.Diagnostic[]) {
@@ -10,7 +10,7 @@ export function buildTree(define: CDefined, diagnostics: vscode.Diagnostic[]) {
 		let symbolName = define.name.asFound ?? define.name.name;
 		let symbolDetail = define.type.typeString;
 		let symbolKind = define.type.legendEntry;
-		root = new vscode.DocumentSymbol(symbolName, symbolDetail, tokenTypes.get(symbolKind), defineRange, symbolRange);
+		root = new DocumentSymbolPlus(symbolName, symbolDetail, tokenTypes.get(symbolKind), defineRange, symbolRange, define);
 		root.children = [];
 	}
 	let temp = [];
@@ -28,11 +28,11 @@ export function buildTree(define: CDefined, diagnostics: vscode.Diagnostic[]) {
 	root.children = [].concat(...temp);
 	return root;
 }
-type treeReturn = { returnArray: vscode.DocumentSymbol[]; deepestPos: vscode.Position; done?: boolean; };
+type treeReturn = { returnArray: DocumentSymbolPlus[]; deepestPos: vscode.Position; done?: boolean; };
 function treeBuilder(words: IterableIterator<RegExpMatchArray>, context: CDefined, diagnostics: vscode.Diagnostic[], args?: IArg[]): treeReturn {
 	if (!(args === undefined)) {
-		let returnArray: vscode.DocumentSymbol[] = [];
-		let childSymbols: vscode.DocumentSymbol[] = [];
+		let returnArray: DocumentSymbolPlus[] = [];
+		let childSymbols: DocumentSymbolPlus[] = [];
 		let deepestPos: vscode.Position;
 		let offset = context.contents.index;
 		let document = context.document;
@@ -54,13 +54,12 @@ function treeBuilder(words: IterableIterator<RegExpMatchArray>, context: CDefine
 			} else {i += 1; iteratorResult = words.next();}
 			if (iteratorResult?.done) return { returnArray: [], deepestPos: deepestPos, done: iteratorResult.done };
 			word = iteratorResult.value;
-			let childSymbol: vscode.DocumentSymbol;
-			let grandchildSymbols: vscode.DocumentSymbol[];
+			let childSymbol: DocumentSymbolPlus
+			let grandchildSymbols: DocumentSymbolPlus[];
 			let startpos = document.positionAt(offset + word.index);
 			let endpos = startpos.translate({ characterDelta: word[0].length });
-			let childArgs = (nameToDefines.get(word[0].toLowerCase())?.find((value) => 
-				{ return value.type.define === arg?.type })?.args /* make this handled triggers/abilites */
-				?? determineFlagArgs(word[0], context))
+			let define = nameToDefines.get(word[0].toLowerCase())?.find((value) => { return value.type.define === arg?.type })
+			let childArgs = (define?.args ?? determineFlagArgs(word[0], context)) // make this handled triggers/abilites
 			if (word[0] === 'GainAbilityText') childArgs.push(argOptions.ENDUSER)
 			/* bad form but should work */ let diag = createDiagnostic(new vscode.Range(startpos,endpos), arg?.type, nameToDefines.get(word[0].toLowerCase()) ?? [], word[0])
 			if (diag && arg) {diagnostics.push(diag);
@@ -80,7 +79,8 @@ function treeBuilder(words: IterableIterator<RegExpMatchArray>, context: CDefine
 				grandchildSymbols = temp.returnArray;
 				deepestPos = temp.deepestPos;
 			}
-			childSymbol = new vscode.DocumentSymbol(word[0], arg?.type, 4, new vscode.Range(startpos, deepestPos ?? temp.deepestPos), new vscode.Range(startpos, endpos));
+			childSymbol = new DocumentSymbolPlus(word[0], arg?.type, 4, new vscode.Range(startpos, deepestPos ?? temp.deepestPos), new vscode.Range(startpos, endpos), define);
+			if (!childSymbol.define) {delete(childSymbol.define)}
 			childSymbol.children = grandchildSymbols;
 			childSymbols.push(childSymbol);
 		} while ((i < args.length)||endHelper)

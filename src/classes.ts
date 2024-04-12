@@ -1,6 +1,8 @@
 import * as vscode from "vscode";
 import { IType, IName, IArgument, typesLegend, tokenTypes, ICapture, nameToDefines, IArg, argOptions, fileToGatherResults } from "./constants";
 import { regexes } from "./regexes";
+import { buildTree } from "./providers/treeFunctions";
+import { protoDiagnostics } from "./initialize";
 
 export class CBuiltIn {
 	type: CType;
@@ -48,7 +50,8 @@ export class CDefined extends CBuiltIn {
 				}
 				this.args = args;
 			}
-			this.contents = new CContents(regex, defineType, document);
+			this.contents = new CContents(regex, defineType, document, this);
+			if (CDefined.initializeFinished) {this.contents.buildTheTree()}
 		}
 	}
 	public setMapEntryValue(input:CDefined[]):CDefined {
@@ -103,12 +106,14 @@ export class CContents {
 	index: number;
 	location: vscode.Location
 	components: CToken[] = [];
-	constructor(regex: RegExpMatchArray, defineType: string, document: vscode.TextDocument) {
+	tree?: DocumentSymbolPlus
+	diagnostics:vscode.Diagnostic[] = []
+	constructor(regex: RegExpMatchArray, defineType: string, document: vscode.TextDocument, private parent:CDefined) {
 		this.capture = { text: regex[0], index: regex.index, location: new vscode.Location(document.uri,new vscode.Range(document.positionAt(regex.index),document.positionAt(regex.index+regex[0].length)))};
 		this.content = regex.groups['ContentsOf' + defineType];
 		this.index = regex.indices.groups['ContentsOf' + defineType][0];
 		this.location = new vscode.Location(document.uri,new vscode.Range(document.positionAt(this.index+regex.index),document.positionAt(this.index+this.content.length+regex.index)))
-		if (CDefined.initializeFinished) {// todo some hash stuff or something // turns out raw string compare is faster
+		/* if (CDefined.initializeFinished) {// todo some hash stuff or something // turns out raw string compare is faster
 			for (let word of this.content.matchAll(regexes.stringExcluderCapture)) { // Mostly verbose could be more function-ized
 				if ((defineType === 'TEXTTOOLTIP')) break; //abort if tooltiptext but still highlight name
 				let result = nameToDefines.get(word[0].toLowerCase()) ?? null;
@@ -117,7 +122,10 @@ export class CContents {
 					this.components.push(new CToken(result, tokenStart));
 				}
 			}
-		}
+		} */
+	}
+	buildTheTree(){
+		this.tree = buildTree(this.parent, this.diagnostics)
 	}
 }
 
@@ -135,4 +143,37 @@ export class CToken {
 export class CGatherResults {
 	constructor(public document: vscode.TextDocument, public defines: CDefined[], public comments?: RegExpMatchArray[],
 		public scenarios?: RegExpMatchArray[], public ArtOverrides?: RegExpMatchArray[], public doActions?: RegExpMatchArray[]) { }
+}
+
+export class DocumentSymbolPlus extends vscode.DocumentSymbol {
+	declare children: DocumentSymbolPlus[];
+	constructor(name: string, detail: string, kind: vscode.SymbolKind, range: vscode.Range, selectionRange: vscode.Range, public define?:CDefined) {
+		super(name,detail,kind,range,selectionRange)
+	}
+	get semanticSymbols():CToken[] {
+		let output:CToken[] = []
+		this.extractSemanticSymbols(this, output)
+		return output
+	}
+	private extractSemanticSymbols(present:DocumentSymbolPlus,outputArray:CToken[]) {
+		if (present?.define) outputArray.push(new CToken([present.define],present.selectionRange.start))
+		if (present?.children){
+			for (let child of present.children){
+				this.extractSemanticSymbols(child, outputArray)
+			}
+		}
+	}
+	get diagnostics():vscode.Diagnostic[] {
+		let output:vscode.Diagnostic[] = []
+		this.extractDiagnostics(this, output)
+		return output
+	}
+	private extractDiagnostics(present:DocumentSymbolPlus,outputArray:vscode.Diagnostic[]) {
+		if (present.diagnostics) outputArray.push(...present.diagnostics)
+			if (present?.children){
+				for (let child of present.children){
+					this.extractDiagnostics(child, outputArray)
+				}
+			}
+	}
 }
