@@ -136,12 +136,12 @@ export const cubeFlags = new Map([['Ability:',[argOptions.TRIGGERcompound]],['Ai
 ['TYPE',[argOptions.STRINGtype]],['Variable:',[argOptions.STRINGvar]],['LevelReq:',[argOptions.INTconst]],['Visual:',[argOptions.VISUAL]],['Animation:',[argOptions.ANIMATION]],
 ['Text:',[argOptions.ENDUSER]],['ExtraTrigger:',[argOptions.TRIGGERcompound]],['FlavourText:',[argOptions.ENDUSER]]/* ,['IDENT'],['Invisible'],['Debug'],['DebugE'],['UNUSUED'],['RNGAbility:'] */])
 
-type tFlag = [string,IArg?];
+/* type tFlag = [string,IArg?];
 export class CFlags {
 	static universal:tFlag[] = [['OVERRIDE']]
 	static compound:tFlag[] = [['ABILITY',{type:'TRIGGER'}],['ACTION',{type:'ACTION'}],['BOOLEAN',{type:'BOOLEAN'}], //unused property, handled elsewhere
 		['DIRECTION',{type:'DIRECTION'}],['DOUBLE',{type:'DOUBLE'}],['CUBE',{type:'CUBE'}],['POSITION',{type:'POSITION'}]]
-	static compoundAbility:tFlag[] = [['Visual:'/* ,{type:'VISUALTYPE'} */],['Text:',{type:'ENDUSER'}],['ExtraTrigger:',{type:'TRIGGER'}],
+	static compoundAbility:tFlag[] = [['Visual:'/* ,{type:'VISUALTYPE'} * /],['Text:',{type:'ENDUSER'}],['ExtraTrigger:',{type:'TRIGGER'}],
 		['CubeColorShift:'],['NO_DUPLICATES'],['LOCAL'],['INVISIBLE'],['VISIBLE']]
 	static perk:tFlag[] = [['Ability:',{type:'ABILITY'}],['WorldAbility:',{type:'ABILITY'}],['CampaignAbility:',{type:'ABILITY'}],['AbilityText:',{type:'ENDUSER'}],
 		['ExtraTrigger:',{type:'TRIGGER'}],['Invisible:'],['Visible:'],['PerkBarSplit:'],['ObtainAction:',{type:'ACTION'}],['ClickAction:',{type:'ACTION'}],
@@ -149,7 +149,7 @@ export class CFlags {
 		['DebugN'],['Unique'],['ReferenceCube:',{type:'CUBECONSTANT'}],['UpgradeFrom:',{type:'PERKCONSTANT'}],['IsUpgradeFrom:',{type:'PERKCONSTANT'}],['RemoveUponObtaining'],
 		['Description:',{type:'ENDUSER'}],['TODO:',{type:'ENDUSER'}],['UNUSED'],['BelongsTo:'],['Value:',{type:'DOUBLECONSTANT'}]]
 	static cube:tFlag[] = [['Ability:',{type:'ABILITY'}],['RNGAbility:'],['AiPlacementRule:'],['AiPlacementAdd:'],['AiPlacementAbility:'],['IDENT'],['ADDEDAICOST'],
-		['TYPE'],['Variable:'],['LevelReq:',{type:'DOUBLECONSTANT'}],['Debug'],['DebugE'],['Visual:'/* ,{type:'VISUALTYPE'} */],['Animation:'/* ,{type:'ANIMATIONTYPE'} */],
+		['TYPE'],['Variable:'],['LevelReq:',{type:'DOUBLECONSTANT'}],['Debug'],['DebugE'],['Visual:'/* ,{type:'VISUALTYPE'} * /],['Animation:'/* ,{type:'ANIMATIONTYPE'} * /],
 		['Text:',{type:'ENDUSER'}],['ExtraTrigger:',{type:'TRIGGER'}],['FlavourText:',{type:'ENDUSER'}],['Invisible'],['UNUSUED']]
 	static compoundAbilityVisual:tFlag[] = [['Area'],['Arrow'],['Sword'],['Square'],['Target'],['Mist'],['Plus']]
 	static cubeVisual:tFlag[] = this.compoundAbilityVisual
@@ -176,7 +176,7 @@ export class CFlags {
 	public static get cubeAnimationFlags(){
 		return CFlags.cubeAnimation
 	}
-}
+} */
 export interface IType {
 	defineType:string
 	compoundType?:string
@@ -184,7 +184,7 @@ export interface IType {
 export interface IName{
 	name: string;
 	asFound?: string;
-	index: number;
+	index: vscode.Position;
 }
 export interface ICapture {
 	text:string;

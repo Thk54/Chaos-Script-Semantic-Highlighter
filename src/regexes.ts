@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { CFlags } from "./constants";
 export module regexes {
 
 	const blankBehind = /(?<=\s|^)/.source //need to say above the exported generated constants so the generators don't try to use these constants before they are initialized

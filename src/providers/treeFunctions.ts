@@ -6,7 +6,7 @@ export function buildTree(define: CDefined, diagnostics: vscode.Diagnostic[]) {
 	let regex = define.contents.content.matchAll(/\S+/g);
 	let root; {
 		let defineRange = new vscode.Range(define.document.positionAt(define.contents.capture.index), define.document.positionAt(define.contents.capture.index + define.contents.capture.text.length));
-		let symbolRange = new vscode.Range(define.document.positionAt(define.name.index), define.document.positionAt(define.name.index + define.name.name.length));
+		let symbolRange = new vscode.Range(define.name.index, define.document.positionAt(define.document.offsetAt(define.name.index) + define.name.name.length));
 		let symbolName = define.name.asFound ?? define.name.name;
 		let symbolDetail = define.type.typeString;
 		let symbolKind = define.type.legendEntry;

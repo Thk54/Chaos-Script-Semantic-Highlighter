@@ -9,7 +9,7 @@ export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
 		let symbols: vscode.SymbolInformation[] = [];
 		for (let define of await this._findRelevantDefines(query)) {
 			if (define.iDefined.name?.asFound && define.iDefined.name?.index) {
-				let location = new vscode.Location(define.document.uri, new vscode.Range(define.document.positionAt(define.iDefined.name.index), define.document.positionAt(define.iDefined.name.index + define.iDefined.name.asFound.length)));
+				let location = new vscode.Location(define.document.uri, new vscode.Range(define.iDefined.name.index, define.document.positionAt(define.document.offsetAt(define.iDefined.name.index) + define.iDefined.name.asFound.length)));
 				symbols.push({ name: define.iDefined.name.asFound, containerName: define.iDefined.type.typeString, kind: tokenTypes.get(define.iDefined.type.legendEntry), location: location });
 			}
 		}

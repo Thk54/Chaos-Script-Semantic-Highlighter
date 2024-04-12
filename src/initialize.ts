@@ -89,7 +89,7 @@ async function packBuiltins(match:RegExpMatchArray, document:vscode.TextDocument
 		if (type === 'TRIGGER') {type = 'ABILITY'}
 		let builtin:CBuiltIn = new CBuiltIn(
 			/* Type: */ { defineType: 'BUILT-IN', compoundType:type },
-			/* Name: */ { name: name[0].toLowerCase(), asFound: name[0], index:index },
+			/* Name: */ { name: name[0].toLowerCase(), asFound: name[0], index:document.positionAt(index) },
 			/* Document: */ document,
 			/* Arguments: */ args
 		);

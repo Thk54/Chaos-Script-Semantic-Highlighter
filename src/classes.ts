@@ -23,7 +23,7 @@ export class CDefined extends CBuiltIn {
 	constructor(regex: RegExpMatchArray, document: vscode.TextDocument) {
 		let defineType = regex.groups['TypeOfDEFINE'].toUpperCase();
 		super(<IType>{ defineType: defineType, compoundType: regex?.groups['TypeOfCOMPOUND']?.toUpperCase() },
-			<IName>{ name: regex.groups['NameOf' + defineType].toLowerCase(), asFound: regex.groups['NameOf' + defineType], index: regex.indices.groups['NameOf' + defineType][0] },
+			<IName>{ name: regex.groups['NameOf' + defineType].toLowerCase(), asFound: regex.groups['NameOf' + defineType], index: document.positionAt(regex.indices.groups['NameOf' + defineType][0]) },
 			document);
 /* 		let existingSameDefine = fileToGatherResults.get(document.uri.toString())?.defines.find(define => define.contents.capture.text === regex[0])
 		if (existingSameDefine) {
