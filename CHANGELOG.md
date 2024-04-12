@@ -1,5 +1,8 @@
 ## Release Notes
 
+## [0.2.3]
+Semantics now only highlights if it finds a given word validly placed, plan to get it back to working as before, the improvement is that it should now highlight based on what is being used as rather than just whatever got put in the backend name map first. Now when something like test is being used as a Perk it will be a diffrent color than when it is being used as a Cube
+
 ## [0.2.2]
 Minor update this time. Diagnostics should now not produce false positives, and I think false negatives should be restricted to things that demand constants, (especially strings) Visual:, and Animation:, but probably don't trust me on that.
 

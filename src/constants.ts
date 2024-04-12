@@ -86,7 +86,7 @@ export const legend = (function () {
 		'i', //'macro',//blue
 		'PERK', //'variable',//light sky blue
 		'CUBE', //'parameter',//light sky blue
-		'z', //'property',//light sky blue
+		'COMPOUND PERK', //'property',//light sky blue
 		'a', //'enumMember',//bright light blue
 		'v', //'event',//light sky blue
 		'COMPOUND DIRECTION', //'decorator',//pale yellow
@@ -113,7 +113,7 @@ export const legend = (function () {
 		'i', //'macro',//blue
 		argOptions.PERKdefine.type, //'variable',//light sky blue
 		argOptions.CUBEdefine.type, //'parameter',//light sky blue
-		'z', //'property',//light sky blue
+		argOptions.PERKcompound.type, //'property',//light sky blue
 		'a', //'enumMember',//bright light blue
 		'v', //'event',//light sky blue
 		argOptions.DIRECTIONcompound.type, //'decorator',//pale yellow
