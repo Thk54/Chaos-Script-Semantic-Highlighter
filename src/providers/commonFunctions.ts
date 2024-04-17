@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { fileToGatherResults, nameToDefines, IArgument } from "../constants";
+import { uriToGatherResultsDefines, nameToDefines, IArgument } from "../constants";
 import { CGatherResults, CDefined } from "../classes";
 import { gatherDefinitions } from "../parser";
 import { regexes } from "../regexes";
@@ -18,12 +18,12 @@ export function doesCDefineHaveArguments(tested:CDefined):boolean{
 	return tested?.args ? true : false
 }
 export function returnArgumentsAsString(defined:CDefined):string{
-	return defined.args.map((temp)=>(temp.type)).join(' ')
+	return defined?.args?.map((temp)=>(temp.type)).join(' ')
 }
 export async function updateFilesMapsIfEntries(document: { doc?: vscode.TextDocument; uri?: vscode.Uri; }) {
 	//console.time('map time')
 	const gatherResults: CGatherResults = (await gatherDefinitions(document?.doc ?? (await vscode.workspace.openTextDocument(document.uri))));
-	const oldResults = fileToGatherResults.get(gatherResults.document.uri.toString()) ?? undefined
+	const oldResults = uriToGatherResultsDefines.get(gatherResults.document.uri.toString()) ?? undefined
 	if (oldResults !== undefined){
 		const oldDefines = oldResults.defines.map((value)=>{return value})
 		for (let oldDefine of oldDefines){
@@ -44,7 +44,7 @@ export async function updateFilesMapsIfEntries(document: { doc?: vscode.TextDocu
 	for (let define of gatherResults.defines){
 		addCDefinedToMapWithRefrenceToOwnEntryValue(nameToDefines,define)
 	}
-	fileToGatherResults.set(gatherResults.document.uri.toString(),gatherResults)
+	uriToGatherResultsDefines.set(gatherResults.document.uri.toString(),gatherResults)
 	//console.timeLog('map time')
 	//console.timeEnd('map time')
 }

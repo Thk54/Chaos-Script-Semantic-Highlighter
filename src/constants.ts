@@ -5,7 +5,7 @@ export const tokenTypes = new Map<string, number>();
 export const tokenModifiers = new Map<string, number>();
 export const typesLegend = new Map<string, string>();
 
-export const fileToGatherResults = new Map<string,CGatherResults>();
+export const uriToGatherResultsDefines = new Map<string,CGatherResults>();
 export let nameToDefines = new Map<string,CDefined[]>();
 
 export const argOptions = { //this will probably need to be redone *sigh*

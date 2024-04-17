@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { IType, IName, IArgument, typesLegend, tokenTypes, ICapture, nameToDefines, IArg, argOptions, fileToGatherResults } from "./constants";
+import { IType, IName, IArgument, typesLegend, tokenTypes, ICapture, nameToDefines, IArg, argOptions, uriToGatherResultsDefines } from "./constants";
 import { regexes } from "./regexes";
 import { buildTree } from "./providers/treeFunctions";
 import { protoDiagnostics } from "./initialize";
@@ -150,6 +150,19 @@ export class DocumentSymbolPlus extends vscode.DocumentSymbol {
 	constructor(name: string, detail: string, kind: vscode.SymbolKind, range: vscode.Range, selectionRange: vscode.Range, public define?:CDefined) {
 		super(name,detail,kind,range,selectionRange)
 	}
+	get documentSymbolArray():DocumentSymbolPlus[]{
+		let outputArray:DocumentSymbolPlus[] = []
+		this.extractChildren(this,outputArray)
+		return outputArray
+	}
+	private extractChildren(present:DocumentSymbolPlus,outputArray:DocumentSymbolPlus[]) {
+		outputArray.push(present)
+		if (present?.children){
+			for (let child of present.children){
+				this.extractChildren(child, outputArray)
+			}
+		}
+	}
 	get semanticSymbols():CToken[] {
 		let output:CToken[] = []
 		this.extractSemanticSymbols(this, output)
@@ -170,10 +183,10 @@ export class DocumentSymbolPlus extends vscode.DocumentSymbol {
 	}
 	private extractDiagnostics(present:DocumentSymbolPlus,outputArray:vscode.Diagnostic[]) {
 		if (present.diagnostics) outputArray.push(...present.diagnostics)
-			if (present?.children){
-				for (let child of present.children){
-					this.extractDiagnostics(child, outputArray)
-				}
+		if (present?.children){
+			for (let child of present.children){
+				this.extractDiagnostics(child, outputArray)
 			}
+		}
 	}
 }

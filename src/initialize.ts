@@ -8,7 +8,7 @@ import { DocumentSemanticTokensProvider } from './providers/documentSemanticToke
 import { DocumentSymbolProvider } from './providers/documentSymbolProvider';
 import { WorkspaceSymbolProvider } from './providers/workspaceSymbolProvider';
 import { HoverProvider } from './providers/hoverProvider';
-import { IArgument, legend, fileToGatherResults, nameToDefines, argOptions } from './constants';
+import { IArgument, legend, uriToGatherResultsDefines, nameToDefines, argOptions } from './constants';
 import { CGatherResults, CDefined, CBuiltIn } from "./classes";
 import { gatherDefinitions } from './parser';
 import { addCDefinedToMapWithRefrenceToOwnEntryValue } from './providers/commonFunctions';
@@ -19,7 +19,7 @@ export const protoDiagnostics = vscode.languages.createDiagnosticCollection('pro
 export async function activate(context: vscode.ExtensionContext) {
 	vscode.workspace.getConfiguration('', ).update('editor.wordSeparators', ''/* default: `~!@#$%^&*()-=+[{]}\|;:'",.<>/? */, false, true);
 	await initialize(context);
-	//context.subscriptions.push(vscode.languages.registerCompletionItemProvider({ language: 'chaos-script' }, new CompletionItemProvider()))
+	context.subscriptions.push(vscode.languages.registerCompletionItemProvider({ language: 'chaos-script' }, new CompletionItemProvider()))
 	//context.subscriptions.push(vscode.languages.registerCodeLensProvider({ language: 'chaos-script' }, new CodeLensProvider))
 	//context.subscriptions.push(vscode.languages.registerCallHierarchyProvider({ language: 'chaos-script' }, new CallHierarchyProvider()))
 	context.subscriptions.push(vscode.languages.registerDeclarationProvider({ language: 'chaos-script' }, new DeclarationProvider));
@@ -41,15 +41,15 @@ export async function initialize(context: vscode.ExtensionContext) {
 		promises.push(gatherDefinitions({uri:txt}))
 	}
 	for (let defines of promises){
-		fileToGatherResults.set((await defines).document.uri.toString(), (await defines))
+		uriToGatherResultsDefines.set((await defines).document.uri.toString(), (await defines))
 	}
 	await Promise.allSettled(promises);
-	for (let defines of fileToGatherResults.values()){
+	for (let defines of uriToGatherResultsDefines.values()){
 		for (let define of defines.defines){
 			addCDefinedToMapWithRefrenceToOwnEntryValue(nameToDefines,define)
 		}
 	}
-	for (let defines of fileToGatherResults.values()){
+	for (let defines of uriToGatherResultsDefines.values()){
 		for (let define of defines.defines){
 			if (!define.type.isBuiltIn) define.contents.buildTheTree()
 		}

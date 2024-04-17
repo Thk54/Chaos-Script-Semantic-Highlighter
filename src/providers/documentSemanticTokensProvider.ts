@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { updateFilesMapsIfEntries } from "./commonFunctions";
-import { fileToGatherResults, tokenTypes, legend } from '../constants';
+import { uriToGatherResultsDefines, tokenTypes, legend } from '../constants';
 import { CDefined } from "../classes";
 import { protoDiagnostics } from '../initialize';
 
@@ -12,7 +12,7 @@ export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTo
 		const builder: vscode.SemanticTokensBuilder = new vscode.SemanticTokensBuilder(legend);
 		let diagnostics: vscode.Diagnostic[] = []
 		let promises = [];
-		for (let define of fileToGatherResults.get(document.uri.toString())?.defines ?? []) {
+		for (let define of uriToGatherResultsDefines.get(document.uri.toString())?.defines ?? []) {
 			promises.push(builderTokens(builder, define));
 			diagnostics.push(...define.contents.diagnostics)
 		}
