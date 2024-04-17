@@ -1,5 +1,8 @@
 ## Release Notes
 
+## [0.2.4]
+Implemented a cube chaos specific auto-complete provider, so it should now give less garbage, also Compounds show what inputs they take if relevant
+
 ## [0.2.3]
 Semantics now only highlights if it finds a given word validly placed, plan to get it back to working as before secondarily, the improvement is that it should now highlight based on what is being used as rather than just whatever got put in the backend name map first. Now when something like test is being used as a Perk it will be a different color than when it is being used as a Cube
 
