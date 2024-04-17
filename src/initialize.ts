@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { CallHierarchyProvider } from './providers/callHierarchyProvider';
+import { CodeLensProvider } from './providers/codeLensProvider';
 import { CompletionItemProvider } from './providers/completionItemProvider';
 import { DeclarationProvider } from './providers/declarationProvider';
 import { FoldingRangeProvider } from './providers/foldingRangeProvider';
@@ -19,6 +20,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.workspace.getConfiguration('', ).update('editor.wordSeparators', ''/* default: `~!@#$%^&*()-=+[{]}\|;:'",.<>/? */, false, true);
 	await initialize(context);
 	//context.subscriptions.push(vscode.languages.registerCompletionItemProvider({ language: 'chaos-script' }, new CompletionItemProvider()))
+	//context.subscriptions.push(vscode.languages.registerCodeLensProvider({ language: 'chaos-script' }, new CodeLensProvider))
 	//context.subscriptions.push(vscode.languages.registerCallHierarchyProvider({ language: 'chaos-script' }, new CallHierarchyProvider()))
 	context.subscriptions.push(vscode.languages.registerDeclarationProvider({ language: 'chaos-script' }, new DeclarationProvider));
 	context.subscriptions.push(vscode.languages.registerFoldingRangeProvider({ language: 'chaos-script' }, new FoldingRangeProvider()));
@@ -26,7 +28,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'chaos-script' }, new DocumentSymbolProvider()));
 	context.subscriptions.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider()));
 	context.subscriptions.push(vscode.languages.registerHoverProvider({ language: 'chaos-script' }, new HoverProvider()))
-	context.subscriptions.push(vscode.languages.setLanguageConfiguration('chaos-script', {wordPattern:/\\S+/}))
+	context.subscriptions.push(vscode.languages.setLanguageConfiguration('chaos-script', {wordPattern:/\S+/}))
 	//context.subscriptions.push(vscode.workspace.onDidChangeTextDocument((e)=>{console.log(e.document.uri.toString())}))
 }
 
