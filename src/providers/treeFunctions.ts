@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { CDefined, DocumentSymbolPlus } from "../classes";
-import { nameToDefines, tokenTypes, IArg, compoundAbilityFlags, cubeFlags, perkFlags, argOptions } from "../constants";
+import { nameToDefines, tokenTypes, compoundAbilityFlags, cubeFlags, perkFlags, argOptions } from "../constants";
+import { IArg } from "../classes";
 import { createDiagnostic } from "./commonFunctions";
 
 export function buildTree(define: CDefined, diagnostics: vscode.Diagnostic[]) {

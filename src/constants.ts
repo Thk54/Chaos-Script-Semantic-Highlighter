@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { CDefined } from "./classes";
 import { CGatherResults } from "./classes";
+import { IArg } from "./classes";
 export const tokenTypes = new Map<string, number>();
 export const tokenModifiers = new Map<string, number>();
 export const typesLegend = new Map<string, string>();
@@ -9,42 +10,42 @@ export const uriToGatherResultsDefines = new Map<string,CGatherResults>();
 export let nameToDefines = new Map<string,CDefined[]>();
 
 export const argOptions = { //this will probably need to be redone *sigh*
-	CUBEcompound: {mapString:'CUBEcompound'},
-	DOUBLEcompound: {mapString:'DOUBLEcompound'},
-	ACTIONcompound: {mapString:'ACTIONcompound'},
-	BOOLEANcompound: {mapString:'BOOLEANcompound'},
-	ABILITYcompound: {mapString:'ABILITYcompound'},
-	DIRECTIONcompound: {mapString:'DIRECTIONcompound'},
-	POSITIONcompound: {mapString:'POSITIONcompound'},
-	STRINGcompound: {mapString:'STRINGcompound'},
-	TRIGGERcompound: {mapString:'ABILITYcompound'},
-	PERKcompound: {mapString:'PERKcompound'},
-	LISTcompound: {mapString:'LISTcompound'},
+	CUBEcompound: new IArg({mapString:'CUBEcompound'}),
+	DOUBLEcompound: new IArg({mapString:'DOUBLEcompound'}),
+	ACTIONcompound: new IArg({mapString:'ACTIONcompound'}),
+	BOOLEANcompound: new IArg({mapString:'BOOLEANcompound'}),
+	ABILITYcompound: new IArg({mapString:'ABILITYcompound'}),
+	DIRECTIONcompound: new IArg({mapString:'DIRECTIONcompound'}),
+	POSITIONcompound: new IArg({mapString:'POSITIONcompound'}),
+	STRINGcompound: new IArg({mapString:'STRINGcompound'}),
+	TRIGGERcompound: new IArg({mapString:'ABILITYcompound'}),
+	PERKcompound: new IArg({mapString:'PERKcompound'}),
+	LISTcompound: new IArg({mapString:'LISTcompound'}),
 
-	STRINGconst: {mapString:'STRINGcompound'},//catchall string
-	ACTIONconst: {mapString:'ACTIONcompound'},
-	TRIGGERconst: {mapString:'ABILITYcompound'},
-	DOUBLEconst: {mapString:'DOUBLEcompound'},
-	ABILITYconst: {mapString:'ABILITYcompound'},
-	INTconst: {mapString:'INTcompound'}, //int
+	STRINGconst: new IArg({mapString:'STRINGcompound'}),//catchall string
+	ACTIONconst: new IArg({mapString:'ACTIONcompound'}),
+	TRIGGERconst: new IArg({mapString:'ABILITYcompound'}),
+	DOUBLEconst: new IArg({mapString:'DOUBLEcompound'}),
+	ABILITYconst: new IArg({mapString:'ABILITYcompound'}),
+	INTconst: new IArg({mapString:'INTcompound'}), //int
 
-	STRINGvar: {mapString:'STRINGcompound'},//catchall string
-	STRINGcampaginValue: {mapString:'STRINGcompound'},//todo figure out valid campgain values
-	STRINGtype: {mapString:'STRINGcompound'},//todo list types
+	STRINGvar: new IArg({mapString:'STRINGcompound'}),//catchall string
+	STRINGcampaginValue: new IArg({mapString:'STRINGcompound'}),//todo figure out valid campgain values
+	STRINGtype: new IArg({mapString:'STRINGcompound'}),//todo list types
 
-	TEXTTOOLTIPdefine: {mapString:'TEXTTOOLTIPdefine'},
-	ARTOVERRIDEdefine: {mapString:'ARTOVERRIDEdefine'},
-	DOACTIONdefine: {mapString:'DOACTIONdefine'},
-	SCENARIOdefine: {mapString:'SCENARIOdefine'},
-	PERKdefine: {mapString:'PERKdefine'}, 
-	CUBEdefine: {mapString:'CUBEdefine'},
+	TEXTTOOLTIPdefine: new IArg({mapString:'TEXTTOOLTIPdefine'}),
+	ARTOVERRIDEdefine: new IArg({mapString:'ARTOVERRIDEdefine'}),
+	DOACTIONdefine: new IArg({mapString:'DOACTIONdefine'}),
+	SCENARIOdefine: new IArg({mapString:'SCENARIOdefine'}),
+	PERKdefine: new IArg({mapString:'PERKdefine'}), 
+	CUBEdefine: new IArg({mapString:'CUBEdefine'}),
 
-	VISUAL: {mapString:'VISUALS'},
-	ANIMATION: {mapString:'ANIMATIONS'},
-	ENDUSER: {mapString:'ENDUSER'},
+	VISUAL: new IArg({mapString:'VISUALS'}),
+	ANIMATION: new IArg({mapString:'ANIMATIONS'}),
+	ENDUSER: new IArg({mapString:'ENDUSER'}),
 
-	TYPEcompound: {mapString:'TYPEcompound'},
-	NONE: {mapString:''}
+	TYPEcompound: new IArg({mapString:'TYPEcompound'}),
+	NONE: new IArg({mapString:''})
 }
 export const defineTypeToArgOptionMap = new Map(
 	[['String',argOptions.STRINGconst],['Action',argOptions.ACTIONconst],['Trigger',argOptions.TRIGGERconst],['double',argOptions.DOUBLEconst],['Ability',argOptions.ABILITYconst],['int',argOptions.INTconst]]
@@ -67,33 +68,6 @@ export const legend = (function () {
 		'deprecated', 'modification', 'async', 'defaultLibrary'
 	];
 	tokenModifiersLegend.forEach((tokenModifier, index) => tokenModifiers.set(tokenModifier, index));
-	const chaosMappingsOld = [
-		'COMMENT', //'comment',//green
-		'h', //'string',//salmon
-		'COMPOUND CUBE', //'keyword',//pink
-		'COMPOUND DOUBLE', //'number',//pale yellow
-		'COMPOUND STRING', //'regexp',//purple
-		'COMPOUND BOOLEAN', //'operator',//offwhite
-		'COMPOUND ABILITY', //'namespace',//teal
-		'TEXTTOOLTIP', //'type',//teal
-		'g', //'struct',//teal
-		'COMPOUND TRIGGER', //'class',//teal
-		'ARTOVERRIDE', //'interface',//teal
-		'c'/* 'COMPOUND PERK' */, //'enum',//teal
-		'DOACTION', //'typeParameter',//teal
-		'COMPOUND ACTION', //'function',//pale yellow
-		'SCENARIO', //'method',//pale yellow
-		'i', //'macro',//blue
-		'PERK', //'variable',//light sky blue
-		'CUBE', //'parameter',//light sky blue
-		'COMPOUND PERK', //'property',//light sky blue
-		'a', //'enumMember',//bright light blue
-		'v', //'event',//light sky blue
-		'COMPOUND DIRECTION', //'decorator',//pale yellow
-		'COMPOUND TYPE', //'label'//undefined
-		'COMPOUND POSITION',//entity.other.attribute-name.position.chaos
-		'UHANDLED'
-	];
 	const chaosMappings = [
 		'COMMENT', //'comment',//green
 		'h', //'string',//salmon
@@ -190,9 +164,6 @@ export interface ICapture {
 	text: string;
 	index: number;
 	location: vscode.Location;
-}
-export interface IArg {
-	mapString: string;
 }
 export interface IArgument extends IArg {
 	mapString: string;

@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
-import { uriToGatherResultsDefines, nameToDefines, IArgument, IArg, argOptions } from "../constants";
+import { uriToGatherResultsDefines, nameToDefines, IArgument, argOptions } from "../constants";
+import { IArg } from "../classes";
 import { CGatherResults, CDefined } from "../classes";
 import { gatherDefinitions } from "../parser";
 import { regexes } from "../regexes";

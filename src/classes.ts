@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { IType, IName, IArgument, typesLegend, tokenTypes, ICapture, nameToDefines, IArg, argOptions, uriToGatherResultsDefines } from "./constants";
+import { IType, IName, IArgument, typesLegend, tokenTypes, ICapture, nameToDefines, argOptions, uriToGatherResultsDefines } from "./constants";
 import { regexes } from "./regexes";
 import { buildTree } from "./providers/treeFunctions";
 import { protoDiagnostics } from "./initialize";
@@ -82,10 +82,10 @@ export class CType {
 
 	}
 	public isValidType() { return tokenTypes.get(this.legendEntry) !== tokenTypes.size; } //if it is the fallback we don't know what to do with it
-	public satisfiesArgument(arg:string):boolean{
+/* 	public satisfiesArgument(arg:string):boolean{
 		
 		return
-	} 
+	}  */
 	public defaultArgs():IArg[]{
 		let args:IArg[] = []
 		if (this.isCompoundDefine) {
@@ -94,6 +94,13 @@ export class CType {
 			} else { args = [{ mapString: this.define }]; }
 		}
 		return args
+	}
+}
+
+export class IArg {
+	mapString: string;
+	constructor(input:{mapString:string}) {
+		this.mapString = input.mapString
 	}
 }
 
