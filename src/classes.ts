@@ -27,23 +27,20 @@ export class CDefined extends CBuiltIn {
 		super(<IType>{ defineType: defineType, compoundType: regex?.groups['TypeOfCOMPOUND']?.toUpperCase() },
 			<IName>{ name: regex.groups['NameOf' + defineType].toLowerCase(), asFound: regex.groups['NameOf' + defineType], index: document.positionAt(regex.indices.groups['NameOf' + defineType][0]) },
 			document);
-/* 		let existingSameDefine = fileToGatherResults.get(document.uri.toString())?.defines.find(define => define.contents.capture.text === regex[0])
-		if (existingSameDefine) {
-				
-		} else */ {
+		{
 			if (defineType === 'COMPOUND') {
 				let args = [];
 				for (let generic of regex.groups['ContentsOfCOMPOUND'].matchAll(regexes.genericsCapture)) {
 					if (generic.groups['CompoundGenerics']){
-						let type = generic.groups['CompoundGenerics'].slice(7)
-						if (type.toUpperCase() === type) {
-							type = type.toUpperCase() + 'compound';
-						} else { type = type.toUpperCase() + 'compound'}
-						if (type === 'TIMEcompound') type = argOptions.DOUBLEcompound.type
+						let mapString = generic.groups['CompoundGenerics'].slice(7)
+						if (mapString.toUpperCase() === mapString) {
+							mapString = mapString.toUpperCase() + 'compound';
+						} else { mapString = mapString.toUpperCase() + 'compound'}
+						if (mapString === 'TIMEcompound') mapString = argOptions.DOUBLEcompound.mapString
 						let startPos = document.positionAt(generic.indices.groups['CompoundGenerics'][0] + regex.index)
 						args.push({
 							string: generic.groups['CompoundGenerics'],
-							type: type,
+							mapString: mapString,
 							index: generic.indices.groups['CompoundGenerics'][0] + regex.index,
 							location: new vscode.Location(document.uri,new vscode.Range(startPos,startPos.translate({characterDelta:generic.groups['CompoundGenerics'].length})))
 						});}
@@ -92,9 +89,9 @@ export class CType {
 	public defaultArgs():IArg[]{
 		let args:IArg[] = []
 		if (this.isCompoundDefine) {
-			if (this.define === argOptions.ABILITYcompound.type) {
+			if (this.define === argOptions.ABILITYcompound.mapString) {
 				args = [argOptions.TRIGGERconst];
-			} else { args = [{ type: this.define }]; }
+			} else { args = [{ mapString: this.define }]; }
 		}
 		return args
 	}
@@ -113,16 +110,6 @@ export class CContents {
 		this.content = regex.groups['ContentsOf' + defineType];
 		this.index = regex.indices.groups['ContentsOf' + defineType][0];
 		this.location = new vscode.Location(document.uri,new vscode.Range(document.positionAt(this.index+regex.index),document.positionAt(this.index+this.content.length+regex.index)))
-		/* if (CDefined.initializeFinished) {// todo some hash stuff or something // turns out raw string compare is faster
-			for (let word of this.content.matchAll(regexes.stringExcluderCapture)) { // Mostly verbose could be more function-ized
-				if ((defineType === 'TEXTTOOLTIP')) break; //abort if tooltiptext but still highlight name
-				let result = nameToDefines.get(word[0].toLowerCase()) ?? null;
-				if (result?.length) {
-					let tokenStart = document.positionAt(this.index + word.index);
-					this.components.push(new CToken(result, tokenStart));
-				}
-			}
-		} */
 	}
 	buildTheTree(){
 		this.tree = buildTree(this.parent, this.diagnostics)
@@ -160,32 +147,6 @@ export class DocumentSymbolPlus extends vscode.DocumentSymbol {
 		if (present?.children){
 			for (let child of present.children){
 				this.extractChildren(child, outputArray)
-			}
-		}
-	}
-	get semanticSymbols():CToken[] {
-		let output:CToken[] = []
-		this.extractSemanticSymbols(this, output)
-		return output
-	}
-	private extractSemanticSymbols(present:DocumentSymbolPlus,outputArray:CToken[]) {
-		if (present?.define) outputArray.push(new CToken([present.define],present.selectionRange.start))
-		if (present?.children){
-			for (let child of present.children){
-				this.extractSemanticSymbols(child, outputArray)
-			}
-		}
-	}
-	get diagnostics():vscode.Diagnostic[] {
-		let output:vscode.Diagnostic[] = []
-		this.extractDiagnostics(this, output)
-		return output
-	}
-	private extractDiagnostics(present:DocumentSymbolPlus,outputArray:vscode.Diagnostic[]) {
-		if (present.diagnostics) outputArray.push(...present.diagnostics)
-		if (present?.children){
-			for (let child of present.children){
-				this.extractDiagnostics(child, outputArray)
 			}
 		}
 	}

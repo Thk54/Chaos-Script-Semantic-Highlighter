@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { uriToGatherResultsDefines, nameToDefines, IArgument } from "../constants";
+import { uriToGatherResultsDefines, nameToDefines, IArgument, IArg, argOptions } from "../constants";
 import { CGatherResults, CDefined } from "../classes";
 import { gatherDefinitions } from "../parser";
 import { regexes } from "../regexes";
@@ -18,7 +18,7 @@ export function doesCDefineHaveArguments(tested:CDefined):boolean{
 	return tested?.args ? true : false
 }
 export function returnArgumentsAsString(defined:CDefined):string{
-	return defined?.args?.map((temp)=>(temp.type)).join(' ')
+	return defined?.args?.map((temp)=>(temp.mapString)).join(' ')
 }
 export async function updateFilesMapsIfEntries(document: { doc?: vscode.TextDocument; uri?: vscode.Uri; }) {
 	//console.time('map time')
@@ -75,3 +75,21 @@ export function addCDefinedToMapWithRefrenceToOwnEntryValue(map:Map<string,CDefi
 		}
 	}
 }
+export function createDiagnostic(range: vscode.Range, arg: IArg['mapString'], defines: CDefined[], word: string): vscode.Diagnostic {
+	let thingsFound: Set<string> = new Set<string>;
+	arg?.replace('const', 'compound');
+	for (let define of defines) {
+		define.type.define.replace('const', 'compound');
+		thingsFound.add(define.type.define);
+	}
+	if (/^[-+]?\d+$/.test(word)) thingsFound.add(argOptions.INTconst.mapString).add(argOptions.DOUBLEconst.mapString);
+	if (/^\S+$/.test(word)) thingsFound.add(argOptions.STRINGconst.mapString);
+	if (thingsFound.has('TIMEcompound')) thingsFound.add(argOptions.DOUBLEcompound.mapString);
+	if (thingsFound.has('CUBEdefine')) thingsFound.add(argOptions.CUBEcompound.mapString);
+	if (thingsFound.has('PERKdefine')) thingsFound.add(argOptions.PERKcompound.mapString);
+	if (arg === "NAMEcompound") arg = argOptions.STRINGcompound.mapString;
+	if (arg === "STACKINGcompound") arg = argOptions.DOUBLEcompound.mapString;
+	if (arg === "CONSTANTcompound") arg = argOptions.DOUBLEcompound.mapString;
+	if (thingsFound.has(arg) || (arg === argOptions.VISUAL.mapString) || (arg === argOptions.ANIMATION.mapString)) { return; } else { return new vscode.Diagnostic(range, 'Expected: ' + arg + '\nFound: ' + [...thingsFound.values()].join(', '), 2); }
+}
+

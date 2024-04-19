@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { CDefined, DocumentSymbolPlus } from "../classes";
 import { nameToDefines, tokenTypes, IArg, compoundAbilityFlags, cubeFlags, perkFlags, argOptions } from "../constants";
+import { createDiagnostic } from "./commonFunctions";
 
 export function buildTree(define: CDefined, diagnostics: vscode.Diagnostic[]) {
 	let regex = define.contents.content.matchAll(/\S+/g);
@@ -44,9 +45,9 @@ function treeBuilder(words: IterableIterator<RegExpMatchArray>, context: CDefine
 			let arg = args[i]
 			endHelper = false
 			let listMarker
-			if (arg?.type === argOptions.LISTcompound.type) {listMarker = true; arg = argOptions.DOUBLEcompound}
+			if (arg?.mapString === argOptions.LISTcompound.mapString) {listMarker = true; arg = argOptions.DOUBLEcompound}
 			//i += 1
-			if (arg?.type === argOptions.ENDUSER.type) {
+			if (arg?.mapString === argOptions.ENDUSER.mapString) {
 				handleEndUser(words)
 				args.splice(args.findIndex((value)=>{value === arg}),1)
 				if (i<=0) endHelper = true
@@ -58,10 +59,10 @@ function treeBuilder(words: IterableIterator<RegExpMatchArray>, context: CDefine
 			let grandchildSymbols: DocumentSymbolPlus[];
 			let startpos = document.positionAt(offset + word.index);
 			let endpos = startpos.translate({ characterDelta: word[0].length });
-			let define = nameToDefines.get(word[0].toLowerCase())?.find((value) => { return value.type.define === arg?.type })
+			let define = nameToDefines.get(word[0].toLowerCase())?.find((value) => { return value.type.define === arg?.mapString })
 			let childArgs = (define?.args ?? determineFlagArgs(word[0], context)) // make this handled triggers/abilites
 			if (word[0] === 'GainAbilityText') childArgs.push(argOptions.ENDUSER)
-			/* bad form but should work */ let diag = createDiagnostic(new vscode.Range(startpos,endpos), arg?.type, nameToDefines.get(word[0].toLowerCase()) ?? [], word[0])
+			/* bad form but should work */ let diag = createDiagnostic(new vscode.Range(startpos,endpos), arg?.mapString, nameToDefines.get(word[0].toLowerCase()) ?? [], word[0])
 			if (diag && arg) {diagnostics.push(diag);
 			} else {
 				if (listMarker){
@@ -79,7 +80,7 @@ function treeBuilder(words: IterableIterator<RegExpMatchArray>, context: CDefine
 				grandchildSymbols = temp.returnArray;
 				deepestPos = temp.deepestPos;
 			}
-			childSymbol = new DocumentSymbolPlus(word[0], arg?.type, 4, new vscode.Range(startpos, deepestPos ?? temp.deepestPos), new vscode.Range(startpos, endpos), define);
+			childSymbol = new DocumentSymbolPlus(word[0], arg?.mapString, 4, new vscode.Range(startpos, deepestPos ?? temp.deepestPos), new vscode.Range(startpos, endpos), define);
 			if (!childSymbol.define) {delete(childSymbol.define)}
 			childSymbol.children = grandchildSymbols;
 			childSymbols.push(childSymbol);
@@ -90,12 +91,12 @@ function treeBuilder(words: IterableIterator<RegExpMatchArray>, context: CDefine
 }
 function determineFlagArgs(word: string, context: CDefined): IArg[] {
 	if (context.type.isCompoundDefine) {
-		if (context.type.define === argOptions.ABILITYcompound.type) {
+		if (context.type.define === argOptions.ABILITYcompound.mapString) {
 			return compoundAbilityFlags.get(word);
 		}
-	} else if (context.type.define === argOptions.CUBEdefine.type) {
+	} else if (context.type.define === argOptions.CUBEdefine.mapString) {
 		return cubeFlags.get(word);
-	} else if (context.type.define === argOptions.PERKdefine.type) {
+	} else if (context.type.define === argOptions.PERKdefine.mapString) {
 		return perkFlags.get(word);
 	}
 	return;
@@ -109,20 +110,3 @@ function handleEndUser(words:IterableIterator<RegExpMatchArray>):IteratorResult<
 }
 
 function convertToUndefined(any:any):undefined{return undefined}
-function createDiagnostic(range:vscode.Range,arg:IArg['type'],defines:CDefined[],word:string):vscode.Diagnostic{
-	let thingsFound:Set<string> = new Set<string>
-	arg?.replace('const', 'compound')
-	for (let define of defines){
-		define.type.define.replace('const', 'compound')
-		thingsFound.add(define.type.define)
-	}
-	if (/^[-+]?\d+$/.test(word)) thingsFound.add(argOptions.INTconst.type).add(argOptions.DOUBLEconst.type);
-	if (/^\S+$/.test(word)) thingsFound.add(argOptions.STRINGconst.type)
-	if (thingsFound.has('TIMEcompound')) thingsFound.add(argOptions.DOUBLEcompound.type)
-	if (thingsFound.has('CUBEdefine')) thingsFound.add(argOptions.CUBEcompound.type)
-	if (thingsFound.has('PERKdefine')) thingsFound.add(argOptions.PERKcompound.type)
-	if (arg === "NAMEcompound") arg = argOptions.STRINGcompound.type
-	if (arg === "STACKINGcompound") arg = argOptions.DOUBLEcompound.type
-	if (arg === "CONSTANTcompound") arg = argOptions.DOUBLEcompound.type
-	if (thingsFound.has(arg)||(arg === argOptions.VISUAL.type)||(arg === argOptions.ANIMATION.type)) {return} else {return new vscode.Diagnostic(range,'Expected: '+arg+'\nFound: '+[...thingsFound.values()].join(', '),2)}
-}

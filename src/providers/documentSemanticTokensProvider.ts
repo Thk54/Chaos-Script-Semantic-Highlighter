@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { updateFilesMapsIfEntries } from "./commonFunctions";
 import { uriToGatherResultsDefines, tokenTypes, legend } from '../constants';
-import { CDefined } from "../classes";
+import { CDefined, CToken } from "../classes";
 import { protoDiagnostics } from '../initialize';
 
 
@@ -25,8 +25,10 @@ export class DocumentSemanticTokensProvider implements vscode.DocumentSemanticTo
 async function builderTokens(builder: vscode.SemanticTokensBuilder, compound: CDefined) {
 	const mainOffset = compound.contents.index;
 	if (!compound.type.isBuiltIn) {
-		for (let symbol of compound.contents.tree.semanticSymbols){
-			builder.push(symbol.range, symbol.tokenType)
+		for (let symbol of compound.contents.tree.documentSymbolArray){
+			let temp
+			if (symbol?.define) temp = (new CToken([symbol.define],symbol.selectionRange.start))
+			if (temp) builder.push(temp.range, temp.tokenType)
 		}
 		let nameStart = compound.name.index;
 		builder.push(nameStart.line, nameStart.character, compound.name.name.length, tokenTypes.get(compound.type.legendEntry));

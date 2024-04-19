@@ -19,9 +19,9 @@ export const protoDiagnostics = vscode.languages.createDiagnosticCollection('pro
 export async function activate(context: vscode.ExtensionContext) {
 	vscode.workspace.getConfiguration('', ).update('editor.wordSeparators', ''/* default: `~!@#$%^&*()-=+[{]}\|;:'",.<>/? */, false, true);
 	await initialize(context);
-	context.subscriptions.push(vscode.languages.registerCompletionItemProvider({ language: 'chaos-script' }, new CompletionItemProvider()))
-	//context.subscriptions.push(vscode.languages.registerCodeLensProvider({ language: 'chaos-script' }, new CodeLensProvider))
 	//context.subscriptions.push(vscode.languages.registerCallHierarchyProvider({ language: 'chaos-script' }, new CallHierarchyProvider()))
+	//context.subscriptions.push(vscode.languages.registerCodeLensProvider({ language: 'chaos-script' }, new CodeLensProvider))
+	context.subscriptions.push(vscode.languages.registerCompletionItemProvider({ language: 'chaos-script' }, new CompletionItemProvider()))
 	context.subscriptions.push(vscode.languages.registerDeclarationProvider({ language: 'chaos-script' }, new DeclarationProvider));
 	context.subscriptions.push(vscode.languages.registerFoldingRangeProvider({ language: 'chaos-script' }, new FoldingRangeProvider()));
 	context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'chaos-script' }, new DocumentSemanticTokensProvider(), legend));
@@ -90,8 +90,8 @@ async function packBuiltins(match:RegExpMatchArray, document:vscode.TextDocument
 				if (/* generic[0].toUpperCase() === generic[0] */true) {
 					temp = generic[0].toUpperCase() + 'compound';
 				} else { temp = generic[0].toUpperCase() + 'const'}
-				if (temp === 'TRIGGERcompound') temp = argOptions.ABILITYcompound.type
-				args.push({ type: temp });
+				if (temp === 'TRIGGERcompound') temp = argOptions.ABILITYcompound.mapString
+				args.push({ mapString: temp });
 			}
 		}
 		if (type === 'TRIGGER') {type = 'ABILITY'}

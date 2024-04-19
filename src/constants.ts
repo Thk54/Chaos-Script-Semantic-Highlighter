@@ -9,42 +9,42 @@ export const uriToGatherResultsDefines = new Map<string,CGatherResults>();
 export let nameToDefines = new Map<string,CDefined[]>();
 
 export const argOptions = { //this will probably need to be redone *sigh*
-	CUBEcompound: {type:'CUBEcompound'},
-	DOUBLEcompound: {type:'DOUBLEcompound'},
-	ACTIONcompound: {type:'ACTIONcompound'},
-	BOOLEANcompound: {type:'BOOLEANcompound'},
-	ABILITYcompound: {type:'ABILITYcompound'},
-	DIRECTIONcompound: {type:'DIRECTIONcompound'},
-	POSITIONcompound: {type:'POSITIONcompound'},
-	STRINGcompound: {type:'STRINGcompound'},
-	TRIGGERcompound: {type:'ABILITYcompound'},
-	PERKcompound: {type:'PERKcompound'},
-	LISTcompound: {type:'LISTcompound'},
+	CUBEcompound: {mapString:'CUBEcompound'},
+	DOUBLEcompound: {mapString:'DOUBLEcompound'},
+	ACTIONcompound: {mapString:'ACTIONcompound'},
+	BOOLEANcompound: {mapString:'BOOLEANcompound'},
+	ABILITYcompound: {mapString:'ABILITYcompound'},
+	DIRECTIONcompound: {mapString:'DIRECTIONcompound'},
+	POSITIONcompound: {mapString:'POSITIONcompound'},
+	STRINGcompound: {mapString:'STRINGcompound'},
+	TRIGGERcompound: {mapString:'ABILITYcompound'},
+	PERKcompound: {mapString:'PERKcompound'},
+	LISTcompound: {mapString:'LISTcompound'},
 
-	STRINGconst: {type:'STRINGcompound'},//catchall string
-	ACTIONconst: {type:'ACTIONcompound'},
-	TRIGGERconst: {type:'ABILITYcompound'},
-	DOUBLEconst: {type:'DOUBLEcompound'},
-	ABILITYconst: {type:'ABILITYcompound'},
-	INTconst: {type:'INTcompound'}, //int
+	STRINGconst: {mapString:'STRINGcompound'},//catchall string
+	ACTIONconst: {mapString:'ACTIONcompound'},
+	TRIGGERconst: {mapString:'ABILITYcompound'},
+	DOUBLEconst: {mapString:'DOUBLEcompound'},
+	ABILITYconst: {mapString:'ABILITYcompound'},
+	INTconst: {mapString:'INTcompound'}, //int
 
-	STRINGvar: {type:'STRINGcompound'},//catchall string
-	STRINGcampaginValue: {type:'STRINGcompound'},//todo figure out valid campgain values
-	STRINGtype: {type:'STRINGcompound'},//todo list types
+	STRINGvar: {mapString:'STRINGcompound'},//catchall string
+	STRINGcampaginValue: {mapString:'STRINGcompound'},//todo figure out valid campgain values
+	STRINGtype: {mapString:'STRINGcompound'},//todo list types
 
-	TEXTTOOLTIPdefine: {type:'TEXTTOOLTIPdefine'},
-	ARTOVERRIDEdefine: {type:'ARTOVERRIDEdefine'},
-	DOACTIONdefine: {type:'DOACTIONdefine'},
-	SCENARIOdefine: {type:'SCENARIOdefine'},
-	PERKdefine: {type:'PERKdefine'}, 
-	CUBEdefine: {type:'CUBEdefine'},
+	TEXTTOOLTIPdefine: {mapString:'TEXTTOOLTIPdefine'},
+	ARTOVERRIDEdefine: {mapString:'ARTOVERRIDEdefine'},
+	DOACTIONdefine: {mapString:'DOACTIONdefine'},
+	SCENARIOdefine: {mapString:'SCENARIOdefine'},
+	PERKdefine: {mapString:'PERKdefine'}, 
+	CUBEdefine: {mapString:'CUBEdefine'},
 
-	VISUAL: {type:'VISUALS'},
-	ANIMATION: {type:'ANIMATIONS'},
-	ENDUSER: {type:'ENDUSER'},
+	VISUAL: {mapString:'VISUALS'},
+	ANIMATION: {mapString:'ANIMATIONS'},
+	ENDUSER: {mapString:'ENDUSER'},
 
-	TYPEcompound: {type:'TYPEcompound'},
-	NONE: {type:''}
+	TYPEcompound: {mapString:'TYPEcompound'},
+	NONE: {mapString:''}
 }
 export const defineTypeToArgOptionMap = new Map(
 	[['String',argOptions.STRINGconst],['Action',argOptions.ACTIONconst],['Trigger',argOptions.TRIGGERconst],['double',argOptions.DOUBLEconst],['Ability',argOptions.ABILITYconst],['int',argOptions.INTconst]]
@@ -97,28 +97,28 @@ export const legend = (function () {
 	const chaosMappings = [
 		'COMMENT', //'comment',//green
 		'h', //'string',//salmon
-		argOptions.CUBEcompound.type, //'keyword',//pink
-		argOptions.DOUBLEcompound.type, //'number',//pale yellow
-		argOptions.STRINGcompound.type, //'regexp',//purple
-		argOptions.BOOLEANcompound.type, //'operator',//offwhite
-		argOptions.ABILITYcompound.type, //'namespace',//teal
-		argOptions.TEXTTOOLTIPdefine.type, //'type',//teal
+		argOptions.CUBEcompound.mapString, //'keyword',//pink
+		argOptions.DOUBLEcompound.mapString, //'number',//pale yellow
+		argOptions.STRINGcompound.mapString, //'regexp',//purple
+		argOptions.BOOLEANcompound.mapString, //'operator',//offwhite
+		argOptions.ABILITYcompound.mapString, //'namespace',//teal
+		argOptions.TEXTTOOLTIPdefine.mapString, //'type',//teal
 		'g', //'struct',//teal
-		argOptions.TRIGGERcompound.type, //'class',//teal
-		argOptions.ARTOVERRIDEdefine.type, //'interface',//teal
+		argOptions.TRIGGERcompound.mapString, //'class',//teal
+		argOptions.ARTOVERRIDEdefine.mapString, //'interface',//teal
 		'c'/* 'COMPOUND PERK' */, //'enum',//teal
-		argOptions.DOACTIONdefine.type, //'typeParameter',//teal
-		argOptions.ACTIONcompound.type, //'function',//pale yellow
-		argOptions.SCENARIOdefine.type, //'method',//pale yellow
+		argOptions.DOACTIONdefine.mapString, //'typeParameter',//teal
+		argOptions.ACTIONcompound.mapString, //'function',//pale yellow
+		argOptions.SCENARIOdefine.mapString, //'method',//pale yellow
 		'i', //'macro',//blue
-		argOptions.PERKdefine.type, //'variable',//light sky blue
-		argOptions.CUBEdefine.type, //'parameter',//light sky blue
-		argOptions.PERKcompound.type, //'property',//light sky blue
+		argOptions.PERKdefine.mapString, //'variable',//light sky blue
+		argOptions.CUBEdefine.mapString, //'parameter',//light sky blue
+		argOptions.PERKcompound.mapString, //'property',//light sky blue
 		'a', //'enumMember',//bright light blue
 		'v', //'event',//light sky blue
-		argOptions.DIRECTIONcompound.type, //'decorator',//pale yellow
-		argOptions.TYPEcompound.type, //'label'//undefined
-		argOptions.POSITIONcompound.type,//entity.other.attribute-name.position.chaos
+		argOptions.DIRECTIONcompound.mapString, //'decorator',//pale yellow
+		argOptions.TYPEcompound.mapString, //'label'//undefined
+		argOptions.POSITIONcompound.mapString,//entity.other.attribute-name.position.chaos
 		'UHANDLED'
 	];
 	chaosMappings.forEach((TypeOfCompound, index) => typesLegend.set(TypeOfCompound, tokenTypesLegend[index]));
@@ -178,8 +178,8 @@ export class CFlags {
 	}
 } */
 export interface IType {
-	defineType:string
-	compoundType?:string
+	defineType: string;
+	compoundType?: string;
 }
 export interface IName{
 	name: string;
@@ -187,16 +187,16 @@ export interface IName{
 	index: vscode.Position;
 }
 export interface ICapture {
-	text:string;
-	index:number
-	location:vscode.Location
+	text: string;
+	index: number;
+	location: vscode.Location;
 }
 export interface IArg {
-	type:string
+	mapString: string;
 }
 export interface IArgument extends IArg {
-	type: string;
+	mapString: string;
 	string?: string;
 	index?: number;
-	location?: vscode.Location
+	location?: vscode.Location;
 }
