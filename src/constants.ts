@@ -70,13 +70,13 @@ export const legend = (function () {
 	tokenModifiersLegend.forEach((tokenModifier, index) => tokenModifiers.set(tokenModifier, index));
 	const chaosMappings = [
 		'COMMENT', //'comment',//green
-		'h', //'string',//salmon
+		argOptions.BOOLEANcompound.mapString, //'string',//salmon
 		argOptions.CUBEcompound.mapString, //'keyword',//pink
 		argOptions.DOUBLEcompound.mapString, //'number',//pale yellow
-		argOptions.STRINGcompound.mapString, //'regexp',//purple
-		argOptions.BOOLEANcompound.mapString, //'operator',//offwhite
+		argOptions.TEXTTOOLTIPdefine.mapString, //'regexp',//purple
+		argOptions.STRINGcompound.mapString, //'operator',//offwhite
 		argOptions.ABILITYcompound.mapString, //'namespace',//teal
-		argOptions.TEXTTOOLTIPdefine.mapString, //'type',//teal
+		'h', //'type',//teal
 		'g', //'struct',//teal
 		argOptions.TRIGGERcompound.mapString, //'class',//teal
 		argOptions.ARTOVERRIDEdefine.mapString, //'interface',//teal
