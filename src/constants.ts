@@ -82,15 +82,15 @@ export const legend = (function () {
 		argOptions.ARTOVERRIDEdefine.mapString, //'interface',//teal
 		'c'/* 'COMPOUND PERK' */, //'enum',//teal
 		argOptions.DOACTIONdefine.mapString, //'typeParameter',//teal
-		argOptions.ACTIONcompound.mapString, //'function',//pale yellow
+		'i', //'function',//pale yellow
 		argOptions.SCENARIOdefine.mapString, //'method',//pale yellow
-		'i', //'macro',//blue
+		argOptions.ACTIONcompound.mapString, //'macro',//blue
 		argOptions.PERKdefine.mapString, //'variable',//light sky blue
 		argOptions.CUBEdefine.mapString, //'parameter',//light sky blue
 		argOptions.PERKcompound.mapString, //'property',//light sky blue
-		'a', //'enumMember',//bright light blue
+		argOptions.DIRECTIONcompound.mapString, //'enumMember',//bright light blue
 		'v', //'event',//light sky blue
-		argOptions.DIRECTIONcompound.mapString, //'decorator',//pale yellow
+		'a', //'decorator',//pale yellow
 		argOptions.TYPEcompound.mapString, //'label'//undefined
 		argOptions.POSITIONcompound.mapString,//entity.other.attribute-name.position.chaos
 		'UHANDLED'
