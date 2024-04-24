@@ -8,8 +8,8 @@ import { DocumentSemanticTokensProvider } from './providers/documentSemanticToke
 import { DocumentSymbolProvider } from './providers/documentSymbolProvider';
 import { WorkspaceSymbolProvider } from './providers/workspaceSymbolProvider';
 import { HoverProvider } from './providers/hoverProvider';
-import { IArgument, legend, uriToGatherResultsDefines, nameToDefines, argOptions } from './constants';
-import { CGatherResults, CDefined, CBuiltIn } from "./classes";
+import { legend, uriToGatherResultsDefines, nameToDefines, argOptions } from './constants';
+import { CGatherResults, CDefined, CBuiltIn, IArg } from "./classes";
 import { gatherDefinitions } from './parser';
 import { addCDefinedToMapWithRefrenceToOwnEntryValue } from './providers/commonFunctions';
 export const protoDiagnostics = vscode.languages.createDiagnosticCollection('proto')
@@ -77,7 +77,7 @@ async function packBuiltins(match:RegExpMatchArray, document:vscode.TextDocument
 	let type = lines[0].toUpperCase().slice(0,lines[0].length-2) //.match(/(.*?)S?: /)[1];
 	lines.shift();
 	for (let line of lines) {
-		let args: IArgument[] = [];
+		let args: IArg[] = [];
 		let name = line.match(/^\S+/);
 		let index = match.index + match[0].indexOf(line)
 		line.slice(name.length);
@@ -87,11 +87,11 @@ async function packBuiltins(match:RegExpMatchArray, document:vscode.TextDocument
 				first = false;
 			} else {
 				let temp
-				if (/* generic[0].toUpperCase() === generic[0] */true) {
+				if (generic[0].toUpperCase() === generic[0]/* true */) {
 					temp = generic[0].toUpperCase() + 'compound';
 				} else { temp = generic[0].toUpperCase() + 'const'}
 				if (temp === 'TRIGGERcompound') temp = argOptions.ABILITYcompound.mapString
-				args.push({ mapString: temp });
+				args.push(new IArg({ mapString: temp }));
 			}
 		}
 		if (type === 'TRIGGER') {type = 'ABILITY'}

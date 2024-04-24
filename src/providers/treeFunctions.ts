@@ -46,7 +46,7 @@ function treeBuilder(words: IterableIterator<RegExpMatchArray>, context: CDefine
 			let arg = args[i]
 			endHelper = false
 			let listMarker
-			if (arg?.mapString === argOptions.LISTcompound.mapString) {listMarker = true; arg = argOptions.DOUBLEcompound}
+			if (arg?.mapString === argOptions.LISTconst.mapString) {listMarker = true; arg = argOptions.DOUBLEcompound}
 			//i += 1
 			if (arg?.mapString === argOptions.ENDUSER.mapString) {
 				handleEndUser(words)
@@ -60,9 +60,10 @@ function treeBuilder(words: IterableIterator<RegExpMatchArray>, context: CDefine
 			let grandchildSymbols: DocumentSymbolPlus[];
 			let startpos = document.positionAt(offset + word.index);
 			let endpos = startpos.translate({ characterDelta: word[0].length });
-			let define = nameToDefines.get(word[0].toLowerCase())?.find((value) => { return value.type.define === arg?.mapString })
+			let define = nameToDefines.get(word[0].toLowerCase())?.find((value) => {
+				for (let valid of arg?.satifiedBy()??[]) {if (value.type.define === valid.mapString) return true}; return false})
 			let childArgs = (define?.args ?? determineFlagArgs(word[0], context)) // make this handled triggers/abilites
-			if (word[0] === 'GainAbilityText') childArgs.push(argOptions.ENDUSER)
+			if (word[0] === 'GainAbilityText') childArgs?.push(argOptions.ENDUSER)
 			/* bad form but should work */ let diag = createDiagnostic(new vscode.Range(startpos,endpos), arg?.mapString, nameToDefines.get(word[0].toLowerCase()) ?? [], word[0])
 			if (diag && arg) {diagnostics.push(diag);
 			} else {

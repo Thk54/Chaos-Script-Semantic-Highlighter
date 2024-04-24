@@ -12,22 +12,26 @@ export let nameToDefines = new Map<string,CDefined[]>();
 export const argOptions = { //this will probably need to be redone *sigh*
 	CUBEcompound: new IArg({mapString:'CUBEcompound'}),
 	DOUBLEcompound: new IArg({mapString:'DOUBLEcompound'}),
+	STACKINGcompound: new IArg({mapString:'STACKINGcompound'}),
+	CONSTANTcompound: new IArg({mapString:'CONSTANTcompound'}),
 	ACTIONcompound: new IArg({mapString:'ACTIONcompound'}),
 	BOOLEANcompound: new IArg({mapString:'BOOLEANcompound'}),
 	ABILITYcompound: new IArg({mapString:'ABILITYcompound'}),
 	DIRECTIONcompound: new IArg({mapString:'DIRECTIONcompound'}),
 	POSITIONcompound: new IArg({mapString:'POSITIONcompound'}),
 	STRINGcompound: new IArg({mapString:'STRINGcompound'}),
+	NAMEcompound: new IArg({mapString:'NAMEcompound'}),
 	TRIGGERcompound: new IArg({mapString:'ABILITYcompound'}),
 	PERKcompound: new IArg({mapString:'PERKcompound'}),
-	LISTcompound: new IArg({mapString:'LISTcompound'}),
-
-	STRINGconst: new IArg({mapString:'STRINGcompound'}),//catchall string
-	ACTIONconst: new IArg({mapString:'ACTIONcompound'}),
-	TRIGGERconst: new IArg({mapString:'ABILITYcompound'}),
-	DOUBLEconst: new IArg({mapString:'DOUBLEcompound'}),
-	ABILITYconst: new IArg({mapString:'ABILITYcompound'}),
-	INTconst: new IArg({mapString:'INTcompound'}), //int
+	TIMEcompound: new IArg({mapString:'TIMEcompound'}),
+	
+	LISTconst: new IArg({mapString:'LISTconst'}),
+	STRINGconst: new IArg({mapString:'STRINGconst'}),//catchall string
+	ACTIONconst: new IArg({mapString:'ACTIONconst'}),
+	TRIGGERconst: new IArg({mapString:'ABILITYconst'}),
+	DOUBLEconst: new IArg({mapString:'DOUBLEconst'}),
+	ABILITYconst: new IArg({mapString:'ABILITYconst'}),
+	INTconst: new IArg({mapString:'INTconst'}), //int
 
 	STRINGvar: new IArg({mapString:'STRINGcompound'}),//catchall string
 	STRINGcampaginValue: new IArg({mapString:'STRINGcompound'}),//todo figure out valid campgain values
@@ -47,6 +51,47 @@ export const argOptions = { //this will probably need to be redone *sigh*
 	TYPEcompound: new IArg({mapString:'TYPEcompound'}),
 	NONE: new IArg({mapString:''})
 }
+{
+	argOptions.CUBEcompound.satisfies = [argOptions.CUBEcompound]
+	argOptions.DOUBLEcompound.satisfies = [argOptions.DOUBLEcompound]
+	argOptions.ACTIONcompound.satisfies = [argOptions.ACTIONcompound, argOptions.ACTIONconst] //always asked for as a constant
+	argOptions.BOOLEANcompound.satisfies = [argOptions.BOOLEANcompound]
+	argOptions.ABILITYcompound.satisfies = [argOptions.ABILITYcompound, argOptions.ABILITYconst] //always asked for as a constant
+	argOptions.DIRECTIONcompound.satisfies = [argOptions.DIRECTIONcompound]
+	argOptions.POSITIONcompound.satisfies = [argOptions.POSITIONcompound]
+	argOptions.STRINGcompound.satisfies = [argOptions.STRINGcompound]
+	argOptions.NAMEcompound.satisfies = [argOptions.NAMEcompound]
+	argOptions.TRIGGERcompound.satisfies = [argOptions.TRIGGERcompound]
+	argOptions.PERKcompound.satisfies = [argOptions.PERKcompound]
+	argOptions.TIMEcompound.satisfies = [argOptions.TIMEcompound]
+	
+	argOptions.LISTconst.satisfies = [argOptions.LISTconst]
+	argOptions.STRINGconst.satisfies = [argOptions.STRINGconst, argOptions.STRINGcompound, argOptions.NAMEcompound]
+	argOptions.ACTIONconst.satisfies = [argOptions.ACTIONconst, argOptions.ACTIONcompound]
+	argOptions.TRIGGERconst.satisfies = [argOptions.TRIGGERconst, argOptions.TRIGGERcompound]
+	argOptions.DOUBLEconst.satisfies = [argOptions.DOUBLEconst, argOptions.DOUBLEcompound, argOptions.INTconst, argOptions.TIMEcompound, argOptions.LISTconst, argOptions.STACKINGcompound, argOptions.CONSTANTcompound]
+	argOptions.ABILITYconst.satisfies = [argOptions.ABILITYconst, argOptions.ABILITYcompound]
+	argOptions.INTconst.satisfies = [argOptions.INTconst, argOptions.TIMEcompound]
+
+	argOptions.STRINGvar.satisfies = [argOptions.STRINGvar]
+	argOptions.STRINGcampaginValue.satisfies = [argOptions.STRINGcampaginValue]
+	argOptions.STRINGtype.satisfies = [argOptions.STRINGtype]
+
+	argOptions.TEXTTOOLTIPdefine.satisfies = [argOptions.TEXTTOOLTIPdefine]
+	argOptions.ARTOVERRIDEdefine.satisfies = [argOptions.ARTOVERRIDEdefine]
+	argOptions.DOACTIONdefine.satisfies = [argOptions.DOACTIONdefine]
+	argOptions.SCENARIOdefine.satisfies = [argOptions.SCENARIOdefine]
+	argOptions.PERKdefine.satisfies = [argOptions.PERKdefine]
+	argOptions.CUBEdefine.satisfies = [argOptions.CUBEdefine]
+
+	argOptions.VISUAL.satisfies = [argOptions.VISUAL]
+	argOptions.ANIMATION.satisfies = [argOptions.ANIMATION]
+	argOptions.ENDUSER.satisfies = [argOptions.ENDUSER]
+
+	argOptions.TYPEcompound.satisfies = [argOptions.TYPEcompound]
+	argOptions.NONE.satisfies = [argOptions.NONE]
+}
+
 export const defineTypeToArgOptionMap = new Map(
 	[['String',argOptions.STRINGconst],['Action',argOptions.ACTIONconst],['Trigger',argOptions.TRIGGERconst],['double',argOptions.DOUBLEconst],['Ability',argOptions.ABILITYconst],['int',argOptions.INTconst]]
 )
@@ -110,52 +155,11 @@ export const cubeFlags = new Map([['Ability:',[argOptions.TRIGGERcompound]],['Ai
 ['TYPE',[argOptions.STRINGtype]],['Variable:',[argOptions.STRINGvar]],['LevelReq:',[argOptions.INTconst]],['Visual:',[argOptions.VISUAL]],['Animation:',[argOptions.ANIMATION]],
 ['Text:',[argOptions.ENDUSER]],['ExtraTrigger:',[argOptions.TRIGGERcompound]],['FlavourText:',[argOptions.ENDUSER]]/* ,['IDENT'],['Invisible'],['Debug'],['DebugE'],['UNUSUED'],['RNGAbility:'] */])
 
-/* type tFlag = [string,IArg?];
-export class CFlags {
-	static universal:tFlag[] = [['OVERRIDE']]
-	static compound:tFlag[] = [['ABILITY',{type:'TRIGGER'}],['ACTION',{type:'ACTION'}],['BOOLEAN',{type:'BOOLEAN'}], //unused property, handled elsewhere
-		['DIRECTION',{type:'DIRECTION'}],['DOUBLE',{type:'DOUBLE'}],['CUBE',{type:'CUBE'}],['POSITION',{type:'POSITION'}]]
-	static compoundAbility:tFlag[] = [['Visual:'/* ,{type:'VISUALTYPE'} * /],['Text:',{type:'ENDUSER'}],['ExtraTrigger:',{type:'TRIGGER'}],
-		['CubeColorShift:'],['NO_DUPLICATES'],['LOCAL'],['INVISIBLE'],['VISIBLE']]
-	static perk:tFlag[] = [['Ability:',{type:'ABILITY'}],['WorldAbility:',{type:'ABILITY'}],['CampaignAbility:',{type:'ABILITY'}],['AbilityText:',{type:'ENDUSER'}],
-		['ExtraTrigger:',{type:'TRIGGER'}],['Invisible:'],['Visible:'],['PerkBarSplit:'],['ObtainAction:',{type:'ACTION'}],['ClickAction:',{type:'ACTION'}],
-		['RemoveAction:',{type:'ACTION'}],['PerkRequirement:'],['PerkRequirementAmount:'],['LevelRequirement:',{type:'DOUBLECONSTANT'}],['Requirement:'],['Debug'],
-		['DebugN'],['Unique'],['ReferenceCube:',{type:'CUBECONSTANT'}],['UpgradeFrom:',{type:'PERKCONSTANT'}],['IsUpgradeFrom:',{type:'PERKCONSTANT'}],['RemoveUponObtaining'],
-		['Description:',{type:'ENDUSER'}],['TODO:',{type:'ENDUSER'}],['UNUSED'],['BelongsTo:'],['Value:',{type:'DOUBLECONSTANT'}]]
-	static cube:tFlag[] = [['Ability:',{type:'ABILITY'}],['RNGAbility:'],['AiPlacementRule:'],['AiPlacementAdd:'],['AiPlacementAbility:'],['IDENT'],['ADDEDAICOST'],
-		['TYPE'],['Variable:'],['LevelReq:',{type:'DOUBLECONSTANT'}],['Debug'],['DebugE'],['Visual:'/* ,{type:'VISUALTYPE'} * /],['Animation:'/* ,{type:'ANIMATIONTYPE'} * /],
-		['Text:',{type:'ENDUSER'}],['ExtraTrigger:',{type:'TRIGGER'}],['FlavourText:',{type:'ENDUSER'}],['Invisible'],['UNUSUED']]
-	static compoundAbilityVisual:tFlag[] = [['Area'],['Arrow'],['Sword'],['Square'],['Target'],['Mist'],['Plus']]
-	static cubeVisual:tFlag[] = this.compoundAbilityVisual
-	static cubeAnimation:tFlag[] = [['CLOCK'],['TRIGGER'],['HP'],['DOUBLE'],['BOOLEAN'],['TIME']]
-	constructor() {}
-	public static get compoundFlags(){
-		return CFlags.universal
-	}
-	public static get compoundAbilityFlags(){
-		return CFlags.universal.concat(CFlags.compoundAbility)
-	}
-	public static get compoundAbilityVisualFlags(){
-		return CFlags.compoundAbilityVisual
-	}
-	public static get perkFlags(){
-		return CFlags.universal.concat(CFlags.perk)
-	}
-	public static get cubeFlags(){
-		return CFlags.universal.concat(CFlags.cube)
-	}
-	public static get cubeVisualFlags(){
-		return CFlags.cubeVisual
-	}
-	public static get cubeAnimationFlags(){
-		return CFlags.cubeAnimation
-	}
-} */
 export interface IType {
 	defineType: string;
 	compoundType?: string;
 }
-export interface IName{
+export interface IName {
 	name: string;
 	asFound?: string;
 	index: vscode.Position;
@@ -164,10 +168,4 @@ export interface ICapture {
 	text: string;
 	index: number;
 	location: vscode.Location;
-}
-export interface IArgument extends IArg {
-	mapString: string;
-	string?: string;
-	index?: number;
-	location?: vscode.Location;
 }

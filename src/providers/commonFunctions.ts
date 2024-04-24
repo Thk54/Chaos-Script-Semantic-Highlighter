@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { uriToGatherResultsDefines, nameToDefines, IArgument, argOptions } from "../constants";
+import { uriToGatherResultsDefines, nameToDefines, argOptions } from "../constants";
 import { IArg } from "../classes";
 import { CGatherResults, CDefined } from "../classes";
 import { gatherDefinitions } from "../parser";
@@ -76,21 +76,26 @@ export function addCDefinedToMapWithRefrenceToOwnEntryValue(map:Map<string,CDefi
 		}
 	}
 }
-export function createDiagnostic(range: vscode.Range, arg: IArg['mapString'], defines: CDefined[], word: string): vscode.Diagnostic {
+export function createDiagnostic(range: vscode.Range, argToFind: IArg['mapString'], defines: CDefined[], word: string): vscode.Diagnostic {
+	if ((argToFind === argOptions.VISUAL.mapString) || (argToFind === argOptions.ANIMATION.mapString)) { return; } //todo handle these properly
 	let thingsFound: Set<string> = new Set<string>;
-	arg?.replace('const', 'compound');
+	let argOptionToFind = Object.entries(argOptions).find((entries)=>{return entries[1].mapString === argToFind})
+	//argToFind?.replace('const', 'compound');
 	for (let define of defines) {
-		define.type.define.replace('const', 'compound');
+		//define.type.define.replace('const', 'compound');
 		thingsFound.add(define.type.define);
 	}
 	if (/^[-+]?\d+$/.test(word)) thingsFound.add(argOptions.INTconst.mapString).add(argOptions.DOUBLEconst.mapString);
 	if (/^\S+$/.test(word)) thingsFound.add(argOptions.STRINGconst.mapString);
-	if (thingsFound.has('TIMEcompound')) thingsFound.add(argOptions.DOUBLEcompound.mapString);
+ 	if (thingsFound.has('TIMEcompound')) thingsFound.add(argOptions.DOUBLEcompound.mapString);
 	if (thingsFound.has('CUBEdefine')) thingsFound.add(argOptions.CUBEcompound.mapString);
 	if (thingsFound.has('PERKdefine')) thingsFound.add(argOptions.PERKcompound.mapString);
-	if (arg === "NAMEcompound") arg = argOptions.STRINGcompound.mapString;
-	if (arg === "STACKINGcompound") arg = argOptions.DOUBLEcompound.mapString;
-	if (arg === "CONSTANTcompound") arg = argOptions.DOUBLEcompound.mapString;
-	if (thingsFound.has(arg) || (arg === argOptions.VISUAL.mapString) || (arg === argOptions.ANIMATION.mapString)) { return; } else { return new vscode.Diagnostic(range, 'Expected: ' + arg + '\nFound: ' + [...thingsFound.values()].join(', '), 2); }
+/*	if (argToFind === "NAMEcompound") argToFind = argOptions.STRINGcompound.mapString;
+	if (argToFind === "STACKINGcompound") argToFind = argOptions.DOUBLEcompound.mapString;
+	if (argToFind === "CONSTANTcompound") argToFind = argOptions.DOUBLEcompound.mapString; */
+	if (argOptionToFind) for (let option of argOptionToFind[1].satifiedBy()){
+		if (thingsFound.has(option.mapString)) return
+	}
+	return new vscode.Diagnostic(range, 'Expected: ' + argToFind + '\nFound: ' + [...thingsFound.values()].join(', '), 2);
 }
 

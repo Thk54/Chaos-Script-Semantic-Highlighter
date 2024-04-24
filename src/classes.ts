@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
-import { IType, IName, IArgument, typesLegend, tokenTypes, ICapture, nameToDefines, argOptions, uriToGatherResultsDefines } from "./constants";
+import { IType, IName, typesLegend, tokenTypes, ICapture, nameToDefines, argOptions, uriToGatherResultsDefines } from "./constants";
 import { regexes } from "./regexes";
 import { buildTree } from "./providers/treeFunctions";
 import { protoDiagnostics } from "./initialize";
 
 export class CBuiltIn {
 	type: CType;
-	constructor(type: IType, public name: IName, public document: vscode.TextDocument, public args?: IArgument[]) {
+	constructor(type: IType, public name: IName, public document: vscode.TextDocument, public args?: IArg[]) {
 		this.type = new CType(type);
 	}
 	public get uri(): vscode.Uri {
@@ -38,12 +38,12 @@ export class CDefined extends CBuiltIn {
 						} else { mapString = mapString.toUpperCase() + 'compound'}
 						if (mapString === 'TIMEcompound') mapString = argOptions.DOUBLEcompound.mapString
 						let startPos = document.positionAt(generic.indices.groups['CompoundGenerics'][0] + regex.index)
-						args.push({
+						args.push(new IArg({
 							string: generic.groups['CompoundGenerics'],
 							mapString: mapString,
 							index: generic.indices.groups['CompoundGenerics'][0] + regex.index,
 							location: new vscode.Location(document.uri,new vscode.Range(startPos,startPos.translate({characterDelta:generic.groups['CompoundGenerics'].length})))
-						});}
+						}));}
 				}
 				this.args = args;
 			}
@@ -91,7 +91,7 @@ export class CType {
 		if (this.isCompoundDefine) {
 			if (this.define === argOptions.ABILITYcompound.mapString) {
 				args = [argOptions.TRIGGERconst];
-			} else { args = [{ mapString: this.define }]; }
+			} else { args = [new IArg({ mapString: this.define })]; }
 		}
 		return args
 	}
@@ -99,8 +99,24 @@ export class CType {
 
 export class IArg {
 	mapString: string;
-	constructor(input:{mapString:string}) {
+	string?: string;
+	index?: number;
+	location?: vscode.Location;
+	satisfies?: IArg[]
+	constructor(input:{mapString:string, string?: string, index?: number, location?: vscode.Location}) {
 		this.mapString = input.mapString
+		if (input.string) {
+			this.string = input.string
+		}
+		if (input.index) {
+			this.index = input.index
+		}
+		if (input.location) {
+			this.location = input.location
+		}
+	}
+	public satifiedBy() {
+		return Object.entries(argOptions)?.filter((entries)=>{return entries[1].satisfies?.some((options)=>{return this.mapString === options.mapString})})?.map((entry)=>{return entry[1]})
 	}
 }
 
