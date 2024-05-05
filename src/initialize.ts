@@ -19,16 +19,16 @@ export const protoDiagnostics = vscode.languages.createDiagnosticCollection('pro
 export async function activate(context: vscode.ExtensionContext) {
 	vscode.workspace.getConfiguration('', ).update('editor.wordSeparators', ''/* default: `~!@#$%^&*()-=+[{]}\|;:'",.<>/? */, false, true);
 	await initialize(context);
-	//context.subscriptions.push(vscode.languages.registerCallHierarchyProvider({ language: 'chaos-script' }, new CallHierarchyProvider()))
-	//context.subscriptions.push(vscode.languages.registerCodeLensProvider({ language: 'chaos-script' }, new CodeLensProvider))
-	context.subscriptions.push(vscode.languages.registerCompletionItemProvider({ language: 'chaos-script' }, new CompletionItemProvider()))
-	context.subscriptions.push(vscode.languages.registerDeclarationProvider({ language: 'chaos-script' }, new DeclarationProvider));
-	context.subscriptions.push(vscode.languages.registerFoldingRangeProvider({ language: 'chaos-script' }, new FoldingRangeProvider()));
-	context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'chaos-script' }, new DocumentSemanticTokensProvider(), legend));
-	context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'chaos-script' }, new DocumentSymbolProvider()));
+	//context.subscriptions.push(vscode.languages.registerCallHierarchyProvider({ language: 'cube-script' }, new CallHierarchyProvider()))
+	//context.subscriptions.push(vscode.languages.registerCodeLensProvider({ language: 'cube-script' }, new CodeLensProvider))
+	context.subscriptions.push(vscode.languages.registerCompletionItemProvider({ language: 'cube-script' }, new CompletionItemProvider()))
+	context.subscriptions.push(vscode.languages.registerDeclarationProvider({ language: 'cube-script' }, new DeclarationProvider));
+	context.subscriptions.push(vscode.languages.registerFoldingRangeProvider({ language: 'cube-script' }, new FoldingRangeProvider()));
+	context.subscriptions.push(vscode.languages.registerDocumentSemanticTokensProvider({ language: 'cube-script' }, new DocumentSemanticTokensProvider(), legend));
+	context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider({ language: 'cube-script' }, new DocumentSymbolProvider()));
 	context.subscriptions.push(vscode.languages.registerWorkspaceSymbolProvider(new WorkspaceSymbolProvider()));
-	context.subscriptions.push(vscode.languages.registerHoverProvider({ language: 'chaos-script' }, new HoverProvider()))
-	context.subscriptions.push(vscode.languages.setLanguageConfiguration('chaos-script', {wordPattern:/\S+/}))
+	context.subscriptions.push(vscode.languages.registerHoverProvider({ language: 'cube-script' }, new HoverProvider()))
+	context.subscriptions.push(vscode.languages.setLanguageConfiguration('cube-script', {wordPattern:/\S+/}))
 	//context.subscriptions.push(vscode.workspace.onDidChangeTextDocument((e)=>{console.log(e.document.uri.toString())}))
 }
 

@@ -6,6 +6,7 @@ import { regexes } from '../regexes';
 
 export class WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
 	async provideWorkspaceSymbols(query: string, token: vscode.CancellationToken): Promise<vscode.SymbolInformation[]> {
+		console.log(query)
 		let symbols: vscode.SymbolInformation[] = [];
 		for (let define of await this._findRelevantDefines(query)) {
 			if (define.iDefined.name?.asFound && define.iDefined.name?.index) {

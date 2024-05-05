@@ -1,6 +1,6 @@
 {
-	"name": "chaos-script-semantic-highlighter",
-	"displayName": "Chaos Script Semantic Highlighter",
+	"name": "cube-script-semantic-highlighter",
+	"displayName": "Cube Script Semantic Highlighter",
 	"description": "Semantic highlighter for Cube Chaos mod files.",
 	"version": "0.2.4",
 	"publisher": "Thk",
@@ -19,8 +19,9 @@
 	"contributes": {
 		"languages": [
 			{
-				"id": "chaos-script",
+				"id": "cube-script",
 				"aliases": [
+					"Cube Script",
 					"Chaos Script",
 					"chaos"
 				],
@@ -32,9 +33,9 @@
 		],
 		"grammars": [
 			{
-				"language": "chaos-script",
+				"language": "cube-script",
 				"scopeName": "source.chaos",
-				"path": "./syntaxes/chaos-script.tmLanguage.json"
+				"path": "./syntaxes/cube-script.tmLanguage.json"
 			}
 		]
 	},
