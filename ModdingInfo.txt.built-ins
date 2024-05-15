@@ -14,6 +14,7 @@ AfterAMapIsGenerated Action
 AfterBlockedTeleport Action
 AfterCampaignSomething Action
 AfterEndOfTheBattle Action
+AfterThisBlocksCreation Action
 AfterThisCreates Action
 AfterThisDealsDamage Action
 AfterThisDies Action
@@ -163,6 +164,7 @@ ChangeCampaignVariable String DOUBLE
 SetCampaignVariable String DOUBLE
 ObtainPerk PERK
 LosePerk PERK
+LockPerk PERK
 ChangeDeckSize DOUBLE
 FlipSprite BOOLEAN
 SystemTime
@@ -325,6 +327,7 @@ RoundedDown DOUBLE
 Minus DOUBLE
 InvertedFaction DOUBLE
 % DOUBLE DOUBLE
+Power DOUBLE DOUBLE
 
 PERK: 
 Target
