@@ -1,5 +1,8 @@
 ## Release Notes
 
+## [0.2.5]
+Been a bit. Converted language name to Cube Script. (should have been done ages ago) IDNT, BalanceCap: and CubeColourShift: are now recognized as the flags they are
+
 ## [0.2.4]
 Implemented a cube chaos specific auto-complete provider, so it should now give less garbage, also Compounds show what inputs they take if relevant
 

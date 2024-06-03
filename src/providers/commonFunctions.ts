@@ -85,7 +85,9 @@ export function createDiagnostic(range: vscode.Range, argToFind: IArg['mapString
 		//define.type.define.replace('const', 'compound');
 		thingsFound.add(define.type.define);
 	}
-	if (/^[-+]?\d+$/.test(word)) thingsFound.add(argOptions.INTconst.mapString).add(argOptions.DOUBLEconst.mapString);
+	if (/^[-+]?\d+(\.\d+)?$/.test(word)) {thingsFound.add(argOptions.DOUBLEconst.mapString)
+		if (/^[-+]?\d+$/.test(word)) {thingsFound.add(argOptions.INTconst.mapString)}
+	}
 	if (/^\S+$/.test(word)) thingsFound.add(argOptions.STRINGconst.mapString);
  	if (thingsFound.has('TIMEcompound')) thingsFound.add(argOptions.DOUBLEcompound.mapString);
 	if (thingsFound.has('CUBEdefine')) thingsFound.add(argOptions.CUBEcompound.mapString);
