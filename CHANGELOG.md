@@ -1,5 +1,8 @@
 ## Release Notes
 
+## [0.2.6]
+Updated built-ins
+
 ## [0.2.5]
 Been a bit. Converted language name to Cube Script. (should have been done ages ago) IDNT, BalanceCap: and CubeColourShift: are now recognized as the flags they are
 
