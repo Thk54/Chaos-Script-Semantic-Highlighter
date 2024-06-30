@@ -44,7 +44,6 @@ BeforeACubeIsAddedToInventory Action
 BeforeACubeMoves Action
 BeforeACubeMovesNegation Action
 BeforeACubeTakesDamage Action
-BeforeACubeVariableChanges Action
 BeforeCollision Action
 BeforeEndOfTheBattle Action
 BeforeManaIsGenerated Action
@@ -121,6 +120,7 @@ RemoveThisAbility
 Nothing
 Exile
 SetVariable String DOUBLE
+SetSVariable String STRING
 ChangeVariable String DOUBLE
 RemoveAbilityWithName String
 AccelerateX DOUBLE
@@ -165,6 +165,7 @@ SetCampaignVariable String DOUBLE
 ObtainPerk PERK
 LosePerk PERK
 LockPerk PERK
+UnlockPerk PERK
 ChangeDeckSize DOUBLE
 FlipSprite BOOLEAN
 SystemTime
@@ -173,6 +174,7 @@ SetScore DOUBLE
 SetName STRING
 SetScoringScenario String
 Banish
+BanishPerk PERK
 RemoveAllAbilities
 PlaySound String
 TriggerCampaignSomething String
@@ -185,9 +187,11 @@ SetMapNodeDifficulty DOUBLE DOUBLE
 CreateGhost
 SetSpriteToCube CUBE
 SetSpriteToPerk PERK
+ClickPerk PERK
 DisablePerkAutoSort
 ReadAPartialScenario String
 TriggerWorldSomething String
+AddCubeSpriteAtXYSizeZ CUBE DOUBLE DOUBLE DOUBLE
 PrintDouble DOUBLE
 
 BOOLEAN: 
@@ -227,6 +231,7 @@ MapNodeIsType DOUBLE String
 XOr BOOLEAN BOOLEAN
 WorldExists
 StringContainsString STRING STRING
+StringExists STRING
 
 CUBE: 
 Caster
@@ -237,6 +242,7 @@ Culprit
 Test
 GenericCube
 CubeConstant String
+HiddenCubeConstant String
 CopyOfCube CUBE
 ARandomCubeInLibraryWhich BOOLEAN
 ARandomCubeInHandOfFactionWhich DOUBLE BOOLEAN
@@ -315,6 +321,7 @@ CopiableAbilitiesOfPerk PERK
 AmountOfCubesInHandOfFactionWhich DOUBLE BOOLEAN
 PerkInventorySlot
 CharCount STRING
+AmountOfAbilityWithNameOfCube String CUBE
 Addition DOUBLE DOUBLE
 Subtraction DOUBLE DOUBLE
 Division DOUBLE DOUBLE
@@ -335,6 +342,7 @@ Test
 PerkConstant String
 ARandomPerkInInventoryWhich BOOLEAN
 ARandomPerkInLibraryWhich BOOLEAN
+PerkNInInventory DOUBLE
 UpgradeOfPerk PERK
 GenericPerk
 
@@ -352,6 +360,7 @@ NameOfCube CUBE
 NameOfPerk PERK
 StringMissingLetterX STRING DOUBLE
 StringMissingCharX STRING DOUBLE
+GetVariableOnCube String CUBE
 StringConstant String
 GenericString
 RandomName
@@ -359,5 +368,6 @@ StringAddition STRING STRING
 GenericWord
 GenericName
 IfElse BOOLEAN STRING STRING
-StringNull
+StringEmpty
 CurrentScenario
+CauseType
